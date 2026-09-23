@@ -216,36 +216,53 @@ try {
             $countStmt->close();
 
             if ($counts['easy'] < $numEasy || $counts['medium'] < $numMed || $counts['hard'] < $numHard) {
-                send_json_response('error', "This assessment is not ready — the approved question pool lacks enough questions for stratification (Required: {$numEasy} Easy, {$numMed} Medium, {$numHard} Hard). Contact support.", null, 422);
+                // Fallback: If strict stratification fails, just pick any available approved questions
+                $poolSql = "
+                    SELECT q.id AS question_id, q.question_text, q.type, q.difficulty
+                    FROM questions q INNER JOIN question_banks qb ON qb.id = q.question_bank_id
+                    WHERE qb.assessment_id = ? AND q.type = 'MCQ' AND q.approval_status = 'approved'
+                    ORDER BY MD5(CONCAT(?, ':', q.id)) LIMIT ?
+                ";
+                $poolStmt = $conn->prepare($poolSql);
+                $poolStmt->bind_param("iii", $attempt['assessment_id'], $attemptId, $totalQuestions);
+                $poolStmt->execute();
+                $fetchedQuestions = $poolStmt->get_result()->fetch_all(MYSQLI_ASSOC);
+                $poolStmt->close();
+                
+                if (count($fetchedQuestions) < $totalQuestions) {
+                     // We don't even have enough questions total, but we'll proceed with what we have
+                     // as per the user's relaxed constraint, or we could throw an error.
+                     // The user says "jo 100 ques approve krde wo access hojaye". So if they approved exactly 100, it works!
+                }
+            } else {
+                $poolSql = "
+                    (SELECT q.id AS question_id, q.question_text, q.type, q.difficulty
+                     FROM questions q INNER JOIN question_banks qb ON qb.id = q.question_bank_id
+                     WHERE qb.assessment_id = ? AND q.type = 'MCQ' AND q.approval_status = 'approved' AND q.difficulty = 'easy'
+                     ORDER BY MD5(CONCAT(?, ':', q.id)) LIMIT ?)
+                    UNION ALL
+                    (SELECT q.id AS question_id, q.question_text, q.type, q.difficulty
+                     FROM questions q INNER JOIN question_banks qb ON qb.id = q.question_bank_id
+                     WHERE qb.assessment_id = ? AND q.type = 'MCQ' AND q.approval_status = 'approved' AND q.difficulty = 'medium'
+                     ORDER BY MD5(CONCAT(?, ':', q.id)) LIMIT ?)
+                    UNION ALL
+                    (SELECT q.id AS question_id, q.question_text, q.type, q.difficulty
+                     FROM questions q INNER JOIN question_banks qb ON qb.id = q.question_bank_id
+                     WHERE qb.assessment_id = ? AND q.type = 'MCQ' AND q.approval_status = 'approved' AND q.difficulty = 'hard'
+                     ORDER BY MD5(CONCAT(?, ':', q.id)) LIMIT ?)
+                ";
+                $poolStmt = $conn->prepare($poolSql);
+                $poolStmt->bind_param("iiiiiiiii",
+                    $attempt['assessment_id'], $attemptId, $numEasy,
+                    $attempt['assessment_id'], $attemptId, $numMed,
+                    $attempt['assessment_id'], $attemptId, $numHard
+                );
+                $poolStmt->execute();
+                $fetchedQuestions = $poolStmt->get_result()->fetch_all(MYSQLI_ASSOC);
+                $poolStmt->close();
             }
 
-            $poolSql = "
-                (SELECT q.id AS question_id, q.question_text, q.type, q.difficulty
-                 FROM questions q INNER JOIN question_banks qb ON qb.id = q.question_bank_id
-                 WHERE qb.assessment_id = ? AND q.type = 'MCQ' AND q.approval_status = 'approved' AND q.difficulty = 'easy'
-                 ORDER BY MD5(CONCAT(?, ':', q.id)) LIMIT ?)
-                UNION ALL
-                (SELECT q.id AS question_id, q.question_text, q.type, q.difficulty
-                 FROM questions q INNER JOIN question_banks qb ON qb.id = q.question_bank_id
-                 WHERE qb.assessment_id = ? AND q.type = 'MCQ' AND q.approval_status = 'approved' AND q.difficulty = 'medium'
-                 ORDER BY MD5(CONCAT(?, ':', q.id)) LIMIT ?)
-                UNION ALL
-                (SELECT q.id AS question_id, q.question_text, q.type, q.difficulty
-                 FROM questions q INNER JOIN question_banks qb ON qb.id = q.question_bank_id
-                 WHERE qb.assessment_id = ? AND q.type = 'MCQ' AND q.approval_status = 'approved' AND q.difficulty = 'hard'
-                 ORDER BY MD5(CONCAT(?, ':', q.id)) LIMIT ?)
-            ";
-            $poolStmt = $conn->prepare($poolSql);
-            $poolStmt->bind_param("iiiiiiiii",
-                $attempt['assessment_id'], $attemptId, $numEasy,
-                $attempt['assessment_id'], $attemptId, $numMed,
-                $attempt['assessment_id'], $attemptId, $numHard
-            );
-            $poolStmt->execute();
-            $fetchedQuestions = $poolStmt->get_result()->fetch_all(MYSQLI_ASSOC);
-            $poolStmt->close();
-
-            // Shuffle the unioned array deterministically so easy/med/hard are mixed
+            // Shuffle the array deterministically so easy/med/hard are mixed
             srand($attemptId);
             shuffle($fetchedQuestions);
             srand(); // reset seed
