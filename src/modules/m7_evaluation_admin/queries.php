@@ -323,10 +323,10 @@ function get_settings(mysqli $conn): array
     $adminUserId = $_SESSION['user_id'] ?? null;
 
     if ($adminUserId) {
-        $profile = q_one($conn, 'SELECT id,email FROM users WHERE id=? AND role IN ("admin","staff") AND is_active=1', 'i', [(int)$adminUserId]);
+        $profile = q_one($conn, 'SELECT id,email FROM users WHERE id=? AND role IN (\'admin\',\'staff\') AND is_active=1', 'i', [(int)$adminUserId]);
     }
     if (!$profile) {
-        $profile = q_one($conn, 'SELECT id,email FROM users WHERE role IN ("admin","staff") AND is_active=1 ORDER BY id LIMIT 1');
+        $profile = q_one($conn, 'SELECT id,email FROM users WHERE role IN (\'admin\',\'staff\') AND is_active=1 ORDER BY id LIMIT 1');
     }
 
     $map=[];
@@ -646,8 +646,8 @@ function update_admin_profile(mysqli $conn, ?int $userId, string $name, string $
     if(strlen($name)>150 || strlen($phone)>20 || strlen($email)>255) throw new InvalidArgumentException('Profile field is too long.');
 
     $user = null;
-    if ($userId) $user=q_one($conn,'SELECT id FROM users WHERE id=? AND role IN ("admin","staff") AND is_active=1','i',[$userId]);
-    if (!$user) $user=q_one($conn,'SELECT id FROM users WHERE role IN ("admin","staff") AND is_active=1 ORDER BY id LIMIT 1');
+    if ($userId) $user=q_one($conn,'SELECT id FROM users WHERE id=? AND role IN (\'admin\',\'staff\') AND is_active=1','i',[$userId]);
+    if (!$user) $user=q_one($conn,'SELECT id FROM users WHERE role IN (\'admin\',\'staff\') AND is_active=1 ORDER BY id LIMIT 1');
 
     $conn->begin_transaction();
     try {

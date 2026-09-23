@@ -146,7 +146,7 @@ function m7_handle_request(mysqli $conn): void
 
         $adminUserId = isset($_SESSION['user_id']) ? (int)$_SESSION['user_id'] : 0;
         if ($adminUserId <= 0) {
-            $admin = q_one($conn, 'SELECT id FROM users WHERE role IN ("admin","staff") AND is_active=1 ORDER BY id LIMIT 1');
+            $admin = q_one($conn, 'SELECT id FROM users WHERE role IN (\'admin\',\'staff\') AND is_active=1 ORDER BY id LIMIT 1');
             $adminUserId = $admin ? (int)$admin['id'] : 0;
         }
         if ($adminUserId <= 0) throw new InvalidArgumentException('Administrator account could not be resolved.');

@@ -337,12 +337,19 @@ function handle_cancel_slot_booking_request(array $input, mysqli $conn): void {
 function handle_list_provisional_slots_request(array $input, mysqli $conn): void {
     try {
         $candidateId = validate_candidate_session($conn);
-        
+
+        // 🔴 CRITICAL FIX: validate_candidate_session returns null (not exception) on unauthenticated
+        // Without this check, unauthenticated users silently get a 200 with data.
+        if ($candidateId === null) {
+            send_json_response('error', 'Unauthorized: Active candidate session required', null, 401);
+            return;
+        }
+
         if (!array_key_exists('assessment_id', $input) || $input['assessment_id'] === null) {
             send_json_response('error', 'Assessment ID is required', null, 400);
             return;
         }
-        
+
         $assessmentId = parse_positive_int($input['assessment_id']);
         if ($assessmentId === null) {
             send_json_response('error', 'A valid assessment_id is required', null, 400);
@@ -351,11 +358,7 @@ function handle_list_provisional_slots_request(array $input, mysqli $conn): void
 
         $slots = fetch_provisional_slots_with_counts($assessmentId, $conn);
         send_json_response('success', 'Provisional slots retrieved successfully', ['slots' => $slots], 200);
-    } catch (Exception $e) {
-        if ($e->getMessage() === 'Unauthorized: Active candidate session required') {
-            send_json_response('error', $e->getMessage(), null, 401);
-            return;
-        }
+    } catch (Throwable $e) {
         $msg = $e->getMessage();
         error_log("Error listing provisional slots: " . $msg);
         send_json_response('error', is_dev_env() ? $msg : 'An internal error occurred.', null, 500);
@@ -365,10 +368,18 @@ function handle_list_provisional_slots_request(array $input, mysqli $conn): void
 function handle_list_notifications_request(array $input, mysqli $conn): void {
     try {
         $candidateId = validate_candidate_session($conn);
-        
-        $sql = "SELECT id, type, related_schedule_id, message, is_read, created_at 
-                FROM notifications 
-                WHERE candidate_id = ? 
+
+        // 🔴 CRITICAL FIX: validate_candidate_session returns null (not exception) for unauthenticated.
+        // Without this guard, $candidateId=null is passed to bind_param("i", null) which
+        // either sends NULL to MySQL (returning all rows or 0) or crashes with a TypeError.
+        if ($candidateId === null) {
+            send_json_response('error', 'Unauthorized: Active candidate session required', null, 401);
+            return;
+        }
+
+        $sql = "SELECT id, type, related_schedule_id, message, is_read, created_at
+                FROM notifications
+                WHERE candidate_id = ?
                 ORDER BY created_at DESC";
         $stmt = $conn->prepare($sql);
         $stmt->bind_param("i", $candidateId);
@@ -377,14 +388,8 @@ function handle_list_notifications_request(array $input, mysqli $conn): void {
         $notifications = $result->fetch_all(MYSQLI_ASSOC);
         $stmt->close();
 
-        // Mark as read optionally? 
-        // Just return them for now.
         send_json_response('success', 'Notifications retrieved successfully', ['notifications' => $notifications], 200);
-    } catch (Exception $e) {
-        if ($e->getMessage() === 'Unauthorized: Active candidate session required') {
-            send_json_response('error', $e->getMessage(), null, 401);
-            return;
-        }
+    } catch (Throwable $e) {
         $msg = $e->getMessage();
         error_log("Error listing notifications: " . $msg);
         send_json_response('error', is_dev_env() ? $msg : 'An internal error occurred.', null, 500);

@@ -5,7 +5,7 @@
 
 require_once __DIR__ . '/../src/core/bootstrap.php';
 require_once __DIR__ . '/../src/modules/m5_batch_slots/service.php';
-require_once __DIR__ . '/../src/core/mailer.php';
+require_once __DIR__ . '/../src/core/Mailer.php';
 
 echo "Running Monday Batch Finalization...\n";
 
@@ -109,7 +109,7 @@ try {
     
     $conn->commit();
     echo "Monday Batch Finalization completed successfully.\n";
-} catch (Exception $e) {
+} catch (Throwable $e) {
     $conn->rollback();
     echo "Error: " . $e->getMessage() . "\n";
 }
