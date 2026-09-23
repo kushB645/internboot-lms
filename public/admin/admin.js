@@ -1123,11 +1123,14 @@
             btn.innerHTML = `<i class="ri-loader-4-line animate-spin"></i> Creating...`;
         }
         try {
-          await api("provisional_batch", {
+          const formData = Object.fromEntries(new FormData(provForm));
+          const endpoint = formData.slot_type === "direct" ? "batch" : "provisional_batch";
+          
+          await api(endpoint, {
             method: "POST",
-            body: Object.fromEntries(new FormData(provForm)),
+            body: formData,
           });
-          notify("Provisional slot created successfully!");
+          notify(formData.slot_type === "direct" ? "Direct batch created successfully!" : "Provisional slot created successfully!");
           provForm.reset();
           await loadBatches();
         } catch (err) {
