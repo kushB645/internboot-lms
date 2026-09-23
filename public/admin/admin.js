@@ -1164,7 +1164,6 @@
           });
           notify("Slot added successfully!");
           addSlotForm.reset();
-          document.getElementById('addSlotModal').classList.add('hidden');
           await loadBatches();
         } catch (err) {
           notify(err.message, true);
