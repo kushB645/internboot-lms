@@ -153,7 +153,9 @@
                 <div class="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden h-full flex flex-col">
                     <div class="px-6 py-4 border-b border-slate-100 flex justify-between items-center">
                         <h3 class="font-semibold text-slate-800">Exam Slots</h3>
-                        
+                        <button onclick="document.getElementById('addSlotModal').classList.remove('hidden')" class="bg-primary hover:bg-primary/90 text-intern-blue border border-intern-blue px-3 py-1.5 rounded-lg text-sm font-medium transition-colors flex items-center gap-1">
+                            <i data-lucide="plus" class="h-4 w-4"></i> Add Slot
+                        </button>
                     </div>
                     <div class="overflow-x-auto flex-1">
                         <table class="w-full text-left text-sm text-slate-600">
@@ -184,6 +186,42 @@
       </div>
 
     </main>
+  </div>
+
+  <!-- Add Slot Modal -->
+  <div id="addSlotModal" class="fixed inset-0 bg-slate-900/50 z-50 hidden flex items-center justify-center">
+    <div class="bg-white rounded-2xl shadow-lg border border-slate-100 w-full max-w-md p-6">
+      <div class="flex justify-between items-center mb-4">
+        <h3 class="text-lg font-semibold text-slate-800">Add Exam Slot</h3>
+        <button onclick="document.getElementById('addSlotModal').classList.add('hidden')" class="text-slate-400 hover:text-slate-600">
+          <i data-lucide="x" class="h-5 w-5"></i>
+        </button>
+      </div>
+      <form id="addSlotForm" class="space-y-4">
+        <div>
+          <label class="block text-xs font-medium text-slate-700 mb-1">Batch</label>
+          <select id="slotBatchSelect" name="batch_id" required class="w-full text-sm border-slate-200 rounded-lg focus:ring-primary focus:border-primary px-3 py-2 border"></select>
+        </div>
+        <div class="grid grid-cols-2 gap-4">
+          <div>
+            <label class="block text-xs font-medium text-slate-700 mb-1">Start Time</label>
+            <input type="time" name="start_time" required value="10:00" class="w-full text-sm border-slate-200 rounded-lg focus:ring-primary focus:border-primary px-3 py-2 border">
+          </div>
+          <div>
+            <label class="block text-xs font-medium text-slate-700 mb-1">End Time</label>
+            <input type="time" name="end_time" required value="12:00" class="w-full text-sm border-slate-200 rounded-lg focus:ring-primary focus:border-primary px-3 py-2 border">
+          </div>
+        </div>
+        <div>
+          <label class="block text-xs font-medium text-slate-700 mb-1">Capacity</label>
+          <input type="number" name="capacity" required min="1" value="100" class="w-full text-sm border-slate-200 rounded-lg focus:ring-primary focus:border-primary px-3 py-2 border">
+        </div>
+        <div class="flex justify-end gap-3 mt-6">
+          <button type="button" onclick="document.getElementById('addSlotModal').classList.add('hidden')" class="px-4 py-2 text-sm font-medium text-slate-600 hover:bg-slate-50 rounded-lg transition-colors border border-slate-200">Cancel</button>
+          <button type="submit" class="px-4 py-2 text-sm font-medium text-white bg-intern-blue hover:bg-blue-700 rounded-lg transition-colors">Add Slot</button>
+        </div>
+      </form>
+    </div>
   </div>
 
   <script src="https://cdnjs.cloudflare.com/ajax/libs/flatpickr/4.6.13/flatpickr.min.js"></script>

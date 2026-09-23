@@ -1144,6 +1144,36 @@
       };
     }
 
+    const slotBatchSelect = $("#slotBatchSelect");
+    if (slotBatchSelect) {
+      slotBatchSelect.innerHTML = '<option value="">Select Batch</option>' + 
+        batches.map(b => `<option value="${b.id}">${escapeHtml(b.batch_number)}</option>`).join("");
+    }
+
+    const addSlotForm = $("#addSlotForm");
+    if (addSlotForm && !addSlotForm.dataset.bound) {
+      addSlotForm.dataset.bound = "1";
+      addSlotForm.onsubmit = async (e) => {
+        e.preventDefault();
+        const btn = addSlotForm.querySelector('button[type="submit"]');
+        if (btn) btn.disabled = true;
+        try {
+          await api("slot", {
+            method: "POST",
+            body: Object.fromEntries(new FormData(addSlotForm)),
+          });
+          notify("Slot added successfully!");
+          addSlotForm.reset();
+          document.getElementById('addSlotModal').classList.add('hidden');
+          await loadBatches();
+        } catch (err) {
+          notify(err.message, true);
+        } finally {
+          if (btn) btn.disabled = false;
+        }
+      };
+    }
+
     const set = (id, v) => {
       const el = $("#" + id);
       if (el) el.textContent = v;
