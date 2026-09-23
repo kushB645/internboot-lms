@@ -435,7 +435,7 @@ function generate_questions_via_ai(
     }
 }
 
-function edit_manual_question(int $questionId, string $questionText, string $difficulty, array $options, mysqli $conn): void {
+function edit_manual_question(int $questionId, string $questionText, string $difficulty, array $options, mysqli $conn, bool $forcePending = false): void {
     $correctCount = 0;
     foreach ($options as $opt) {
         if (trim($opt['option_text']) === '') throw new InvalidArgumentException("Option text empty");
@@ -445,7 +445,11 @@ function edit_manual_question(int $questionId, string $questionText, string $dif
 
     $conn->begin_transaction();
     try {
-        $stmt = $conn->prepare("UPDATE questions SET question_text=?, difficulty=? WHERE id=?");
+        if ($forcePending) {
+            $stmt = $conn->prepare("UPDATE questions SET question_text=?, difficulty=?, approval_status='pending' WHERE id=?");
+        } else {
+            $stmt = $conn->prepare("UPDATE questions SET question_text=?, difficulty=? WHERE id=?");
+        }
         $stmt->bind_param('ssi', $questionText, $difficulty, $questionId);
         $stmt->execute();
         $stmt->close();

@@ -153,8 +153,11 @@ function handle_edit_question_request(array $input, mysqli $conn): void {
     if (count($options) !== 4) {
         send_json_response('error', 'Exactly 4 options must be provided', null, 400);
     }
+    $role = resolve_admin_role($conn);
+    $forcePending = ($role !== 'admin');
+
     try {
-        edit_manual_question($questionId, $questionText, $difficulty, $options, $conn);
+        edit_manual_question($questionId, $questionText, $difficulty, $options, $conn, $forcePending);
         send_json_response('success', 'Question edited', null, 200);
     } catch (Throwable $e) {
         send_json_response('error', $e->getMessage(), null, 400);
@@ -168,6 +171,12 @@ function handle_delete_question_request(array $input, mysqli $conn): void {
     if ($questionId <= 0) {
         send_json_response('error', 'Valid question_id required', null, 400);
     }
+
+    $role = resolve_admin_role($conn);
+    if ($role !== 'admin') {
+        send_json_response('error', 'Only administrators can delete questions', null, 403);
+    }
+
     try {
         $stmt = $conn->prepare("UPDATE questions SET approval_status = 'rejected' WHERE id = ?");
         $stmt->bind_param('i', $questionId);
