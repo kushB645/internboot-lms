@@ -1115,6 +1115,15 @@
     const provForm = $("#createProvisionalSlotForm");
     if (provForm && !provForm.dataset.bound) {
       provForm.dataset.bound = "1";
+
+      const slotTypeSelect = provForm.querySelector('select[name="slot_type"]');
+      const createBtnText = $("#createBatchBtnText");
+      if (slotTypeSelect && createBtnText) {
+          slotTypeSelect.addEventListener('change', (e) => {
+              createBtnText.textContent = e.target.value === 'direct' ? 'Create Direct Batch' : 'Create Provisional Slot';
+          });
+      }
+
       provForm.onsubmit = async (e) => {
         e.preventDefault();
         const btn = provForm.querySelector('button[type="submit"]');
@@ -1138,7 +1147,9 @@
         } finally {
             if (btn) {
                 btn.disabled = false;
-                btn.innerHTML = `<i class="ri-calendar-check-line"></i> Create Provisional Slot`;
+                const type = provForm.querySelector('select[name="slot_type"]')?.value;
+                btn.innerHTML = `<i data-lucide="calendar-check" class="h-4 w-4"></i> <span id="createBatchBtnText">${type === 'direct' ? 'Create Direct Batch' : 'Create Provisional Slot'}</span>`;
+                if (typeof lucide !== 'undefined') lucide.createIcons();
             }
         }
       };
