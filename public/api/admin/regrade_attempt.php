@@ -12,6 +12,6 @@ try {
     require_once __DIR__ . '/../../../src/modules/m7_evaluation_admin/service.php';
     $result = evaluate_attempt($conn, $attemptId, true, true);
     send_json_response('success', 'Attempt re-graded successfully', $result, 200);
-} catch (Exception $e) {
+} catch (Throwable $e) {
     send_json_response('error', $e->getMessage(), null, 400);
 }

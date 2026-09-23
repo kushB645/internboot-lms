@@ -69,7 +69,9 @@ class FinalizeProvisionalBatchTest extends TestCase
         $conn->query("INSERT INTO users (email, password, role) VALUES ('test".uniqid()."@example.com', 'pass', 'candidate')");
         $userId = $conn->insert_id;
         
-        $conn->query("INSERT INTO candidates (user_id, full_name, phone) VALUES ($userId, 'Test User', '12345678".rand(10,99)."')");
+        static $phoneCounter = 1000;
+        $phoneCounter++;
+        $conn->query("INSERT INTO candidates (user_id, full_name, phone) VALUES ($userId, 'Test User', '12345678" . $phoneCounter . "')");
         $candidateId = $conn->insert_id;
 
         $conn->query("INSERT INTO enrollments (candidate_id, assessment_id, eligibility_status) VALUES ($candidateId, $assessmentId, 'eligible')");

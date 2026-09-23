@@ -156,7 +156,7 @@ function handle_edit_question_request(array $input, mysqli $conn): void {
     try {
         edit_manual_question($questionId, $questionText, $difficulty, $options, $conn);
         send_json_response('success', 'Question edited', null, 200);
-    } catch (Exception $e) {
+    } catch (Throwable $e) {
         send_json_response('error', $e->getMessage(), null, 400);
     }
 }
@@ -174,7 +174,7 @@ function handle_delete_question_request(array $input, mysqli $conn): void {
         $stmt->execute();
         $stmt->close();
         send_json_response('success', 'Question soft-deleted', null, 200);
-    } catch (Exception $e) {
+    } catch (Throwable $e) {
         send_json_response('error', $e->getMessage(), null, 400);
     }
 }

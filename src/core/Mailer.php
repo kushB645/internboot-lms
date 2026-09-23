@@ -105,11 +105,8 @@ function send_mail(
             $mail->send();
         }
         return true;
-    } catch (Exception $e) {
-        error_log("Mailer Error: {$mail->ErrorInfo} | Exception: {$e->getMessage()}");
-        return false;
     } catch (Throwable $e) {
-        error_log("Mailer Unexpected Error: {$e->getMessage()}");
+        error_log("Mailer Error: {$mail->ErrorInfo} | Exception: {$e->getMessage()}");
         return false;
     }
 }

@@ -54,7 +54,7 @@ function add_manual_question(int $qbankId, string $questionText, string $difficu
             'difficulty' => $difficulty,
             'approval_status' => $approvalStatus,
         ];
-    } catch (Exception $e) {
+    } catch (Throwable $e) {
         $conn->rollback();
         throw new Exception("Transaction Failed: " . $e->getMessage());
     }
@@ -460,7 +460,7 @@ function edit_manual_question(int $questionId, string $questionText, string $dif
             insert_question_option($questionId, trim($opt['option_text']), $isCorrect, $conn);
         }
         $conn->commit();
-    } catch (Exception $e) {
+    } catch (Throwable $e) {
         $conn->rollback();
         throw $e;
     }

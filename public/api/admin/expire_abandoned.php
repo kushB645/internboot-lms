@@ -25,12 +25,12 @@ try {
         try {
             evaluate_attempt($conn, $attemptId, true);
             $expiredCount++;
-        } catch (Exception $e) {
+        } catch (Throwable $e) {
             // ignore
         }
     }
     
     send_json_response('success', "Expired and evaluated {$expiredCount} abandoned attempts.", ['expired_count' => $expiredCount], 200);
-} catch (Exception $e) {
+} catch (Throwable $e) {
     send_json_response('error', $e->getMessage(), null, 400);
 }

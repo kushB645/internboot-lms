@@ -14,7 +14,7 @@ try {
     
     // Fetch new count — scoped to this candidate to prevent IDOR read-back.
     // Closing Finding: "Violation-count read-back is not candidate-scoped" (InternBoot MVP audit).
-    $stmt = $conn->prepare('SELECT violations, status FROM attempts WHERE id = ? AND candidate_id = ?');
+    $stmt = $conn->prepare('SELECT violations, status FROM attempts WHERE id = ? AND candidate_id = ? FOR UPDATE');
     $stmt->bind_param('ii', $attemptId, $candidateId);
     $stmt->execute();
     $row = $stmt->get_result()->fetch_assoc();
@@ -36,6 +36,6 @@ try {
     $v = (int)$row['violations'];
 
     send_json_response('success', 'Logged', ['violations' => $v], 200);
-} catch (Exception $e) {
+} catch (Throwable $e) {
     send_json_response('error', $e->getMessage(), null, 400);
 }

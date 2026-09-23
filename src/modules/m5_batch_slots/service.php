@@ -646,7 +646,7 @@ function finalize_provisional_batch(int $scheduleId, int $assessmentId, mysqli $
             'exam_date' => $sched['exam_date'],
             'assigned_count' => $assignedCount
         ];
-    } catch (Exception $e) {
+    } catch (Throwable $e) {
         $conn->rollback();
         throw $e;
     }
