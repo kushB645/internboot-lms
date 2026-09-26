@@ -9,6 +9,7 @@ if (file_exists(dirname(__DIR__, 3) . '/src/core/bootstrap.php')) {
     require_once __DIR__ . '/../src/core/bootstrap.php';
 }
 
+require_once __DIR__ . '/../../../src/modules/m5_batch_slots/queries.php';
 header('Content-Type: application/json; charset=utf-8');
 header('Cache-Control: no-store');
 
@@ -162,8 +163,12 @@ try {
                 $slotStart = new DateTime($examDate . ' ' . $slotStartTime);
                 $grace = (int) get_setting_value('slot_grace_minutes', $conn);
                 if ($grace <= 0) $grace = 30;
+                
+                $endTimestamp = strtotime($examDate . ' ' . $slotEndTime);
+                if ($slotEndTime < $slotStartTime) { $endTimestamp += 86400; }
+                
                 $slotEnd = (new DateTime())->setTimestamp(
-                    strtotime($examDate . ' ' . $slotEndTime) + ($grace * 60)
+                    $endTimestamp + ($grace * 60)
                 );
 
                 if ($now < $slotStart) {
@@ -205,7 +210,11 @@ try {
         if (!empty($attempt['exam_date']) && !empty($attempt['slot_end_time'])) {
             $grace = (int) get_setting_value('slot_grace_minutes', $conn);
             if ($grace <= 0) $grace = 30;
-            $slotEndTimestamp = strtotime($attempt['exam_date'] . ' ' . $attempt['slot_end_time']) + ($grace * 60);
+            $slotEndTimestamp = strtotime($attempt['exam_date'] . ' ' . $attempt['slot_end_time']);
+            if ($attempt['slot_end_time'] < $attempt['slot_start_time']) {
+                $slotEndTimestamp += 86400; // Add 1 day
+            }
+            $slotEndTimestamp += ($grace * 60);
             if ($slotEndTimestamp !== false && $slotEndTimestamp < $calculatedEnd) {
                 $calculatedEnd = $slotEndTimestamp;
             }
@@ -356,3 +365,4 @@ try {
     error_log('start_exam error: ' . $e->getMessage());
     send_json_response('error', 'Internal server error', null, 500);
 }
+

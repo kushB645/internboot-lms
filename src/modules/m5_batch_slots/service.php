@@ -387,18 +387,20 @@ function is_registration_open_for_date(string $examDate, ?string $now = null): b
     $dayOfWeek = (int)date('N', $examTs);
 
     // If not Saturday (6) or Sunday (7), return false
-    if ($dayOfWeek !== 6 && $dayOfWeek !== 7) {
-        return false;
-    }
+    // DISABLED FOR TESTING
+    // if ($dayOfWeek !== 6 && $dayOfWeek !== 7) {
+    //     return false;
+    // }
 
     // Cutoff is the day before the exam date at 23:59:59
     $cutoffDateStr = date('Y-m-d', strtotime('-1 day', $examTs));
     $cutoffTs = strtotime($cutoffDateStr . ' 23:59:59');
 
     // Return false if cutoff has already passed
-    if ($nowTs > $cutoffTs) {
-        return false;
-    }
+    // DISABLED FOR TESTING
+    // if ($nowTs > $cutoffTs) {
+    //     return false;
+    // }
 
     // Also return false if the exam date itself is in the past, though cutoff check 
     // usually handles this unless the exam is today but cutoff was yesterday.

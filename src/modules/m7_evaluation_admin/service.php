@@ -104,7 +104,6 @@ function evaluate_attempt(mysqli $conn, int $attemptId, bool $generateCertificat
         if ($forceRegrade) {
             $existingResult = q_one($conn, 'SELECT * FROM results WHERE attempt_id=?', 'i', [$attemptId]);
         }
-        $resultId=upsert_result($conn,$attemptId,$score,$percentage,(int)$level['level_number']);
         ensure_placement_record($conn,(int)$attempt['candidate_id'],$resultId);
 
         $certificate = null;

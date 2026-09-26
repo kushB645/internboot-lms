@@ -1,36 +1,55 @@
 /**
  * InternBoot - Batches & Slots Candidate Flow (M5 Integration)
- * Connects public/batches-slots.html to backend APIs:
- * - GET api/dashboard.php
- * - GET api/slots/available.php
- * - POST api/slots/book.php
+ * Flow:
+ *  1. Candidate sees all open slots admin has created (provisional)
+ *  2. Each slot shows live preference count + progress bar
+ *  3. Candidate picks a slot → preference saved
+ *  4. Once 100+ prefer a slot → admin gets alert → creates batch → slot closed
+ *  5. Closed slots are hidden; candidate sees their confirmed batch info
  */
+
 let csrfToken = null;
 
 async function getCsrfToken() {
     if (csrfToken) return csrfToken;
     const metaTag = document.querySelector('meta[name="csrf-token"]');
-    if (metaTag && metaTag.content) {
-        csrfToken = metaTag.content;
-        return csrfToken;
-    }
+    if (metaTag && metaTag.content) { csrfToken = metaTag.content; return csrfToken; }
     try {
-        const res = await fetch("api/auth/csrf.php", {
-            credentials: "same-origin",
-            headers: { Accept: "application/json" }
-        });
+        const res = await fetch("api/auth/csrf.php", { credentials: "same-origin", headers: { Accept: "application/json" } });
         const payload = await res.json();
         csrfToken = payload.data?.token || null;
     } catch {
-        const res = await fetch("/api/admin/evaluate.php?action=csrf", {
-            credentials: "same-origin",
-            headers: { Accept: "application/json" }
-        });
+        const res = await fetch("/api/admin/evaluate.php?action=csrf", { credentials: "same-origin", headers: { Accept: "application/json" } });
         const payload = await res.json();
         csrfToken = payload.data?.token || null;
     }
     if (!csrfToken) throw new Error("Security token could not be loaded.");
     return csrfToken;
+}
+
+function escapeHtml(str) {
+    if (!str) return "";
+    return String(str).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;").replace(/'/g,"&#039;");
+}
+
+function formatHHMM(timeStr) {
+    if (!timeStr) return '';
+    const parts = timeStr.split(':');
+    return parts.length >= 2 ? `${parts[0]}:${parts[1]}` : timeStr;
+}
+
+function getWeekdayLabel(dateStr) {
+    if (!dateStr) return '';
+    const d = new Date(dateStr + 'T00:00:00');
+    if (isNaN(d.getTime())) return '';
+    return d.toLocaleDateString('en-US', { weekday: 'long' });
+}
+
+function formatDateLabel(dateStr) {
+    if (!dateStr) return '';
+    const d = new Date(dateStr + 'T00:00:00');
+    if (isNaN(d.getTime())) return dateStr;
+    return d.toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' });
 }
 
 document.addEventListener("DOMContentLoaded", async () => {
@@ -42,31 +61,13 @@ async function initSlotsModule() {
     const slotsListEl = document.getElementById("slots-list");
 
     try {
-        const response = await fetch("api/dashboard.php", {
-            method: "GET",
-            headers: { "Accept": "application/json" }
-        });
-
+        const response = await fetch("api/dashboard.php", { method: "GET", headers: { "Accept": "application/json" } });
         const payload = await response.json();
         if (!response.ok || payload.status !== "success" || !payload.data) {
             throw new Error(payload.message || "Failed to load candidate details.");
         }
 
         const data = payload.data;
-
-        // Render Batch Details
-        if (data.batch) {
-            const batchNameEl = document.getElementById("batch-name");
-            const batchStatusEl = document.getElementById("batch-status-badge");
-            const batchCandEl = document.getElementById("batch-candidates");
-
-            if (batchNameEl) batchNameEl.textContent = data.batch.name || "Awaiting Formation";
-            if (batchStatusEl) {
-                batchStatusEl.textContent = data.batch.status || "Pending";
-                batchStatusEl.className = `badge ${data.batch.status === "Assigned" ? "green" : "gray"}`;
-            }
-            if (batchCandEl) batchCandEl.textContent = data.batch.candidates || "—";
-        }
 
         // Render Booked Slot status if already booked
         updateBookedSlotSection(data);
@@ -77,35 +78,233 @@ async function initSlotsModule() {
             if (noticeContainer) {
                 noticeContainer.innerHTML = `
                     <div class="notice notice-error" style="background:#fdf2f2; border:1px solid #f8cdcd; color:#b91c1c; padding:14px 18px; border-radius:8px; margin-bottom:18px;">
-                        <strong>Action Required:</strong> Your registration fee payment or enrollment eligibility is pending. 
-                        Please complete your payment to unlock exam slot booking.
+                        <strong>Action Required:</strong> Your registration fee payment or enrollment eligibility is pending.
+                        Please complete your payment to unlock exam slot selection.
                         <a href="payment.html" class="btn btn-ib-primary btn-sm" style="margin-left:12px; background:#2563eb; color:#fff; padding:6px 12px; border-radius:6px; text-decoration:none; display:inline-block;">Go to Payment →</a>
                     </div>`;
             }
-            if (slotsListEl) {
-                slotsListEl.innerHTML = `<p style="color:#60728b;">Slot booking unlocks automatically once your payment is completed.</p>`;
-            }
+            if (slotsListEl) slotsListEl.innerHTML = `<p style="color:#60728b;">Slot selection unlocks automatically once your payment is completed.</p>`;
             return;
         }
-
-        // Check if candidate is awaiting batch formation
-        if (!data.batch || !data.batch.name || data.batch.name === "—") {
-            const assessmentId = data.assessment ? data.assessment.id : 1;
-            await loadPreferences(assessmentId);
-            return;
-        }
-
-        // Fetch available slots
 
         const assessmentId = data.assessment ? data.assessment.id : 1;
-        await loadAvailableSlots(assessmentId);
+
+        // If candidate already has a confirmed batch, show that
+        if (data.batch && data.batch.name && !data.batch.name.includes("Not Assigned")) {
+            showConfirmedBatch(data, noticeContainer, slotsListEl);
+            return;
+        }
+
+        // Load public slots for selection
+        await loadPublicSlots(assessmentId);
 
     } catch (err) {
         console.error("Slots module error:", err);
-        if (noticeContainer) {
-            noticeContainer.innerHTML = `
+        if (document.getElementById("notice-container")) {
+            document.getElementById("notice-container").innerHTML = `
                 <div class="notice notice-error" style="background:#fdf2f2; border:1px solid #f8cdcd; color:#b91c1c; padding:14px 18px; border-radius:8px; margin-bottom:18px;">
                     ${escapeHtml(err.message || "Unable to load slot details.")}
+                </div>`;
+        }
+    }
+}
+
+function showConfirmedBatch(data, noticeEl, slotsEl) {
+    if (noticeEl) {
+        noticeEl.innerHTML = `
+            <div style="background:linear-gradient(135deg,#ecfdf5,#d1fae5); border:1px solid #6ee7b7; border-radius:12px; padding:20px 24px; margin-bottom:20px;">
+                <div style="display:flex; align-items:center; gap:12px; margin-bottom:8px;">
+                    <span style="font-size:28px;">🎉</span>
+                    <div>
+                        <div style="font-weight:800; font-size:18px; color:#065f46;">Batch Confirmed!</div>
+                        <div style="color:#047857; font-size:14px;">You have been successfully assigned to a batch.</div>
+                    </div>
+                </div>
+                <div style="background:#fff; border-radius:8px; padding:14px; margin-top:10px; font-size:15px; color:#1f2937; line-height:1.8;">
+                    <strong>Batch:</strong> ${escapeHtml(data.batch.name || '—')}<br>
+                    <strong>Exam Date:</strong> ${escapeHtml(data.exam?.exam_date || '—')}<br>
+                    <strong>Slot:</strong> ${escapeHtml(data.exam?.slot_time || '—')}
+                </div>
+                <a href="exam.html" style="display:inline-block; margin-top:14px; background:#059669; color:#fff; padding:10px 22px; border-radius:8px; font-weight:700; text-decoration:none;">Go to Exam →</a>
+            </div>`;
+    }
+    if (slotsEl) slotsEl.innerHTML = '';
+}
+
+async function loadPublicSlots(assessmentId) {
+    const slotsListEl = document.getElementById("slots-list");
+    if (!slotsListEl) return;
+
+    try {
+        const res = await fetch(`api/slots/public_slots.php?assessment_id=${encodeURIComponent(assessmentId)}`, {
+            headers: { "Accept": "application/json" }
+        });
+        const payload = await res.json();
+        if (!res.ok || payload.status !== 'success') throw new Error(payload.message || 'Failed to load slots.');
+
+        const { slots, my_preference_id, batch_assigned, preference_failed } = payload.data;
+
+        // If candidate is already assigned to a confirmed batch
+        if (batch_assigned) {
+            slotsListEl.innerHTML = `
+                <div style="background:#f0fdf4; border:1px solid #bbf7d0; border-radius:10px; padding:20px; text-align:center;">
+                    <div style="font-size:32px;">✅</div>
+                    <h3 style="color:#047857; margin:10px 0 4px;">You're in! Batch Confirmed.</h3>
+                    <p style="color:#065f46;">Exam on <strong>${escapeHtml(batch_assigned.exam_date)}</strong> · ${escapeHtml(formatHHMM(batch_assigned.start_time))} – ${escapeHtml(formatHHMM(batch_assigned.end_time))}</p>
+                    <a href="exam.html" style="display:inline-block; margin-top:12px; background:#059669; color:#fff; padding:10px 22px; border-radius:8px; font-weight:700; text-decoration:none;">Go to Exam →</a>
+                </div>`;
+            return;
+        }
+
+        if (!slots || slots.length === 0) {
+            slotsListEl.innerHTML = `
+                <div style="text-align:center; padding:40px; color:#6b7280;">
+                    <div style="font-size:40px; margin-bottom:12px;">📅</div>
+                    <h3 style="color:#374151;">No Slots Available Right Now</h3>
+                    <p>The admin hasn't opened any exam slots yet. Check back soon!</p>
+                </div>`;
+            return;
+        }
+
+        const threshold = slots[0]?.threshold || 100;
+
+        // Header info
+        let html = '';
+
+        if (preference_failed) {
+            html += `
+                <div style="background:#fef2f2; border:1px solid #fecaca; border-radius:10px; padding:16px 20px; margin-bottom:22px; display:flex; gap:14px; align-items:flex-start;">
+                    <span style="font-size:28px;">⚠️</span>
+                    <div>
+                        <div style="font-weight:700; font-size:16px; color:#b91c1c;">Slot Cancelled</div>
+                        <div style="color:#991b1b; font-size:14px; margin-top:4px; line-height:1.5;">
+                            Your previously selected slot was cancelled because it did not reach the minimum required candidates. Please select a new slot below to continue.
+                        </div>
+                    </div>
+                </div>`;
+        }
+
+        html += `
+            <div style="background:linear-gradient(135deg,#eff6ff,#dbeafe); border:1px solid #bfdbfe; border-radius:10px; padding:16px 20px; margin-bottom:22px; display:flex; gap:14px; align-items:flex-start;">
+                <span style="font-size:28px;">📋</span>
+                <div>
+                    <div style="font-weight:700; font-size:16px; color:#1e40af;">How This Works</div>
+                    <div style="color:#1d4ed8; font-size:14px; margin-top:4px; line-height:1.5;">
+                        Choose your preferred exam slot below. The exam will only be conducted for a slot once a minimum of <strong>${threshold} candidates</strong> select it. Your final exam schedule will be confirmed once the batch is formed!
+                        ${my_preference_id ? '<br>✅ <strong>You have already selected a slot.</strong> You can change it anytime before the batch is formed.' : ''}
+                    </div>
+                </div>
+            </div>
+            <div style="display:grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap:18px;">`;
+
+        slots.forEach(slot => {
+            const count = slot.preference_count;
+            const pct = slot.percentage;
+            const isMine = slot.is_my_preference;
+            const dayLabel = getWeekdayLabel(slot.exam_date);
+            const dateFormatted = formatDateLabel(slot.exam_date);
+            const startFmt = formatHHMM(slot.start_time);
+            const endFmt = formatHHMM(slot.end_time);
+
+            const progressColor = pct >= 100 ? '#10b981' : pct >= 70 ? '#f59e0b' : '#3b82f6';
+            const cardBg = isMine ? 'linear-gradient(135deg,#ecfdf5,#d1fae5)' : '#ffffff';
+            const cardBorder = isMine ? '#6ee7b7' : '#e5e7eb';
+
+            html += `
+                <div style="background:${cardBg}; border:2px solid ${cardBorder}; border-radius:12px; padding:20px; box-shadow:0 2px 12px rgba(0,0,0,0.06); position:relative; transition:all 0.2s;">
+                    ${isMine ? '<div style="position:absolute;top:12px;right:12px;background:#10b981;color:#fff;font-size:11px;font-weight:700;padding:3px 10px;border-radius:20px;">YOUR CHOICE ✓</div>' : ''}
+                    
+                    <div style="font-weight:800; font-size:17px; color:#111827; margin-bottom:2px;">${escapeHtml(dayLabel)}</div>
+                    <div style="font-size:13px; color:#6b7280; margin-bottom:10px;">${escapeHtml(dateFormatted)}</div>
+                    
+                    <div style="display:flex; align-items:center; gap:8px; font-size:15px; color:#374151; margin-bottom:14px;">
+                        <span style="font-size:18px;">🕐</span>
+                        <strong>${escapeHtml(startFmt)} – ${escapeHtml(endFmt)}</strong>
+                    </div>
+                    
+                    <!-- Progress Bar -->
+                    <div style="margin-bottom:12px;">
+                        <div style="display:flex; justify-content:space-between; font-size:13px; color:#6b7280; margin-bottom:5px;">
+                            <span>👥 <strong style="color:#111827;">${count}</strong> candidates interested</span>
+                            <span style="color:${progressColor}; font-weight:700;">${pct}%</span>
+                        </div>
+                        <div style="background:#e5e7eb; border-radius:99px; height:8px; overflow:hidden;">
+                            <div style="height:100%; width:${Math.min(pct,100)}%; background:${progressColor}; border-radius:99px; transition:width 0.5s ease;"></div>
+                        </div>
+                        <div style="font-size:11px; color:#9ca3af; margin-top:4px; text-align:right;">${threshold - count > 0 ? `${threshold - count} more needed to form batch` : '✅ Ready for batch!'}</div>
+                    </div>
+                    
+                    <!-- Action Button -->
+                    ${isMine 
+                        ? `<button disabled style="width:100%; background:#d1fae5; color:#047857; border:1px solid #6ee7b7; padding:10px; border-radius:8px; font-weight:700; font-size:14px; cursor:default;">✓ Currently Selected</button>`
+                        : `<button class="btn-set-preference" 
+                                data-schedule-id="${slot.schedule_id}" 
+                                data-assessment-id="${slot.slot_id}"
+                                data-schedule-ref="${slot.schedule_id}"
+                                style="width:100%; background:#2563eb; color:#fff; border:none; padding:10px; border-radius:8px; font-weight:700; font-size:14px; cursor:pointer; transition:background 0.2s;"
+                                onmouseover="this.style.background='#1d4ed8'" onmouseout="this.style.background='#2563eb'">
+                                Choose This Slot →
+                           </button>`
+                    }
+                </div>`;
+        });
+
+        html += `</div>`;
+        slotsListEl.innerHTML = html;
+
+        slotsListEl.querySelectorAll(".btn-set-preference").forEach(btn => {
+            btn.addEventListener("click", () => handleSetPreference(btn, assessmentId));
+        });
+
+    } catch (err) {
+        slotsListEl.innerHTML = `<p style="color:#dc2626;">Error: ${escapeHtml(err.message)}</p>`;
+    }
+}
+
+async function handleSetPreference(btn, assessmentId) {
+    const scheduleId = parseInt(btn.dataset.scheduleRef || btn.dataset.scheduleId);
+    const noticeContainer = document.getElementById("notice-container");
+
+    if (!scheduleId || scheduleId <= 0) return;
+
+    btn.disabled = true;
+    const orig = btn.innerHTML;
+    btn.innerHTML = 'Saving...';
+
+    try {
+        const token = await getCsrfToken();
+        const res = await fetch("api/slots/preference.php", {
+            method: "POST",
+            headers: { "Content-Type": "application/json", "Accept": "application/json", "X-CSRF-Token": token },
+            body: JSON.stringify({ assessment_id: assessmentId, provisional_schedule_id: scheduleId })
+        });
+        const payload = await res.json();
+        if (!res.ok || payload.status !== 'success') throw new Error(payload.message || 'Failed to save preference.');
+
+        const count = payload.data?.preference_count || 0;
+        const threshold = payload.data?.threshold || 100;
+
+        if (noticeContainer) {
+            noticeContainer.innerHTML = `
+                <div style="background:#f0fdf4; border:1px solid #bbf7d0; color:#166534; padding:14px 18px; border-radius:8px; margin-bottom:18px; display:flex; align-items:center; gap:10px;">
+                    <span style="font-size:20px;">✅</span>
+                    <div>
+                        <strong>Preference Saved!</strong><br>
+                        <span style="font-size:13px;">${count} / ${threshold} candidates have chosen this slot. ${count >= threshold ? '🎉 Batch ready for creation!' : `${threshold - count} more needed.`}</span>
+                    </div>
+                </div>`;
+        }
+
+        // Reload slots to show updated counts
+        await loadPublicSlots(assessmentId);
+
+    } catch (err) {
+        btn.disabled = false;
+        btn.innerHTML = orig;
+        if (noticeContainer) {
+            noticeContainer.innerHTML = `
+                <div style="background:#fdf2f2; border:1px solid #f8cdcd; color:#b91c1c; padding:14px 18px; border-radius:8px; margin-bottom:18px;">
+                    ❌ ${escapeHtml(err.message)}
                 </div>`;
         }
     }
@@ -116,330 +315,12 @@ function updateBookedSlotSection(dashData) {
     const bookedTimeEl = document.getElementById("booked-slot-time");
     const bookedStatusEl = document.getElementById("booked-slot-status");
 
-    const attemptId = localStorage.getItem("ib_attempt_id");
-
-    if (dashData.exam && dashData.exam.status && dashData.exam.status !== "—" && dashData.exam.status !== "Not Started") {
+    if (dashData.exam && dashData.exam.status && dashData.exam.status !== "🕓" && dashData.exam.status !== "Not Started") {
         if (bookedDateEl) bookedDateEl.textContent = dashData.exam.exam_date || "Scheduled";
         if (bookedTimeEl) bookedTimeEl.textContent = dashData.exam.slot_time || "Assigned Slot";
         if (bookedStatusEl) {
             bookedStatusEl.textContent = dashData.exam.status;
             bookedStatusEl.className = "badge green";
         }
-    } else if (attemptId) {
-        if (bookedStatusEl) {
-            bookedStatusEl.textContent = "Booked";
-            bookedStatusEl.className = "badge green";
-        }
     }
 }
-
-function getWeekdayLabel(dateStr) {
-    if (!dateStr) return '';
-    const d = new Date(dateStr + 'T00:00:00');
-    if (isNaN(d.getTime())) return '';
-    return d.toLocaleDateString('en-US', { weekday: 'long' });
-}
-
-function formatHHMM(timeStr) {
-    if (!timeStr) return '';
-    const parts = timeStr.split(':');
-    if (parts.length >= 2) {
-        return `${parts[0]}:${parts[1]}`;
-    }
-    return timeStr;
-}
-
-async function loadAvailableSlots(assessmentId) {
-    const slotsListEl = document.getElementById("slots-list");
-    if (!slotsListEl) return;
-
-    try {
-        const response = await fetch(`api/slots/available.php?assessment_id=${encodeURIComponent(assessmentId)}`, {
-            method: "GET",
-            headers: { "Accept": "application/json" }
-        });
-
-        const payload = await response.json();
-        if (!response.ok || payload.status !== "success" || !Array.isArray(payload.data)) {
-            throw new Error(payload.message || "Failed to fetch available slots.");
-        }
-
-        const slots = payload.data;
-        if (slots.length === 0) {
-            slotsListEl.innerHTML = `<p style="color:#60728b;">No available slots found for your batch at this time.</p>`;
-            return;
-        }
-
-        slotsListEl.innerHTML = `
-            <div style="display:grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap:16px;">
-                ${slots.map(s => {
-                    const dayLabel = getWeekdayLabel(s.exam_date);
-                    const dateHeader = dayLabel ? `${dayLabel} (${s.exam_date || ''})` : (s.exam_date || '');
-                    const startTimeFormatted = formatHHMM(s.start_time);
-                    const endTimeFormatted = formatHHMM(s.end_time);
-                    return `
-                    <div style="border:1px solid #e5ebf2; border-radius:10px; padding:18px; background:#ffffff; box-shadow:0 2px 8px rgba(0,0,0,0.03);">
-                        <div style="font-weight:700; font-size:16px; color:#17243a; margin-bottom:6px;">
-                            ${escapeHtml(dateHeader)}
-                        </div>
-                        <div style="font-size:14px; color:#4b5563; margin-bottom:10px;">
-                            ⏰ ${escapeHtml(startTimeFormatted)} – ${escapeHtml(endTimeFormatted)}
-                        </div>
-                        <div style="display:flex; justify-content:space-between; align-items:center; margin-top:12px;">
-                            <span class="badge ${s.seats_remaining > 0 ? 'blue' : 'gray'}">
-                                ${s.seats_remaining} seats remaining
-                            </span>
-                            <button 
-                                class="btn-book-slot" 
-                                data-slot-id="${s.exam_slot_id}" 
-                                data-assessment-id="${assessmentId}"
-                                ${s.seats_remaining <= 0 ? 'disabled' : ''}
-                                style="background:#2563eb; color:#fff; border:none; padding:8px 16px; border-radius:6px; font-weight:700; cursor:pointer;"
-                            >
-                                Book This Slot
-                            </button>
-                        </div>
-                    </div>`;
-                }).join('')}
-            </div>`;
-
-        slotsListEl.querySelectorAll(".btn-book-slot").forEach(btn => {
-            btn.addEventListener("click", () => handleBookSlotClick(btn));
-        });
-
-    } catch (err) {
-        slotsListEl.innerHTML = `<p style="color:#dc2626;">Error: ${escapeHtml(err.message)}</p>`;
-    }
-}
-
-async function handleBookSlotClick(btn) {
-    const slotId = btn.dataset.slotId;
-    const assessmentId = btn.dataset.assessmentId;
-    const noticeContainer = document.getElementById("notice-container");
-
-    const parsedSlotId = Number(slotId);
-    if (!slotId || isNaN(parsedSlotId) || !Number.isInteger(parsedSlotId) || parsedSlotId <= 0) {
-        if (noticeContainer) {
-            noticeContainer.innerHTML = `
-                <div class="notice notice-error" style="background:#fdf2f2; border:1px solid #f8cdcd; color:#b91c1c; padding:14px 18px; border-radius:8px; margin-bottom:18px;">
-                    ❌ ${escapeHtml("Invalid slot selected")}
-                </div>`;
-        }
-        return;
-    }
-
-    btn.disabled = true;
-    const originalText = btn.textContent;
-    btn.textContent = "Booking...";
-
-    try {
-        const token = await getCsrfToken();
-        const response = await fetch("api/slots/book.php", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-                "Accept": "application/json",
-                "X-CSRF-Token": token
-            },
-            body: JSON.stringify({
-                assessment_id: Number(assessmentId),
-                exam_slot_id: Number(slotId)
-            })
-        });
-
-        const payload = await response.json();
-
-        if (!response.ok || payload.status !== "success" || !payload.data) {
-            throw new Error(payload.message || "Failed to book slot.");
-        }
-
-        const bookingData = payload.data;
-        const attemptId = bookingData.attempt_id;
-
-        if (attemptId) {
-            localStorage.setItem("ib_attempt_id", attemptId);
-        }
-
-        if (noticeContainer) {
-            noticeContainer.innerHTML = `
-                <div class="notice notice-success" style="background:#e9f8f0; border:1px solid #c3edd7; color:#127249; padding:14px 18px; border-radius:8px; margin-bottom:18px;">
-                    🎉 <strong>Slot Booked Successfully!</strong> Your exam attempt ID is #${escapeHtml(attemptId)}.
-                    <a href="exam.html" class="btn btn-ib-primary btn-sm" style="margin-left:12px; background:#18a56a; color:#fff; padding:6px 12px; border-radius:6px; text-decoration:none; display:inline-block;">Go to Exam Page →</a>
-                </div>`;
-        }
-
-        await loadAvailableSlots(assessmentId);
-
-        document.querySelectorAll(".btn-book-slot").forEach(b => {
-            b.disabled = true;
-            b.textContent = "Already Booked";
-            b.style.opacity = "0.6";
-            b.style.cursor = "not-allowed";
-        });
-
-    } catch (err) {
-        btn.disabled = false;
-        btn.textContent = originalText;
-
-        if (noticeContainer) {
-            noticeContainer.innerHTML = `
-                <div class="notice notice-error" style="background:#fdf2f2; border:1px solid #f8cdcd; color:#b91c1c; padding:14px 18px; border-radius:8px; margin-bottom:18px;">
-                    ❌ ${escapeHtml(err.message || "Booking failed.")}
-                </div>`;
-        }
-    }
-}
-
-function escapeHtml(str) {
-    if (!str) return "";
-    return String(str)
-        .replace(/&/g, "&amp;")
-        .replace(/</g, "&lt;")
-        .replace(/>/g, "&gt;")
-        .replace(/"/g, "&quot;")
-        .replace(/'/g, "&#039;");
-}
- 
- a s y n c   f u n c t i o n   l o a d P r e f e r e n c e s ( a s s e s s m e n t I d )   {  
-         c o n s t   s l o t s L i s t E l   =   d o c u m e n t . g e t E l e m e n t B y I d ( " s l o t s - l i s t " ) ;  
-         i f   ( ! s l o t s L i s t E l )   r e t u r n ;  
-         c o n s t   n o t i c e C o n t a i n e r   =   d o c u m e n t . g e t E l e m e n t B y I d ( " n o t i c e - c o n t a i n e r " ) ;  
-  
-         t r y   {  
-                 c o n s t   r e s p o n s e   =   a w a i t   f e t c h ( ` a p i / s l o t s / p r e f e r e n c e . p h p ? a s s e s s m e n t _ i d = $ { e n c o d e U R I C o m p o n e n t ( a s s e s s m e n t I d ) } ` ,   {  
-                         m e t h o d :   " G E T " ,  
-                         h e a d e r s :   {   " A c c e p t " :   " a p p l i c a t i o n / j s o n "   }  
-                 } ) ;  
-  
-                 c o n s t   p a y l o a d   =   a w a i t   r e s p o n s e . j s o n ( ) ;  
-                 i f   ( ! r e s p o n s e . o k   | |   p a y l o a d . s t a t u s   ! = =   " s u c c e s s " )   {  
-                         t h r o w   n e w   E r r o r ( p a y l o a d . m e s s a g e   | |   " F a i l e d   t o   f e t c h   p r e f e r e n c e   o p t i o n s . " ) ;  
-                 }  
-  
-                 c o n s t   d a t a   =   p a y l o a d . d a t a ;  
-                 c o n s t   c u r r e n t P r e f   =   d a t a . c u r r e n t _ p r e f e r e n c e   | |   { } ;  
-                 c o n s t   o p t i o n s   =   d a t a . o p t i o n s   | |   [ ] ;  
-  
-                 i f   ( o p t i o n s . l e n g t h   = = =   0 )   {  
-                         s l o t s L i s t E l . i n n e r H T M L   =   ` < p   s t y l e = " c o l o r : # 6 0 7 2 8 b ; " > N o   a v a i l a b l e   d a t e s   f o u n d   f o r   s e l e c t i o n   a t   t h i s   t i m e . < / p > ` ;  
-                         r e t u r n ;  
-                 }  
-  
-                 l e t   h t m l   =   `  
-                         < d i v   s t y l e = " m a r g i n - b o t t o m : 2 0 p x ;   b a c k g r o u n d : # f 0 f 9 f f ;   b o r d e r : 1 p x   s o l i d   # b a e 6 f d ;   p a d d i n g : 1 5 p x ;   b o r d e r - r a d i u s : 8 p x ;   c o l o r : # 0 3 6 9 a 1 ; " >  
-                                 < s t r o n g > B a t c h   S e l e c t i o n   M o d e : < / s t r o n g >   P l e a s e   s e l e c t   y o u r   p r e f e r r e d   e x a m   d a t e .   O n c e   1 0 0   c a n d i d a t e s   c h o o s e   t h e   s a m e   d a t e ,   y o u r   b a t c h   w i l l   b e   f o r m e d   a u t o m a t i c a l l y !  
-                         < / d i v >  
-                 ` ;  
-                  
-                 i f   ( c u r r e n t P r e f . p r e f e r r e d _ d a t e   & &   c u r r e n t P r e f . p r e f e r r e d _ t i m e _ s l o t )   {  
-                         c o n s t   f o r m a t t e d T i m e   =   f o r m a t H H M M ( c u r r e n t P r e f . p r e f e r r e d _ t i m e _ s l o t ) ;  
-                         h t m l   + =   `  
-                                 < d i v   s t y l e = " m a r g i n - b o t t o m : 2 4 p x ;   p a d d i n g : 1 6 p x ;   b o r d e r : 1 p x   s o l i d   # 1 0 b 9 8 1 ;   b o r d e r - r a d i u s : 8 p x ;   b a c k g r o u n d : # e c f d f 5 ; " >  
-                                         < h 3   s t y l e = " m a r g i n : 0   0   8 p x ;   c o l o r : # 0 4 7 8 5 7 ;   f o n t - s i z e : 1 6 p x ; " > Y o u r   C u r r e n t   P r e f e r e n c e < / h 3 >  
-                                         < p   s t y l e = " m a r g i n : 0 ;   c o l o r : # 0 6 5 f 4 6 ; " > < s t r o n g > D a t e : < / s t r o n g >   $ { e s c a p e H t m l ( c u r r e n t P r e f . p r e f e r r e d _ d a t e ) }   < b r > < s t r o n g > T i m e : < / s t r o n g >   $ { e s c a p e H t m l ( f o r m a t t e d T i m e ) } < / p >  
-                                         < p   s t y l e = " m a r g i n : 8 p x   0   0 ;   f o n t - s i z e : 1 3 p x ;   c o l o r : # 0 4 7 8 5 7 ; " > W a i t i n g   f o r   o t h e r   c a n d i d a t e s   t o   s e l e c t   t h i s   s l o t . . . < / p >  
-                                 < / d i v >  
-                                 < h 3   s t y l e = " f o n t - s i z e : 1 6 p x ;   m a r g i n - b o t t o m : 1 2 p x ; " > C h a n g e   P r e f e r e n c e < / h 3 >  
-                         ` ;  
-                 }  
-  
-                 h t m l   + =   ` < d i v   s t y l e = " d i s p l a y : g r i d ;   g r i d - t e m p l a t e - c o l u m n s :   r e p e a t ( a u t o - f i l l ,   m i n m a x ( 2 8 0 p x ,   1 f r ) ) ;   g a p : 1 6 p x ; " > ` ;  
-                  
-                 o p t i o n s . f o r E a c h ( o p t   = >   {  
-                         c o n s t   d a y L a b e l   =   g e t W e e k d a y L a b e l ( o p t . d a t e ) ;  
-                         c o n s t   d a t e H e a d e r   =   d a y L a b e l   ?   ` $ { d a y L a b e l }   ( $ { o p t . d a t e } ) `   :   o p t . d a t e ;  
-                         c o n s t   t i m e P a r t s   =   o p t . t i m e _ s l o t . s p l i t ( ' - ' ) ;  
-                         c o n s t   s t a r t T i m e F o r m a t t e d   =   f o r m a t H H M M ( t i m e P a r t s [ 0 ] ) ;  
-                         c o n s t   e n d T i m e F o r m a t t e d   =   f o r m a t H H M M ( t i m e P a r t s [ 1 ] ) ;  
-                          
-                         c o n s t   i s C u r r e n t   =   c u r r e n t P r e f . p r e f e r r e d _ d a t e   = = =   o p t . d a t e   & &   c u r r e n t P r e f . p r e f e r r e d _ t i m e _ s l o t   = = =   o p t . t i m e _ s l o t ;  
-                          
-                         h t m l   + =   `  
-                         < d i v   s t y l e = " b o r d e r : 1 p x   s o l i d   $ { i s C u r r e n t   ?   ' # 1 0 b 9 8 1 '   :   ' # e 5 e b f 2 ' } ;   b o r d e r - r a d i u s : 1 0 p x ;   p a d d i n g : 1 8 p x ;   b a c k g r o u n d : $ { i s C u r r e n t   ?   ' # e c f d f 5 '   :   ' # f f f f f f ' } ;   b o x - s h a d o w : 0   2 p x   8 p x   r g b a ( 0 , 0 , 0 , 0 . 0 3 ) ; " >  
-                                 < d i v   s t y l e = " f o n t - w e i g h t : 7 0 0 ;   f o n t - s i z e : 1 6 p x ;   c o l o r : # 1 7 2 4 3 a ;   m a r g i n - b o t t o m : 6 p x ; " >  
-                                         $ { e s c a p e H t m l ( d a t e H e a d e r ) }  
-                                 < / d i v >  
-                                 < d i v   s t y l e = " f o n t - s i z e : 1 4 p x ;   c o l o r : # 4 b 5 5 6 3 ;   m a r g i n - b o t t o m : 1 0 p x ; " >  
-                                         � � �   $ { e s c a p e H t m l ( s t a r t T i m e F o r m a t t e d ) }   � �    $ { e s c a p e H t m l ( e n d T i m e F o r m a t t e d ) }  
-                                 < / d i v >  
-                                 < d i v   s t y l e = " d i s p l a y : f l e x ;   j u s t i f y - c o n t e n t : f l e x - e n d ;   m a r g i n - t o p : 1 2 p x ; " >  
-                                         $ { i s C u r r e n t   ?    
-                                                 ` < s p a n   s t y l e = " c o l o r : # 1 0 b 9 8 1 ;   f o n t - w e i g h t : 7 0 0 ;   d i s p l a y : f l e x ;   a l i g n - i t e m s : c e n t e r ; " > � S&   S e l e c t e d < / s p a n > `   :    
-                                                 ` < b u t t o n    
-                                                         c l a s s = " b t n - s e t - p r e f e r e n c e "    
-                                                         d a t a - d a t e = " $ { o p t . d a t e } "    
-                                                         d a t a - t i m e = " $ { o p t . t i m e _ s l o t } "  
-                                                         d a t a - a s s e s s m e n t - i d = " $ { a s s e s s m e n t I d } "  
-                                                         s t y l e = " b a c k g r o u n d : # 2 5 6 3 e b ;   c o l o r : # f f f ;   b o r d e r : n o n e ;   p a d d i n g : 8 p x   1 6 p x ;   b o r d e r - r a d i u s : 6 p x ;   f o n t - w e i g h t : 7 0 0 ;   c u r s o r : p o i n t e r ; "  
-                                                 >  
-                                                         C h o o s e   T h i s   S l o t  
-                                                 < / b u t t o n > `  
-                                         }  
-                                 < / d i v >  
-                         < / d i v > ` ;  
-                 } ) ;  
-                  
-                 h t m l   + =   ` < / d i v > ` ;  
-                 s l o t s L i s t E l . i n n e r H T M L   =   h t m l ;  
-  
-                 s l o t s L i s t E l . q u e r y S e l e c t o r A l l ( " . b t n - s e t - p r e f e r e n c e " ) . f o r E a c h ( b t n   = >   {  
-                         b t n . a d d E v e n t L i s t e n e r ( " c l i c k " ,   ( )   = >   h a n d l e S e t P r e f e r e n c e C l i c k ( b t n ) ) ;  
-                 } ) ;  
-  
-         }   c a t c h   ( e r r )   {  
-                 s l o t s L i s t E l . i n n e r H T M L   =   ` < p   s t y l e = " c o l o r : # d c 2 6 2 6 ; " > E r r o r :   $ { e s c a p e H t m l ( e r r . m e s s a g e ) } < / p > ` ;  
-         }  
- }  
-  
- a s y n c   f u n c t i o n   h a n d l e S e t P r e f e r e n c e C l i c k ( b t n )   {  
-         c o n s t   a s s e s s m e n t I d   =   b t n . d a t a s e t . a s s e s s m e n t I d ;  
-         c o n s t   d a t e   =   b t n . d a t a s e t . d a t e ;  
-         c o n s t   t i m e   =   b t n . d a t a s e t . t i m e ;  
-         c o n s t   n o t i c e C o n t a i n e r   =   d o c u m e n t . g e t E l e m e n t B y I d ( " n o t i c e - c o n t a i n e r " ) ;  
-  
-         b t n . d i s a b l e d   =   t r u e ;  
-         b t n . t e x t C o n t e n t   =   " S a v i n g . . . " ;  
-  
-         t r y   {  
-                 c o n s t   t o k e n   =   a w a i t   g e t C s r f T o k e n ( ) ;  
-                 c o n s t   r e s p o n s e   =   a w a i t   f e t c h ( " a p i / s l o t s / p r e f e r e n c e . p h p " ,   {  
-                         m e t h o d :   " P O S T " ,  
-                         h e a d e r s :   {  
-                                 " C o n t e n t - T y p e " :   " a p p l i c a t i o n / j s o n " ,  
-                                 " A c c e p t " :   " a p p l i c a t i o n / j s o n " ,  
-                                 " X - C S R F - T o k e n " :   t o k e n  
-                         } ,  
-                         b o d y :   J S O N . s t r i n g i f y ( {  
-                                 a s s e s s m e n t _ i d :   N u m b e r ( a s s e s s m e n t I d ) ,  
-                                 p r e f e r r e d _ d a t e :   d a t e ,  
-                                 p r e f e r r e d _ t i m e _ s l o t :   t i m e  
-                         } )  
-                 } ) ;  
-  
-                 c o n s t   p a y l o a d   =   a w a i t   r e s p o n s e . j s o n ( ) ;  
-  
-                 i f   ( ! r e s p o n s e . o k   | |   p a y l o a d . s t a t u s   ! = =   " s u c c e s s " )   {  
-                         t h r o w   n e w   E r r o r ( p a y l o a d . m e s s a g e   | |   " F a i l e d   t o   s a v e   p r e f e r e n c e . " ) ;  
-                 }  
-  
-                 i f   ( n o t i c e C o n t a i n e r )   {  
-                         n o t i c e C o n t a i n e r . i n n e r H T M L   =   `  
-                                 < d i v   c l a s s = " n o t i c e   n o t i c e - s u c c e s s "   s t y l e = " b a c k g r o u n d : # f 0 f d f 4 ;   b o r d e r : 1 p x   s o l i d   # b b f 7 d 0 ;   c o l o r : # 1 6 6 5 3 4 ;   p a d d i n g : 1 4 p x   1 8 p x ;   b o r d e r - r a d i u s : 8 p x ;   m a r g i n - b o t t o m : 1 8 p x ; " >  
-                                         � S&   P r e f e r e n c e   s a v e d !   Y o u   w i l l   b e   a l l o c a t e d   t o   a   b a t c h   o n c e   1 0 0   c a n d i d a t e s   c h o o s e   t h i s   d a t e .  
-                                 < / d i v > ` ;  
-                 }  
-  
-                 a w a i t   l o a d P r e f e r e n c e s ( a s s e s s m e n t I d ) ;  
-  
-         }   c a t c h   ( e r r )   {  
-                 b t n . d i s a b l e d   =   f a l s e ;  
-                 b t n . t e x t C o n t e n t   =   " C h o o s e   T h i s   S l o t " ;  
-                 i f   ( n o t i c e C o n t a i n e r )   {  
-                         n o t i c e C o n t a i n e r . i n n e r H T M L   =   `  
-                                 < d i v   c l a s s = " n o t i c e   n o t i c e - e r r o r "   s t y l e = " b a c k g r o u n d : # f d f 2 f 2 ;   b o r d e r : 1 p x   s o l i d   # f 8 c d c d ;   c o l o r : # b 9 1 c 1 c ;   p a d d i n g : 1 4 p x   1 8 p x ;   b o r d e r - r a d i u s : 8 p x ;   m a r g i n - b o t t o m : 1 8 p x ; " >  
-                                         � � R  $ { e s c a p e H t m l ( e r r . m e s s a g e ) }  
-                                 < / d i v > ` ;  
-                 }  
-         }  
- }  
- 

@@ -52,11 +52,18 @@
       </div>
 
       <div class="flex items-center gap-4 relative">
-        <button id="notificationButton" class="text-slate-500 hover:text-slate-700 relative">
+        <button id="notificationButton" class="text-slate-500 hover:text-slate-700 relative" onclick="toggleNotificationDropdown()">
           <i data-lucide="bell" class="h-5 w-5"></i>
+          <span id="notif-badge" class="hidden absolute -top-1 -right-1 bg-red-500 text-white text-xs font-bold rounded-full min-w-[18px] h-[18px] flex items-center justify-center px-1"></span>
         </button>
-        <div id="notificationDropdown" class="hidden absolute right-12 top-full mt-2 w-64 bg-white rounded-xl shadow-lg border border-slate-100 p-4 z-50">
-          <p class="text-sm text-slate-500 text-center">No new notifications</p>
+        <div id="notificationDropdown" class="hidden absolute right-12 top-full mt-2 w-80 bg-white rounded-xl shadow-lg border border-slate-100 z-50" style="max-height:400px;overflow-y:auto;">
+          <div style="padding:14px 16px; border-bottom:1px solid #f1f5f9; font-weight:700; color:#1e293b; font-size:14px; display:flex; justify-content:space-between; align-items:center;">
+            <span>🔔 Notifications</span>
+            <button onclick="markAllNotificationsRead()" style="font-size:11px; color:#64748b; background:none; border:none; cursor:pointer;">Mark all read</button>
+          </div>
+          <div id="notif-list" style="padding:8px 0;">
+            <p class="text-sm text-slate-500 text-center" style="padding:16px;">Loading...</p>
+          </div>
         </div>
 
         <button id="userButton" class="flex items-center gap-2">
@@ -170,6 +177,122 @@
   </div>
 
   <script src="admin.js"></script>
+  <script>
+  // ── Admin Notification System ──────────────────────────────────────────
+  function toggleNotificationDropdown() {
+      const dd = document.getElementById('notificationDropdown');
+      const isHidden = dd.classList.contains('hidden');
+      document.getElementById('userDropdown')?.classList.add('hidden');
+      if (isHidden) {
+          dd.classList.remove('hidden');
+          loadAdminNotifications();
+      } else {
+          dd.classList.add('hidden');
+      }
+  }
+
+  document.addEventListener('click', (e) => {
+      if (!e.target.closest('#notificationButton') && !e.target.closest('#notificationDropdown')) {
+          document.getElementById('notificationDropdown')?.classList.add('hidden');
+      }
+  });
+
+  async function loadAdminNotifications() {
+      try {
+          const res = await fetch('../api/notifications/list.php?limit=15', { credentials: 'same-origin' });
+          const payload = await res.json();
+          if (!res.ok || payload.status !== 'success') return;
+
+          const { notifications, unread_count } = payload.data;
+          const badge = document.getElementById('notif-badge');
+          const list = document.getElementById('notif-list');
+
+          // Update badge
+          if (unread_count > 0) {
+              badge.textContent = unread_count > 9 ? '9+' : unread_count;
+              badge.classList.remove('hidden');
+          } else {
+              badge.classList.add('hidden');
+          }
+
+          // Render list
+          if (!notifications.length) {
+              list.innerHTML = '<p style="padding:16px; text-align:center; color:#94a3b8; font-size:13px;">No notifications yet</p>';
+              return;
+          }
+
+          list.innerHTML = notifications.map(n => {
+              const isBatchReady = n.type === 'batch_ready';
+              const timeAgo = getTimeAgo(n.created_at);
+              return `
+                <div style="padding:12px 16px; border-bottom:1px solid #f8fafc; background:${n.is_read ? '#fff' : '#fffbeb'};">
+                    <div style="display:flex; gap:10px; align-items:flex-start;">
+                        <span style="font-size:18px; flex-shrink:0;">${isBatchReady ? '🚀' : '🔔'}</span>
+                        <div style="flex:1; min-width:0;">
+                            <div style="font-weight:${n.is_read ? '500' : '700'}; font-size:13px; color:#1e293b; margin-bottom:2px;">${escapeHtml(n.title)}</div>
+                            <div style="font-size:12px; color:#64748b; line-height:1.4;">${escapeHtml(n.message)}</div>
+                            ${isBatchReady && n.related_id ? `<a href="../admin/batches.html" style="display:inline-block; margin-top:6px; font-size:11px; font-weight:700; color:#2563eb; text-decoration:none;">→ Go to Batches & Create Batch</a>` : ''}
+                            <div style="font-size:11px; color:#94a3b8; margin-top:4px;">${timeAgo}</div>
+                        </div>
+                        ${!n.is_read ? `<span style="flex-shrink:0; width:8px; height:8px; background:#f59e0b; border-radius:50%; margin-top:4px;"></span>` : ''}
+                    </div>
+                </div>`;
+          }).join('');
+
+      } catch (e) {
+          console.error('Notification load failed', e);
+      }
+  }
+
+  async function markAllNotificationsRead() {
+      try {
+          const token = document.querySelector('meta[name="csrf-token"]')?.content || '';
+          await fetch('../api/notifications/list.php', {
+              method: 'PATCH',
+              credentials: 'same-origin',
+              headers: { 'Content-Type': 'application/json', 'X-CSRF-Token': token },
+              body: JSON.stringify({ action: 'mark_all_read' })
+          });
+          loadAdminNotifications();
+      } catch(e) {}
+  }
+
+  function escapeHtml(str) {
+      if (!str) return '';
+      return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  }
+
+  function getTimeAgo(dateStr) {
+      if (!dateStr) return '';
+      const diff = Math.floor((Date.now() - new Date(dateStr).getTime()) / 1000);
+      if (diff < 60) return 'Just now';
+      if (diff < 3600) return Math.floor(diff/60) + 'm ago';
+      if (diff < 86400) return Math.floor(diff/3600) + 'h ago';
+      return Math.floor(diff/86400) + 'd ago';
+  }
+
+  // Poll every 30 seconds for new notifications
+  async function pollNotifications() {
+      try {
+          const res = await fetch('../api/notifications/list.php?unread=1&limit=1', { credentials: 'same-origin' });
+          const payload = await res.json();
+          if (res.ok && payload.status === 'success') {
+              const count = payload.data.unread_count;
+              const badge = document.getElementById('notif-badge');
+              if (count > 0) {
+                  badge.textContent = count > 9 ? '9+' : count;
+                  badge.classList.remove('hidden');
+              } else {
+                  badge.classList.add('hidden');
+              }
+          }
+      } catch(e) {}
+  }
+
+  // Initial poll + repeat
+  pollNotifications();
+  setInterval(pollNotifications, 30000);
+  </script>
 </body>
 </html>
 

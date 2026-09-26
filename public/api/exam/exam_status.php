@@ -152,28 +152,30 @@ try {
         $slotStartTime = !empty($attempt['slot_start_time']) ? $attempt['slot_start_time'] : null;
         $slotEndTime = !empty($attempt['slot_end_time']) ? $attempt['slot_end_time'] : null;
 
-        if ($examDate !== null) {
+        if ($examDate !== null && $slotStartTime !== null && $slotEndTime !== null) {
+            // Compare full datetimes — avoids timezone/date-string mismatch bugs
+            $slotStart = new DateTime($examDate . " " . $slotStartTime);
+            $slotEnd = new DateTime($examDate . " " . $slotEndTime);
+            if ($slotEndTime < $slotStartTime) { $slotEnd->modify("+1 day"); }
+
+            if ($now < $slotStart) {
+                $canStart = false;
+                $gateMessage = "Your exam is scheduled for {$examDate} at {$slotStartTime}. This assessment is not yet active.";
+            } elseif ($now > $slotEnd) {
+                $canStart = false;
+                $gateMessage = "Your scheduled exam window has passed.";
+            }
+        } elseif ($examDate !== null) {
             if ($examDate > $today) {
                 $canStart = false;
                 $gateMessage = "Your exam is scheduled for {$examDate}. This assessment is not yet active.";
             } elseif ($examDate < $today) {
                 $canStart = false;
                 $gateMessage = "Your scheduled exam window has passed.";
-            } elseif ($slotStartTime !== null && $slotEndTime !== null) {
-                $slotStart = new DateTime($examDate . ' ' . $slotStartTime);
-                $slotEnd = new DateTime($examDate . ' ' . $slotEndTime);
-
-                if ($now < $slotStart) {
-                    $canStart = false;
-                    $gateMessage = "Your exam slot opens at {$slotStartTime}.";
-                } elseif ($now > $slotEnd) {
-                    $canStart = false;
-                    $gateMessage = "Your exam slot has closed.";
-                }
             }
         }
-    }
 
+    }
     /*
      * Count answers already saved.
      */
@@ -230,3 +232,4 @@ try {
     error_log('exam_status error: ' . $e->getMessage());
     send_json_response('error', 'Internal server error', null, 500);
 }
+

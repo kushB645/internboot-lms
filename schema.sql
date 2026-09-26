@@ -1,4 +1,4 @@
-// VERIFICATION_TOKEN: VERIFY-25BCE14D1F630DEA
+-- VERIFICATION_TOKEN: VERIFY-25BCE14D1F630DEA
 -- ============================================================================
 -- InternBoot Platform - Complete Single-File Production MySQL Database Schema
 -- Database Engine: MySQL 8.0+ / MariaDB 10.3+ (InnoDB Engine)

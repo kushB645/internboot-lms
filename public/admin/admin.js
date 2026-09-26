@@ -1204,11 +1204,34 @@
         <td class="px-6 py-4 text-slate-500">${escapeHtml(s.start_time?.slice(0, 5) || "")} - ${escapeHtml(s.end_time?.slice(0, 5) || "")}</td>
         <td class="px-6 py-4">${s.capacity}</td><td class="px-6 py-4">${s.allocated}</td><td class="px-6 py-4">${s.seats_remaining}</td>
         <td class="px-6 py-4">${badge(s.seats_remaining > 0 ? "Available" : "Full", s.seats_remaining > 0 ? "green" : "red")}</td>
+        <td class="px-6 py-4">
+            <button class="delete-slot-btn text-red-500 hover:text-red-700" data-slot-id="${s.slot_id}" title="Delete Slot">
+                <i data-lucide="trash-2" class="h-4 w-4"></i>
+            </button>
+        </td>
       </tr>`,
             )
             .join("")
-        : `<tr><td class="px-6 py-10 text-center text-sm text-slate-500" colspan="6">No slots created yet.</td></tr>`;
+        : `<tr><td class="px-6 py-10 text-center text-sm text-slate-500" colspan="7">No slots created yet.</td></tr>`;
     refreshIcons();
+
+    document.querySelectorAll('.delete-slot-btn').forEach(btn => {
+        btn.addEventListener('click', async (e) => {
+            const slotId = e.currentTarget.dataset.slotId;
+            if (confirm("Are you sure you want to delete this slot?")) {
+                try {
+                    await api("slot_delete", {
+                        method: "POST",
+                        body: { slot_id: slotId }
+                    });
+                    notify("Slot deleted successfully!");
+                    await loadBatches();
+                } catch (err) {
+                    notify(err.message || "Failed to delete slot", true);
+                }
+            }
+        });
+    });
 
     const allocBody = $("#allocationTableBody");
     const unallocated = eligible.filter((c) => !c.batch_id);
@@ -1275,19 +1298,56 @@
       if (pendingRequests.length === 0) {
         pendingRequestsBody.innerHTML = `<tr><td colspan="3" class="px-4 py-8 text-center text-sm text-slate-500">No pending batch requests.</td></tr>`;
       } else {
-        pendingRequestsBody.innerHTML = pendingRequests.map(r => `
-          <tr class="hover:bg-slate-50">
-            <td class="px-4 py-4"><div class="font-medium text-slate-800">${escapeHtml(r.preferred_date)}</div><div class="text-xs text-slate-500">${escapeHtml(r.assessment_title)}<br>${escapeHtml(r.preferred_time_slot)}</div></td>
-            <td class="px-4 py-4 font-medium ${r.candidate_count >= 100 ? 'text-green-600' : 'text-amber-600'}">${r.candidate_count} <span class="text-xs text-slate-400 font-normal">/ 100</span></td>
+        pendingRequestsBody.innerHTML = pendingRequests.map(r => {
+          const isClosed = Number(r.is_closed) === 1;
+          const isReady = r.candidate_count >= 100;
+          return `
+          <tr class="hover:bg-slate-50 ${isClosed ? 'opacity-60' : ''}">
             <td class="px-4 py-4">
-              <button class="btn-create-auto-batch rounded-lg px-3 py-2 text-xs font-medium text-white ${r.candidate_count >= 100 ? 'bg-intern-blue hover:bg-blue-700' : 'bg-slate-300 cursor-not-allowed'}" 
-                data-assessment="${r.assessment_id}" data-schedule="${r.schedule_id}" 
-                ${r.candidate_count >= 100 ? '' : 'disabled'}>
-                Create Batch
-              </button>
+              <div class="flex items-center gap-2">
+                <div>
+                  <div class="font-medium text-slate-800">${escapeHtml(r.assessment_title || '')}</div>
+                  <div class="text-xs text-slate-500">${escapeHtml(r.preferred_date || '')} · ${escapeHtml(r.preferred_time_slot || '')}</div>
+                </div>
+                ${isClosed ? '<span style="background:#fee2e2;color:#dc2626;font-size:10px;font-weight:700;padding:2px 8px;border-radius:12px;white-space:nowrap;">🔒 CLOSED</span>' : ''}
+              </div>
             </td>
-          </tr>
-        `).join("");
+            <td class="px-4 py-4">
+              <div class="flex items-center gap-2 mb-1">
+                <span class="font-bold ${isReady ? 'text-green-600' : 'text-amber-600'}">${r.candidate_count}</span>
+                <span class="text-xs text-slate-400">/ 100</span>
+                ${isReady ? '<span style="background:#dcfce7;color:#166534;font-size:10px;font-weight:700;padding:2px 7px;border-radius:12px;">✅ READY</span>' : ''}
+              </div>
+              <div style="background:#e5e7eb;border-radius:99px;height:6px;overflow:hidden;width:120px;">
+                <div style="height:100%;width:${Math.min(100, Math.round((r.candidate_count/100)*100))}%;background:${isReady ? '#10b981' : '#f59e0b'};border-radius:99px;"></div>
+              </div>
+              <div style="font-size:10px;color:#94a3b8;margin-top:2px;">${isClosed ? 'Slot closed — no new selections' : `${Math.max(0, 100 - r.candidate_count)} more needed`}</div>
+            </td>
+            <td class="px-4 py-4">
+              <div style="display:flex;gap:8px;flex-wrap:wrap;">
+                ${!isClosed ? `
+                <button class="btn-create-auto-batch rounded-lg px-3 py-2 text-xs font-medium text-white ${isReady ? 'bg-intern-blue hover:bg-blue-700' : 'bg-slate-300 cursor-not-allowed'}" 
+                  data-assessment="${r.assessment_id}" data-schedule="${r.schedule_id}" 
+                  ${isReady ? '' : 'disabled'}>
+                  🚀 Create Batch
+                </button>
+                <button class="btn-close-slot rounded-lg px-3 py-2 text-xs font-medium text-white bg-red-500 hover:bg-red-600"
+                  data-schedule="${r.schedule_id}" data-action="close">
+                  🔒 Close Slot
+                </button>` : `
+                <button class="btn-create-auto-batch rounded-lg px-3 py-2 text-xs font-medium text-white ${isReady ? 'bg-intern-blue hover:bg-blue-700' : 'bg-slate-300 cursor-not-allowed'}" 
+                  data-assessment="${r.assessment_id}" data-schedule="${r.schedule_id}" 
+                  ${isReady ? '' : 'disabled'}>
+                  🚀 Create Batch
+                </button>
+                <button class="btn-close-slot rounded-lg px-3 py-2 text-xs font-medium text-white bg-emerald-500 hover:bg-emerald-600"
+                  data-schedule="${r.schedule_id}" data-action="reopen">
+                  🔓 Reopen Slot
+                </button>`}
+              </div>
+            </td>
+          </tr>`;
+        }).join("");
 
         $$(".btn-create-auto-batch").forEach(btn => {
           btn.addEventListener("click", async () => {
@@ -1320,6 +1380,41 @@
               notify(err.message, true);
               btn.disabled = false;
               btn.textContent = originalText;
+            }
+          });
+        });
+
+        // Close Slot handler
+        $$(".btn-close-slot").forEach(btn => {
+          btn.addEventListener("click", async () => {
+            const scheduleId = Number(btn.dataset.schedule);
+            const action = btn.dataset.action || 'close';
+            
+            const msg = action === 'close' ? 
+              "Close this slot? Candidates will no longer be able to select it. You can reopen it later." : 
+              "Reopen this slot? Candidates will be able to select it again.";
+              
+            if (!confirm(msg)) return;
+            
+            btn.disabled = true;
+            btn.textContent = action === 'close' ? "Closing..." : "Reopening...";
+            
+            try {
+              const token = await getCsrfToken();
+              const res = await fetch("/api/admin/close_slot.php", {
+                method: "POST",
+                headers: { "Content-Type": "application/json", "Accept": "application/json", "X-CSRF-Token": token },
+                body: JSON.stringify({ schedule_id: scheduleId, action: action })
+              });
+              const payload = await res.json();
+              if (!res.ok || payload.status !== "success") throw new Error(payload.message || `Failed to ${action} slot`);
+              
+              notify(action === 'close' ? "Slot closed. Candidates can no longer select it." : "Slot reopened successfully.");
+              await loadBatches();
+            } catch (err) {
+              notify(err.message, true);
+              btn.disabled = false;
+              btn.innerHTML = action === 'close' ? "🔒 Close Slot" : "🔓 Reopen Slot";
             }
           });
         });

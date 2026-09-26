@@ -152,6 +152,15 @@ try {
 
     $answeredCount = (int) $answerData['answered_count'];
 
+    $resultData = null;
+    if ($evaluationDone) {
+        $resStmt = $conn->prepare("SELECT total_score, percentage, level_assigned FROM results WHERE attempt_id = ? ORDER BY id DESC LIMIT 1");
+        $resStmt->bind_param("i", $attemptId);
+        $resStmt->execute();
+        $resultData = $resStmt->get_result()->fetch_assoc();
+        $resStmt->close();
+    }
+
     send_json_response('success', 'Exam submitted successfully', [
         'success' => true,
         'attempt_id' => $attemptId,
@@ -160,7 +169,9 @@ try {
         'status' => 'submitted',
         'submitted_at' => date('Y-m-d H:i:s'),
         'answered_count' => $answeredCount,
-        'evaluation_pending' => !$evaluationDone
+        'evaluation_pending' => !$evaluationDone,
+        'score' => $resultData ? number_format((float)$resultData['percentage'], 2) : null,
+        'level' => $resultData ? $resultData['level_assigned'] : null
     ], 200);
 
 } catch (Throwable $e) {

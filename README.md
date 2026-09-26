@@ -275,7 +275,7 @@ The platform uses 23 relational tables defined in `schema.sql`:
   - **Rate Limiting:** Scoped by client IP, allowing a maximum of 20 verification requests per 15-minute window to protect against certificate number enumeration.
 
 - **Certificate Issuance & Eligibility:**
-  - Enforces minimum qualification gate (`settings.min_certificate_level`, default: Level 2 / Elementary, 40%+). Results for Level 1 (0–39.99%) or failing scores are rejected with `InvalidArgumentException`.
+  - Enforces minimum qualification gate (`settings.min_certificate_level`, default: Level 4 / Basic Knowledge, 40%+). Results for Level 5 (0–39.99%) or failing scores are rejected with `InvalidArgumentException`.
   - PDF rendering uses TCPDF with full TrueType Unicode font embedding (`FreeSans`), fully supporting Devanagari, Latin, and non-Latin character sets.
 
 ---
@@ -301,7 +301,7 @@ The platform uses 23 relational tables defined in `schema.sql`:
 
 ## 12. Known Gaps & Future Roadmap Items
 
-1. **AI Question Bank Auto-Generation:** Prompt-driven dynamic AI question generation endpoint is not yet fully wired to external LLM provider APIs.
-2. **PDF Certificate Design Template:** PDF generation is active in M7 (`certificate_pdf.php`), but the visual layout uses a standard placeholder layout requiring final graphic styling.
-3. **Evaluation Status-Check Bug:** Tracked for resolution in a separate pass following codebase restructuring.
-4. **Database Connection Bootstrap Split:** Exam engine endpoints use `m6_exam_engine/config/database.php` while Core/Admin endpoints use `src/core/bootstrap.php`. Both resolve to identical credentials in `.env`, but should be refactored into a single connection helper in a future pass.
+1. **Mock Payment Gateway:** The payment module currently uses a self-issued demo token flow (flagged in Section 3). Must be replaced with PayU/Easebuzz/Razorpay for production.
+2. **Anti-Cheating Client-Side Limits:** Anti-cheat tracking (tab-blur) is strictly client-side JS right now. Acceptable for MVP but documentable as a known limitation.
+3. **Automated Testing:** The platform currently lacks a PHPUnit automated test suite around the critical financial/certification path (M7 Evaluation).
+4. **PDF Certificate Design Template:** PDF generation is active in M7 (`certificate_pdf.php`), but the visual layout uses a standard placeholder layout requiring final graphic styling.

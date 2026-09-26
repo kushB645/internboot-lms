@@ -15,20 +15,10 @@ require_once __DIR__ . '/../src/core/bootstrap.php';
 $force = in_array('--force', $argv, true);
 
 if ($force) {
-    echo "[--force] Destructive mode: Executing reset-schema.sql...\n";
-    $resetFile = __DIR__ . '/reset-schema.sql';
-    if (!file_exists($resetFile)) {
-        die("Error: reset-schema.sql not found at {$resetFile}\n");
-    }
-    $resetSql = file_get_contents($resetFile);
-    if (!$conn->multi_query($resetSql)) {
-        die("Error executing reset-schema.sql: " . $conn->error . "\n");
-    }
-    // clear results
-    while ($conn->next_result()) {;}
-    echo "Destructive reset complete. Proceeding to apply schema...\n";
+    echo "[WARNING] --force mode is no longer supported (reset-schema.sql has been removed for production safety).\n";
+    echo "Safe mode: Existing data will not be dropped.\n";
 } else {
-    echo "Safe mode: Existing data will not be dropped (use --force for destructive reset).\n";
+    echo "Safe mode: Existing data will not be dropped.\n";
 }
 
 echo "Reading schema.sql...\n";

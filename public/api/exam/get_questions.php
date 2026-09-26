@@ -9,6 +9,7 @@ if (file_exists(dirname(__DIR__, 3) . '/src/core/bootstrap.php')) {
     require_once __DIR__ . '/../src/core/bootstrap.php';
 }
 
+require_once __DIR__ . '/../../../src/modules/m5_batch_slots/queries.php';
 try {
 
     /*
@@ -36,6 +37,7 @@ try {
             id,
             candidate_id,
             assessment_id,
+            exam_slot_id,
             status,
             start_time,
             end_time
@@ -194,29 +196,26 @@ try {
         $snapStmt->close();
 
         if (empty($fetchedQuestions)) {
-            // 4.1 & 4.2: Pool check and Stratification
-            $ratioEasy = (int) get_setting_value('question_ratio_easy', $conn);
-            $ratioMed = (int) get_setting_value('question_ratio_medium', $conn);
-            $ratioHard = (int) get_setting_value('question_ratio_hard', $conn);
-            if ($ratioEasy <= 0 && $ratioMed <= 0 && $ratioHard <= 0) {
-                $ratioEasy = 30; $ratioMed = 40; $ratioHard = 30;
-            }
-            $totalRatio = $ratioEasy + $ratioMed + $ratioHard;
-            $numEasy = (int) round(($ratioEasy / $totalRatio) * $totalQuestions);
-            $numHard = (int) round(($ratioHard / $totalRatio) * $totalQuestions);
-            $numMed = $totalQuestions - $numEasy - $numHard;
+            $slotId = (int)$attempt['exam_slot_id'];
+            
+            // Check if THIS batch already has questions assigned to SOME attempt.
+            $slotSql = "
+                SELECT q.id AS question_id, q.question_text, q.type, q.difficulty
+                FROM attempt_questions aq
+                JOIN attempts a ON a.id = aq.attempt_id
+                JOIN questions q ON q.id = aq.question_id
+                WHERE a.exam_slot_id = ?
+                GROUP BY q.id, q.question_text, q.type, q.difficulty
+                ORDER BY MIN(aq.position) ASC
+            ";
+            $slotStmt = $conn->prepare($slotSql);
+            $slotStmt->bind_param("i", $slotId);
+            $slotStmt->execute();
+            $fetchedQuestions = $slotStmt->get_result()->fetch_all(MYSQLI_ASSOC);
+            $slotStmt->close();
 
-            $countSql = "SELECT difficulty, COUNT(*) FROM questions q INNER JOIN question_banks qb ON qb.id = q.question_bank_id WHERE qb.assessment_id = ? AND q.type = 'MCQ' AND q.approval_status = 'approved' GROUP BY difficulty";
-            $countStmt = $conn->prepare($countSql);
-            $countStmt->bind_param("i", $attempt['assessment_id']);
-            $countStmt->execute();
-            $counts = ['easy' => 0, 'medium' => 0, 'hard' => 0];
-            $res = $countStmt->get_result();
-            while ($r = $res->fetch_row()) $counts[$r[0]] = (int)$r[1];
-            $countStmt->close();
-
-            if ($counts['easy'] < $numEasy || $counts['medium'] < $numMed || $counts['hard'] < $numHard) {
-                // Fallback: If strict stratification fails, just pick any available approved questions
+            if (empty($fetchedQuestions)) {
+                // FIRST candidate in the batch! Assign new questions from 'approved' pool.
                 $poolSql = "
                     SELECT q.id AS question_id, q.question_text, q.type, q.difficulty
                     FROM questions q INNER JOIN question_banks qb ON qb.id = q.question_bank_id
@@ -224,48 +223,28 @@ try {
                     ORDER BY MD5(CONCAT(?, ':', q.id)) LIMIT ?
                 ";
                 $poolStmt = $conn->prepare($poolSql);
-                $poolStmt->bind_param("iii", $attempt['assessment_id'], $attemptId, $totalQuestions);
+                $poolStmt->bind_param("iii", $attempt['assessment_id'], $slotId, $totalQuestions);
                 $poolStmt->execute();
                 $fetchedQuestions = $poolStmt->get_result()->fetch_all(MYSQLI_ASSOC);
                 $poolStmt->close();
                 
-                if (count($fetchedQuestions) < $totalQuestions) {
-                     // We don't even have enough questions total, but we'll proceed with what we have
-                     // as per the user's relaxed constraint, or we could throw an error.
-                     // The user says "jo 100 ques approve krde wo access hojaye". So if they approved exactly 100, it works!
+                // Shuffle deterministically using slotId
+                srand($slotId);
+                shuffle($fetchedQuestions);
+                srand();
+                
+                // ARCHIVE these questions so future batches cannot use them!
+                if (!empty($fetchedQuestions)) {
+                    $qIdsToArchive = array_column($fetchedQuestions, 'question_id');
+                    $inClauseArchive = implode(',', array_fill(0, count($qIdsToArchive), '?'));
+                    $archiveSql = "UPDATE questions SET approval_status = 'archived' WHERE id IN ($inClauseArchive)";
+                    $archiveStmt = $conn->prepare($archiveSql);
+                    $typesArchive = str_repeat('i', count($qIdsToArchive));
+                    $archiveStmt->bind_param($typesArchive, ...$qIdsToArchive);
+                    $archiveStmt->execute();
+                    $archiveStmt->close();
                 }
-            } else {
-                $poolSql = "
-                    (SELECT q.id AS question_id, q.question_text, q.type, q.difficulty
-                     FROM questions q INNER JOIN question_banks qb ON qb.id = q.question_bank_id
-                     WHERE qb.assessment_id = ? AND q.type = 'MCQ' AND q.approval_status = 'approved' AND q.difficulty = 'easy'
-                     ORDER BY MD5(CONCAT(?, ':', q.id)) LIMIT ?)
-                    UNION ALL
-                    (SELECT q.id AS question_id, q.question_text, q.type, q.difficulty
-                     FROM questions q INNER JOIN question_banks qb ON qb.id = q.question_bank_id
-                     WHERE qb.assessment_id = ? AND q.type = 'MCQ' AND q.approval_status = 'approved' AND q.difficulty = 'medium'
-                     ORDER BY MD5(CONCAT(?, ':', q.id)) LIMIT ?)
-                    UNION ALL
-                    (SELECT q.id AS question_id, q.question_text, q.type, q.difficulty
-                     FROM questions q INNER JOIN question_banks qb ON qb.id = q.question_bank_id
-                     WHERE qb.assessment_id = ? AND q.type = 'MCQ' AND q.approval_status = 'approved' AND q.difficulty = 'hard'
-                     ORDER BY MD5(CONCAT(?, ':', q.id)) LIMIT ?)
-                ";
-                $poolStmt = $conn->prepare($poolSql);
-                $poolStmt->bind_param("iiiiiiiii",
-                    $attempt['assessment_id'], $attemptId, $numEasy,
-                    $attempt['assessment_id'], $attemptId, $numMed,
-                    $attempt['assessment_id'], $attemptId, $numHard
-                );
-                $poolStmt->execute();
-                $fetchedQuestions = $poolStmt->get_result()->fetch_all(MYSQLI_ASSOC);
-                $poolStmt->close();
             }
-
-            // Shuffle the array deterministically so easy/med/hard are mixed
-            srand($attemptId);
-            shuffle($fetchedQuestions);
-            srand(); // reset seed
 
             $insertSql = "INSERT INTO attempt_questions (attempt_id, question_id, position) VALUES (?, ?, ?)";
             $insertStmt = $conn->prepare($insertSql);

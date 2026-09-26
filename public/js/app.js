@@ -22,6 +22,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
         const source = payload.data;
 
+        if (source.exam && source.exam.attempt_id) { localStorage.setItem('ib_attempt_id', source.exam.attempt_id); }
         fillSection("candidate", source.candidate);
         fillSection("payment", source.payment);
         fillSection("enrollment", source.enrollment);
@@ -37,6 +38,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         renderCertificateState(source);
         renderProfileState(source);
         renderEnrollmentState(source);
+        renderResultsState(source);
 if (source.demo_mode) {
             let alertBox = document.getElementById('demo-mode-alert');
             if (!alertBox) {
@@ -272,6 +274,21 @@ function renderCertificateState(source) {
         if (dashCertDownload) {
             dashCertDownload.innerHTML = "";
         }
+    }
+}
+
+
+function renderResultsState(source) {
+    if (!source || location.pathname.indexOf('results.html') === -1) return;
+    
+    const resultSection = document.querySelector('.card-pad .empty');
+    const resultTitle = document.querySelector('.card-pad .section-title');
+    if (!resultSection) return;
+
+    if (source.result && source.result.evaluation === 'Evaluated') {
+        resultSection.innerHTML = `<div style='font-size:42px; margin-bottom:10px;'>??</div><h2 style='color:#17243a'>Result Evaluated Successfully</h2><p>Your assessment has been fully evaluated. See your detailed score and level below.</p>`;
+        resultSection.style.padding = '30px';
+        if (resultTitle) resultTitle.textContent = 'Final Assessment Result';
     }
 }
 

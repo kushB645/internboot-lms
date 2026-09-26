@@ -119,7 +119,7 @@ function m7_handle_request(mysqli $conn): void
     require_csrf();
 
     if (in_array($action, [
-        'setting', 'batch', 'slot', 'allocate',
+        'setting', 'batch', 'slot', 'slot_delete', 'allocate',
         'evaluate', 'certificate', 'certificate-next', 'placement', 'question-status'
     ], true)) {
         require_admin_only($conn);
@@ -286,6 +286,12 @@ function m7_handle_request(mysqli $conn): void
             $data=create_exam_slot($conn,$batchId,$start,$end,$capacity);
             create_admin_log($conn,$_SESSION['user_id']??null,'create_slot',json_encode($data));
             send_json_response('success','Exam slot created successfully.',$data,201);
+
+        case 'slot_delete':
+            $slotId = require_positive_int($body['slot_id'] ?? null, 'slot_id');
+            delete_exam_slot($conn, $slotId);
+            create_admin_log($conn, $_SESSION['user_id'] ?? null, 'delete_slot', json_encode(['slot_id' => $slotId]));
+            send_json_response('success', 'Exam slot deleted successfully.');
 
         case 'allocate':
             $enrollmentId=require_positive_int($body['enrollment_id']??null,'enrollment_id');

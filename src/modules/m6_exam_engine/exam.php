@@ -2227,16 +2227,25 @@ async function submitExam(
             ).textContent =
                 "Assessment submitted successfully.";
 
+            let resultHtml = "";
+            if (data.data && data.data.score !== undefined && data.data.score !== null) {
+                resultHtml = `<div style="text-align: center; margin-top: 20px; padding: 20px; background: #f8fafc; border-radius: 8px; border: 1px solid #e2e8f0;">
+                    <h3 style="color: #17243a; font-size: 24px; margin-bottom: 10px;">Actual Score: ${data.data.score} %</h3>
+                    <h4 style="color: #18a56a; font-size: 20px; margin-bottom: 20px;">Level Assigned: Level ${data.data.level}</h4>
+                    <a href="results.html" style="background:#2563eb; color:#fff; padding:10px 20px; text-decoration:none; border-radius:5px; font-weight: bold; display: inline-block;">Go to Results Dashboard</a>
+                </div>`;
+            } else {
+                resultHtml = `<div style="text-align: center; margin-top: 20px;"><a href="results.html" style="background:#2563eb; color:#fff; padding:10px 20px; text-decoration:none; border-radius:5px; font-weight: bold; display: inline-block;">View Results</a></div>`;
+            }
 
             document.getElementById(
                 "options"
-            ).innerHTML = "";
-
+            ).innerHTML = resultHtml;
 
             document.getElementById(
                 "saveStatus"
             ).textContent =
-                "Your responses have been submitted for evaluation.";
+                "Your responses have been submitted and evaluated.";
 
         }
 

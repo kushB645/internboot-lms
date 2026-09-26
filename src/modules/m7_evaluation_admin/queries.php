@@ -305,6 +305,8 @@ function get_batches(mysqli $conn): array
         s.exam_date as preferred_date, 
         CONCAT(es.start_time, '-', es.end_time) as preferred_time_slot,
         es.capacity as capacity,
+        s.is_closed,
+        s.batch_alert_sent,
         (SELECT COUNT(*) FROM enrollments e WHERE e.provisional_schedule_id = s.id AND e.eligibility_status = 'eligible' AND e.batch_id IS NULL) as candidate_count
         FROM exam_schedules s
         JOIN batches b ON s.batch_id = b.id
@@ -749,6 +751,33 @@ function create_exam_slot(mysqli $conn,int $batchId,string $startTime,string $en
     $id=$stmt->insert_id;
     $stmt->close();
     return ['slot_id'=>$id,'batch_id'=>$batchId,'exam_date'=>$schedule['exam_date'],'start_time'=>$startTime,'end_time'=>$endTime,'capacity'=>$capacity];
+}
+
+function delete_exam_slot(mysqli $conn, int $slotId): void
+{
+    $slot = q_one($conn, 'SELECT capacity, seats_remaining FROM exam_slots WHERE id = ?', 'i', [$slotId]);
+    if (!$slot) throw new InvalidArgumentException('Exam slot not found.');
+    
+    if ((int)$slot['capacity'] !== (int)$slot['seats_remaining']) {
+        throw new InvalidArgumentException('Cannot delete slot: candidates are currently allocated to it.');
+    }
+    
+    $attempt = q_one($conn, 'SELECT id FROM attempts WHERE exam_slot_id = ? LIMIT 1', 'i', [$slotId]);
+    if ($attempt) {
+        throw new InvalidArgumentException('Cannot delete slot: candidates have already attempted the exam in this slot.');
+    }
+    
+    try {
+        $stmt = $conn->prepare('DELETE FROM exam_slots WHERE id = ?');
+        $stmt->bind_param('i', $slotId);
+        $stmt->execute();
+        $stmt->close();
+    } catch (mysqli_sql_exception $e) {
+        if ($e->getCode() === 1451) {
+            throw new InvalidArgumentException('Cannot delete this slot because it is linked to existing candidate records.');
+        }
+        throw $e;
+    }
 }
 
 function create_admin_log(mysqli $conn, ?int $userId, string $action, ?string $details = null): void
