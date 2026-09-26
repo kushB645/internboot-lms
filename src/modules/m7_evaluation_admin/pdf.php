@@ -42,11 +42,7 @@ function output_certificate_pdf(array $data): void
         $levelNameStr = "Level {$levelNum}";
     }
 
-    if (stripos($levelNameStr, "Level {$levelNum}") !== false) {
-        $levelDisplay = $levelNameStr;
-    } else {
-        $levelDisplay = "Level {$levelNum} - {$levelNameStr}";
-    }
+    $levelDisplay = "Level {$levelNum} - {$levelNameStr}";
     $percentage = (string)($data['percentage'] ?? '0') . '%';
     $date = (string)($data['issue_date'] ?? date('Y-m-d'));
 
@@ -64,67 +60,113 @@ function output_certificate_pdf(array $data): void
     $pdf->SetAutoPageBreak(false, 0);
     $pdf->AddPage('L', 'A4');
 
-    $pageWidth = 842.0;
-    $pageHeight = 595.0;
+    // 1. Outer Border: Dark Blue (#2563eb -> 37, 99, 235), 2.5 pt
+    $pdf->SetLineStyle(['width' => 2.5, 'color' => [37, 99, 235]]);
+    $pdf->Rect(25, 25, 792, 545);
 
-    // 1. Full-bleed background template image
-    // Stretch to fill the entire A4-L page (x=0, y=0, w=842, h=595).
-    // The template (1264×848, ratio 1.491) is slightly wider than A4-L (842×595, ratio 1.415).
-    // Preserving the aspect ratio via height-fit would crop ~32px off each side of the ornate
-    // border, clipping all four corner seals. Full-stretch introduces only a 5.1% horizontal
-    // squeeze which is imperceptible on the curved ornamental artwork, so full-bleed wins.
-    $templatePath = dirname(__DIR__, 3) . '/public/assets/certificate-template.jpg';
-    if (file_exists($templatePath)) {
-        $pdf->Image($templatePath, 0, 0, $pageWidth, $pageHeight, '', '', '', false, 300, '', false, false, 0);
+    // 2. Inner Border: Thin Slate Line (#94a3b8 -> 148, 163, 184), 0.75 pt
+    $pdf->SetLineStyle(['width' => 0.75, 'color' => [148, 163, 184]]);
+    $pdf->Rect(31, 31, 780, 533);
+
+    // 3. Top Decorative Header Bar
+    $pdf->SetFillColor(37, 99, 235);
+    $pdf->Rect(35, 35, 772, 10, 'F');
+    $pdf->SetFillColor(217, 119, 6);
+    $pdf->Rect(35, 45, 772, 4, 'F');
+
+    // 4. Header Text: Brand & Title
+    $pdf->SetFont('freesans', 'B', 14);
+    $pdf->SetTextColor(30, 41, 59);
+    $pdf->SetXY(0, 68);
+    $pdf->Cell(842, 20, 'INTERNBOOT PLATFORM', 0, 1, 'C');
+
+    $pdf->SetFont('freesans', 'B', 26);
+    $pdf->SetTextColor(37, 99, 235);
+    $pdf->SetXY(0, 96);
+    $pdf->Cell(842, 32, 'CERTIFICATE OF ACHIEVEMENT', 0, 1, 'C');
+
+    // Accent line under title
+    $pdf->SetLineStyle(['width' => 1.5, 'color' => [37, 99, 235]]);
+    $pdf->Line(260, 134, 582, 134);
+
+    // 5. Certification Statement
+    $pdf->SetFont('freesans', '', 12);
+    $pdf->SetTextColor(100, 116, 139);
+    $pdf->SetXY(0, 155);
+    $pdf->Cell(842, 18, 'THIS IS TO CERTIFY THAT', 0, 1, 'C');
+
+    // Candidate Name (Supports Devanagari, Chinese, Arabic, Latin, etc.)
+    $fontSize = 28;
+    $pdf->SetFont('freesans', 'B', $fontSize);
+    
+    // Auto-shrink font if name is too wide (max width ~700)
+    $nameWidth = $pdf->GetStringWidth($name);
+    while ($nameWidth > 700 && $fontSize > 12) {
+        $fontSize--;
+        $pdf->SetFont('freesans', 'B', $fontSize);
+        $nameWidth = $pdf->GetStringWidth($name);
+    }
+    
+    // If it STILL overflows at 12pt (very unlikely for 100 chars), gracefully truncate
+    if ($nameWidth > 700) {
+        while ($pdf->GetStringWidth($name . '...') > 700 && mb_strlen($name) > 0) {
+            $name = mb_substr($name, 0, -1);
+        }
+        $name .= '...';
     }
 
-    // 2. Overlay dynamic text aligned with template layout
-    //
-    // The template is 1264x848 px rendered at full A4-L height (595 pt → scale ≈ 0.7018).
-    // Pre-printed label bands (measured via pixel scan):
-    //   "CANDIDATE NAME" label:  image Y ≈ 370-387  →  PDF Y ≈ 259-272 pt  (centre ~265)
-    //   "DOMAIN" label:          image Y ≈ 464-477  →  PDF Y ≈ 326-335 pt  (centre ~330)
-    //   "LEVEL" label:           image Y ≈ 550-566  →  PDF Y ≈ 386-397 pt  (centre ~391)
-    //   Signature / date area:   image Y ≈ 700-730  →  PDF Y ≈ 491-512 pt  (centre ~502)
-    // Dynamic text is centred over the full page width to stay aligned with the centred labels.
+    $pdf->SetTextColor(15, 23, 42);
+    $pdf->SetXY(0, 182);
+    $pdf->Cell(842, 38, $name, 0, 1, 'C');
 
-    // --- Candidate Name (overlays the "CANDIDATE NAME" placeholder) ---
-    $fontSize = 26;
-    $pdf->SetFont('freesans', 'B', $fontSize);
-    // 2. Overlay dynamic text aligned with template layout
-    // New Scorecard Template has underlines at:
-    // NAME: X=271.3, Y=249.5 (width=426.8)
-    // DOMAIN: X=271.3, Y=286.2
-    // LEVEL: X=271.3, Y=322.8
-    // Cert ID: X=208.9, Y=509.5 (width=119.2)
+    // Accent gold line under candidate name
+    $pdf->SetLineStyle(['width' => 1.5, 'color' => [217, 119, 6]]);
+    $pdf->Line(280, 226, 562, 226);
 
-    $pdf->SetTextColor(10, 24, 60);
+    // 6. Assessment Details
+    $pdf->SetFont('freesans', '', 12);
+    $pdf->SetTextColor(100, 116, 139);
+    $pdf->SetXY(0, 245);
+    $pdf->Cell(842, 18, 'has successfully demonstrated proficiency and completed the assessment:', 0, 1, 'C');
 
-    // NAME
-    $pdf->SetFont('freesans', 'B', 24);
-    $pdf->SetXY(271.3, 249.5 - 26);
-    $pdf->Cell(426.8, 24, $name, 0, 1, 'C');
+    $pdf->SetFont('freesans', 'B', 18);
+    $pdf->SetTextColor(37, 99, 235);
+    $pdf->SetXY(0, 268);
+    $pdf->Cell(842, 26, $assessment, 0, 1, 'C');
 
-    // DOMAIN
-    $pdf->SetFont('freesans', 'B', 16);
-    $pdf->SetXY(271.3, 286.2 - 20);
-    $pdf->Cell(426.8, 20, $assessment, 0, 1, 'C');
+    // 7. Qualification Badge Box
+    $pdf->SetFillColor(240, 246, 255);
+    $pdf->SetLineStyle(['width' => 1.0, 'color' => [192, 216, 252]]);
+    $pdf->Rect(180, 312, 482, 68, 'DF');
 
-    // LEVEL
-    $pdf->SetFont('freesans', 'B', 14);
-    $pdf->SetXY(271.3, 322.8 - 18);
-    $pdf->Cell(426.8, 18, $levelDisplay, 0, 1, 'C');
+    $pdf->SetFont('freesans', 'B', 13);
+    $pdf->SetTextColor(30, 41, 59);
+    $pdf->SetXY(180, 323);
+    $pdf->Cell(482, 20, "Qualification: {$levelDisplay}", 0, 1, 'C');
 
-    // CERTIFICATE ID
-    $pdf->SetFont('freesans', 'B', 11);
-    $pdf->SetTextColor(30, 30, 30);
-    $pdf->SetXY(208.9, 509.5 - 14);
-    $pdf->Cell(119.2, 14, $cert, 0, 0, 'C');
-    
-    // QR code rendering has been completely removed as per user request
+    $pdf->SetFont('freesans', '', 12);
+    $pdf->SetTextColor(37, 99, 235);
+    $pdf->SetXY(180, 347);
+    $pdf->Cell(482, 20, "Final Evaluation Score: {$percentage}", 0, 1, 'C');
 
+    // 8. Footer Section
+    $pdf->SetLineStyle(['width' => 1.0, 'color' => [217, 224, 235]]);
+    $pdf->Line(50, 480, 792, 480);
 
-    // (Date is omitted visually as the new scorecard template does not have a Date field)
+    $pdf->SetFont('freesans', '', 10);
+    $pdf->SetTextColor(100, 116, 139);
+    $pdf->SetXY(50, 495);
+    $pdf->Cell(220, 16, "Certificate No: {$cert}", 0, 0, 'L');
+
+    $pdf->SetFont('freesans', 'I', 10);
+    $pdf->SetTextColor(37, 99, 235);
+    $pdf->SetXY(270, 495);
+    $pdf->Cell(302, 16, 'Verified by InternBoot Assessment Engine', 0, 0, 'C');
+
+    $pdf->SetFont('freesans', '', 10);
+    $pdf->SetTextColor(100, 116, 139);
+    $pdf->SetXY(572, 495);
+    $pdf->Cell(220, 16, "Issue Date: {$date}", 0, 0, 'R');
 
     $pdfContent = $pdf->Output('', 'S');
     $filename = preg_replace('/[^A-Za-z0-9_-]/', '_', (string)($data['certificate_number'] ?? 'certificate')) . '.pdf';

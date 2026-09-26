@@ -84,11 +84,8 @@ function handle_generate_questions_request(array $input, mysqli $conn): void {
     require_csrf();
     $qbankId = (int)($input['question_bank_id'] ?? 0);
     $topic = trim((string)($input['topic'] ?? ''));
-    $qType = trim((string)($input['question_type'] ?? ''));
-    $easyCount = (int)($input['easy_count'] ?? 0);
-    $mediumCount = (int)($input['medium_count'] ?? 0);
-    $hardCount = (int)($input['hard_count'] ?? 0);
-    $totalCount = $easyCount + $mediumCount + $hardCount;
+    $count = (int)($input['count'] ?? 5);
+    $difficultyMix = trim((string)($input['difficulty_mix'] ?? ''));
 
     if ($qbankId <= 0) {
         send_json_response('error', 'Valid question_bank_id is required', null, 400);
@@ -98,12 +95,16 @@ function handle_generate_questions_request(array $input, mysqli $conn): void {
         send_json_response('error', 'Topic description is required', null, 400);
     }
 
-    if ($totalCount <= 0) {
-        send_json_response('error', 'You must generate at least 1 question', null, 400);
+    if ($count <= 0) {
+        send_json_response('error', 'Count must be a positive integer', null, 400);
+    }
+
+    if ($count > 50) {
+        $count = 50;
     }
 
     try {
-        $result = generate_questions_via_ai($qbankId, $topic, $qType, $easyCount, $mediumCount, $hardCount, $conn);
+        $result = generate_questions_via_ai($qbankId, $topic, $count, $difficultyMix, $conn);
         send_json_response('success', "Generated {$result['inserted']} question(s), pending admin approval", $result, 201);
     } catch (InvalidArgumentException $e) {
         send_json_response('error', $e->getMessage(), null, 400);
@@ -136,6 +137,8 @@ function handle_ai_status_request(mysqli $conn): void {
     
     send_json_response('success', 'AI status retrieved', ['provider' => $provider, 'configured' => $configured], 200);
 }
+?>
+
 
 function handle_edit_question_request(array $input, mysqli $conn): void {
     require_admin_access($conn);

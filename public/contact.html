@@ -1,0 +1,1542 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Candidate Support &amp; Contact Us | InternBoot</title>
+  <meta name="description"
+    content="Reach out to the InternBoot Candidate Support team for inquiries regarding level assessments, exam slots, certificate verification, and placement assistance.">
+
+  <!-- Favicon -->
+  <link rel="icon" type="image/png" href="assets/internboot-logo.png">
+  <link rel="shortcut icon" href="assets/internboot-logo.png">
+  <link rel="apple-touch-icon" href="assets/internboot-logo.png">
+
+  <!-- Bootstrap 5 CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"
+    integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+  <!-- Bootstrap Icons -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet"
+    integrity="sha384-tViUnnbYAV00FLIhhi3v/dWt3Jxw4gZQcNoSCxCIFNJVCx7/D55/wXsrNIRANwdD" crossorigin="anonymous">
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap"
+    rel="stylesheet">
+  <!-- Custom Base Stylesheet -->
+  <link rel="stylesheet" href="css/style.css">
+
+  <style>
+    :root {
+      --contact-canvas: #fbf9f5;
+      --contact-card: #ffffff;
+      --contact-ink: #0f1f3d;
+      --contact-muted: #5e6d87;
+      --contact-border: #e6ebf4;
+      --contact-border-focus: #1652d6;
+      --contact-blue: #1652d6;
+      --contact-blue-hover: #0f40ad;
+      --contact-light-blue: #eff5ff;
+      --contact-accent: #ff8a1e;
+    }
+
+    body.contact-body {
+      background-color: var(--contact-canvas);
+      color: var(--contact-ink);
+      font-family: var(--font, "Plus Jakarta Sans", system-ui, sans-serif);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* Ambient background mesh glow */
+    .contact-ambient-glow {
+      position: absolute;
+      top: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 100%;
+      max-width: 1400px;
+      height: 600px;
+      background: radial-gradient(circle 500px at 85% 150px, rgba(22, 82, 214, 0.06), transparent 70%),
+        radial-gradient(circle 450px at 15% 200px, rgba(255, 138, 30, 0.05), transparent 70%);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* Navigation Active state */
+    .ib-nav .nav-link.active-contact {
+      color: var(--contact-blue) !important;
+      font-weight: 700;
+      position: relative;
+    }
+
+    .ib-nav .nav-link.active-contact::after {
+      content: '';
+      position: absolute;
+      bottom: -4px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 18px;
+      height: 2.5px;
+      background: var(--contact-blue);
+      border-radius: 99px;
+    }
+
+    /* Main Contact Section */
+    .contact-hero-section {
+      position: relative;
+      z-index: 1;
+      padding-top: 130px;
+      padding-bottom: 80px;
+    }
+
+    /* Header & Subtitle */
+    .contact-kicker {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.55rem;
+      font-size: 0.85rem;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--contact-blue);
+      margin-bottom: 0.75rem;
+    }
+
+    .contact-kicker-bar {
+      width: 24px;
+      height: 3px;
+      background: var(--contact-blue);
+      border-radius: 4px;
+      display: inline-block;
+    }
+
+    .contact-main-title {
+      font-size: clamp(2.4rem, 4vw, 3.25rem);
+      font-weight: 800;
+      letter-spacing: -0.035em;
+      color: #0b192e;
+      line-height: 1.15;
+      margin-bottom: 1.25rem;
+    }
+
+    .contact-lead-text {
+      font-size: 1.08rem;
+      line-height: 1.65;
+      color: #4a5972;
+      max-width: 520px;
+      margin-bottom: 2.5rem;
+    }
+
+    /* Contact Detail Blocks */
+    .contact-details-list {
+      display: flex;
+      flex-direction: column;
+      gap: 1.6rem;
+      margin-bottom: 2.75rem;
+    }
+
+    .contact-info-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 1.1rem;
+    }
+
+    .contact-info-icon {
+      width: 44px;
+      height: 44px;
+      border-radius: 12px;
+      background: #eff4fc;
+      color: var(--contact-blue);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.25rem;
+      flex-shrink: 0;
+      transition: all 0.25s ease;
+      border: 1px solid rgba(22, 82, 214, 0.12);
+    }
+
+    .contact-info-item:hover .contact-info-icon {
+      background: var(--contact-blue);
+      color: #ffffff;
+      transform: translateY(-2px);
+      box-shadow: 0 8px 18px -4px rgba(22, 82, 214, 0.35);
+    }
+
+    .contact-info-content h4 {
+      font-size: 1.02rem;
+      font-weight: 700;
+      color: #0d1e38;
+      margin-bottom: 0.25rem;
+    }
+
+    .contact-info-content p {
+      font-size: 0.94rem;
+      color: #55657f;
+      margin: 0;
+      line-height: 1.45;
+    }
+
+    .contact-info-content a {
+      color: var(--contact-blue);
+      font-weight: 600;
+      transition: color 0.2s;
+    }
+
+    .contact-info-content a:hover {
+      color: var(--contact-blue-hover);
+      text-decoration: underline;
+    }
+
+    /* Social Links */
+    .social-links-grid {
+      display: flex;
+      flex-direction: column;
+      gap: 0.55rem;
+      margin-top: 0.4rem;
+    }
+
+    .social-link-row {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.65rem;
+      font-size: 0.92rem;
+      font-weight: 600;
+      color: #3b4c68;
+      transition: all 0.2s ease;
+      padding: 0.2rem 0;
+    }
+
+    .social-link-row i {
+      font-size: 1.1rem;
+      color: #1a2a46;
+      transition: transform 0.2s;
+    }
+
+    .social-link-row:hover {
+      color: var(--contact-blue);
+      transform: translateX(3px);
+    }
+
+    .social-link-row:hover i {
+      color: var(--contact-blue);
+    }
+
+    /* "What you get from us" section */
+    .what-you-get-box {
+      background: rgba(255, 255, 255, 0.7);
+      border: 1px solid var(--contact-border);
+      border-radius: 18px;
+      padding: 1.8rem;
+      margin-top: 1rem;
+      max-width: 520px;
+      backdrop-filter: blur(10px);
+    }
+
+    .what-you-get-box h3 {
+      font-size: 1.3rem;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      color: #0b1a2f;
+      margin-bottom: 1.1rem;
+    }
+
+    .what-you-get-list {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 0.85rem;
+    }
+
+    .what-you-get-list li {
+      display: flex;
+      align-items: flex-start;
+      gap: 0.85rem;
+      font-size: 0.95rem;
+      color: #3f506b;
+      line-height: 1.45;
+    }
+
+    .what-you-get-list li i {
+      color: var(--contact-blue);
+      font-size: 1.15rem;
+      font-weight: 700;
+      flex-shrink: 0;
+      margin-top: 1px;
+    }
+
+    /* RIGHT COLUMN: Contact Form Card */
+    .contact-form-card {
+      background: var(--contact-card);
+      border: 1px solid rgba(220, 227, 239, 0.95);
+      border-radius: 24px;
+      padding: 2.75rem 2.6rem;
+      box-shadow: 0 18px 45px -12px rgba(15, 31, 61, 0.08), 0 4px 14px rgba(15, 31, 61, 0.03);
+      position: relative;
+      transition: all 0.3s ease;
+    }
+
+    .form-group-label {
+      font-size: 0.76rem;
+      font-weight: 800;
+      letter-spacing: 0.07em;
+      text-transform: uppercase;
+      color: #4a5972;
+      margin-bottom: 0.5rem;
+      display: block;
+    }
+
+    .form-custom-input,
+    .form-custom-select,
+    .form-custom-textarea {
+      width: 100%;
+      background: #ffffff;
+      border: 1.5px solid #dce4f0;
+      border-radius: 12px;
+      padding: 0.85rem 1.15rem;
+      font-size: 0.98rem;
+      color: #0e1e38;
+      font-family: inherit;
+      transition: all 0.22s ease;
+      outline: none;
+    }
+
+    .form-custom-input::placeholder,
+    .form-custom-textarea::placeholder {
+      color: #9aa9bf;
+      font-size: 0.93rem;
+    }
+
+    .form-custom-input:focus,
+    .form-custom-select:focus,
+    .form-custom-textarea:focus {
+      border-color: var(--contact-blue);
+      box-shadow: 0 0 0 4px rgba(22, 82, 214, 0.12);
+      background-color: #ffffff;
+    }
+
+    .form-custom-textarea {
+      resize: vertical;
+      min-height: 130px;
+    }
+
+    /* Quick category pill chips */
+    .inquiry-chips-wrap {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.45rem;
+      margin-top: 0.55rem;
+      margin-bottom: 0.3rem;
+    }
+
+    .inquiry-chip {
+      font-size: 0.78rem;
+      font-weight: 600;
+      background: #f1f5fb;
+      color: #3b4d6a;
+      border: 1px solid #d8e3f2;
+      padding: 0.32rem 0.75rem;
+      border-radius: 99px;
+      cursor: pointer;
+      transition: all 0.18s ease;
+      user-select: none;
+    }
+
+    .inquiry-chip:hover {
+      background: #e3edfa;
+      color: var(--contact-blue);
+      border-color: #bcd2f3;
+    }
+
+    .inquiry-chip.active {
+      background: var(--contact-blue);
+      color: #ffffff;
+      border-color: var(--contact-blue);
+      box-shadow: 0 4px 12px rgba(22, 82, 214, 0.25);
+    }
+
+    /* Phone input wrapper */
+    .phone-input-wrap {
+      position: relative;
+      display: flex;
+      align-items: center;
+    }
+
+    .phone-country-code {
+      position: absolute;
+      left: 14px;
+      width: 132px;
+      height: 38px;
+      padding: 0.35rem 1.8rem 0.35rem 0.55rem;
+      border: 0;
+      border-right: 1px solid #dce4f0;
+      border-radius: 0;
+      background-color: #fff;
+      font-size: 0.88rem;
+      color: #4a5c78;
+      z-index: 1;
+      box-shadow: none;
+    }
+
+    .phone-country-code:focus {
+      border-color: transparent;
+      box-shadow: none;
+    }
+
+    .phone-input-wrap .form-custom-input {
+      padding-left: 158px;
+    }
+
+    /* Consent disclaimer */
+    .form-disclaimer {
+      font-size: 0.81rem;
+      color: #697891;
+      line-height: 1.55;
+      margin-top: 1.35rem;
+      margin-bottom: 1.6rem;
+    }
+
+    .form-disclaimer a {
+      color: var(--contact-blue);
+      text-decoration: underline;
+    }
+
+    /* Submit Button */
+    .btn-submit-message {
+      width: 100%;
+      background: #1677ff;
+      background: linear-gradient(135deg, #1672f7, #1355db);
+      color: #ffffff;
+      font-size: 1.05rem;
+      font-weight: 700;
+      padding: 0.98rem 2rem;
+      border-radius: 12px;
+      border: none;
+      box-shadow: 0 10px 24px -5px rgba(19, 85, 219, 0.42);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.65rem;
+      cursor: pointer;
+      transition: all 0.24s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .btn-submit-message:hover {
+      background: linear-gradient(135deg, #1062dc, #0b43b3);
+      box-shadow: 0 14px 28px -4px rgba(19, 85, 219, 0.55);
+      transform: translateY(-2px);
+      color: #ffffff;
+    }
+
+    .btn-submit-message:active {
+      transform: scale(0.98) translateY(0);
+    }
+
+    .btn-submit-message:disabled {
+      opacity: 0.7;
+      cursor: not-allowed;
+      transform: none !important;
+    }
+
+    /* SUCCESS CONFIRMATION STATE */
+    .contact-success-state {
+      display: none;
+      text-align: center;
+      padding: 2.5rem 1.5rem;
+      animation: fadeInScale 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+
+    @keyframes fadeInScale {
+      from {
+        opacity: 0;
+        transform: scale(0.95);
+      }
+
+      to {
+        opacity: 1;
+        transform: scale(1);
+      }
+    }
+
+    .success-icon-badge {
+      width: 74px;
+      height: 74px;
+      border-radius: 50%;
+      background: #eef8f2;
+      color: #10b981;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 2.2rem;
+      margin-bottom: 1.35rem;
+      box-shadow: 0 10px 25px -5px rgba(16, 185, 129, 0.28);
+    }
+
+    .ticket-pill-display {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      background: #eff5ff;
+      border: 1px dashed #bcd5fd;
+      padding: 0.45rem 1.15rem;
+      border-radius: 99px;
+      font-size: 0.92rem;
+      font-weight: 700;
+      color: var(--contact-blue);
+      margin: 1rem 0 1.5rem;
+    }
+
+    .btn-copy-ticket {
+      background: none;
+      border: none;
+      color: var(--contact-blue);
+      cursor: pointer;
+      padding: 2px 4px;
+      border-radius: 4px;
+      transition: background 0.15s;
+    }
+
+    .btn-copy-ticket:hover {
+      background: #d8e7ff;
+    }
+
+    /* FAQ Quick Strip */
+    .contact-faq-section {
+      background: #ffffff;
+      border-top: 1px solid var(--contact-border);
+      border-bottom: 1px solid var(--contact-border);
+      padding: 4.5rem 0;
+      position: relative;
+      z-index: 1;
+    }
+
+    .faq-pill-badge {
+      display: inline-block;
+      font-size: 0.78rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      background: var(--contact-light-blue);
+      color: var(--contact-blue);
+      padding: 0.35rem 0.85rem;
+      border-radius: 99px;
+      margin-bottom: 0.65rem;
+    }
+
+    .accordion-contact .accordion-item {
+      border: 1px solid var(--contact-border);
+      border-radius: 14px !important;
+      margin-bottom: 0.85rem;
+      overflow: hidden;
+      background: #ffffff;
+      box-shadow: 0 2px 8px rgba(15, 31, 61, 0.02);
+    }
+
+    .accordion-contact .accordion-button {
+      font-weight: 700;
+      font-size: 1.02rem;
+      color: #0f203e;
+      padding: 1.15rem 1.4rem;
+      background: #ffffff;
+      box-shadow: none;
+    }
+
+    .accordion-contact .accordion-button:not(.collapsed) {
+      color: var(--contact-blue);
+      background: #f7faff;
+    }
+
+    .accordion-contact .accordion-body {
+      padding: 1.15rem 1.4rem;
+      color: #556681;
+      font-size: 0.95rem;
+      line-height: 1.65;
+    }
+
+    /* Live status badge */
+    .online-indicator {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.45rem;
+      font-size: 0.82rem;
+      font-weight: 600;
+      background: #ecfdf5;
+      color: #059669;
+      border: 1px solid #a7f3d0;
+      padding: 0.28rem 0.75rem;
+      border-radius: 99px;
+      margin-bottom: 1.1rem;
+    }
+
+    .online-dot {
+      width: 7px;
+      height: 7px;
+      background-color: #10b981;
+      border-radius: 50%;
+      animation: pulseGreen 1.8s infinite;
+    }
+
+    @keyframes pulseGreen {
+      0% {
+        box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.6);
+      }
+
+      70% {
+        box-shadow: 0 0 0 7px rgba(16, 185, 129, 0);
+      }
+
+      100% {
+        box-shadow: 0 0 0 0 rgba(16, 185, 129, 0);
+      }
+    }
+
+    /* Responsive adjustments */
+    @media (max-width: 991.98px) {
+      .contact-hero-section {
+        padding-top: 100px;
+        padding-bottom: 50px;
+      }
+
+      .contact-form-card {
+        padding: 2rem 1.6rem;
+        margin-top: 2rem;
+      }
+
+      .what-you-get-box {
+        max-width: 100%;
+      }
+    }
+
+    @media (max-width: 575.98px) {
+      .contact-form-card {
+        padding: 1.6rem 1.25rem;
+        border-radius: 18px;
+      }
+
+      .contact-main-title {
+        font-size: 2.15rem;
+      }
+    }
+  </style>
+</head>
+
+<body class="contact-body">
+
+  <!-- Ambient mesh lights -->
+  <div class="contact-ambient-glow"></div>
+
+  <!-- ============ NAVBAR ============ -->
+  <nav class="navbar navbar-expand-lg fixed-top ib-nav" id="ibNav">
+    <div class="container">
+      <a class="navbar-brand" href="index.html" aria-label="InternBoot Home">
+        <img src="assets/internboot-logo.png" alt="InternBoot" class="brand-logo-img">
+      </a>
+
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#ibMenu"
+        aria-controls="ibMenu" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+
+      <div class="collapse navbar-collapse" id="ibMenu">
+        <ul class="navbar-nav ms-auto align-items-lg-center">
+          <li class="nav-item"><a class="nav-link" href="index.html#how">How it works</a></li>
+          <li class="nav-item"><a class="nav-link" href="index.html#levels">Levels</a></li>
+          <li class="nav-item"><a class="nav-link" href="index.html#pattern">Pattern</a></li>
+          <li class="nav-item"><a class="nav-link" href="index.html#fee">Fee</a></li>
+          <li class="nav-item"><a class="nav-link" href="index.html#faq">FAQs</a></li>
+          <li class="nav-item"><a class="nav-link active-contact" href="contact.html">Support</a></li>
+          <li class="nav-item ms-lg-3 mt-3 mt-lg-0">
+            <a class="btn btn-ib-primary w-100" href="register.php">
+              <span>Register now</span>
+              <i class="bi bi-arrow-right-short fs-5"></i>
+            </a>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+  <!-- ============ MAIN CONTACT HERO ============ -->
+  <main class="contact-hero-section">
+    <div class="container">
+      <div class="row g-5 align-items-start">
+
+        <!-- LEFT COLUMN: Contact Details & "What you get from us" -->
+        <div class="col-lg-6">
+          <div class="pe-lg-4">
+
+            <!-- Kicker -->
+            <div class="contact-kicker">
+              <span class="contact-kicker-bar"></span>
+              <span>GET IN TOUCH</span>
+            </div>
+
+            <!-- Page Title -->
+            <h1 class="contact-main-title">Contact Us</h1>
+
+            <!-- Subtitle Description -->
+            <p class="contact-lead-text">
+              Reach out to learn how the InternBoot Level Assessment can accelerate your career in Tech, Software
+              Development, Data &amp; AI, and hiring partner placement. We are here to answer your questions.
+            </p>
+
+            <!-- Contact Information List -->
+            <div class="contact-details-list">
+
+              <!-- Item 1: Headquarters -->
+              <div class="contact-info-item">
+                <div class="contact-info-icon" aria-hidden="true">
+                  <i class="bi bi-geo-alt"></i>
+                </div>
+                <div class="contact-info-content">
+                  <h4>Our Headquarters</h4>
+                  <p>C56A/25, C Block, Phase 2, Industrial, Area Sector 62</p>
+                  <p>Noida, Uttar Pradesh 201309, India</p>
+                  <p class="text-muted small mt-1">Monday–Friday | 09:00 - 18:00 (IST)</p>
+                </div>
+              </div>
+
+              <!-- Item 2: Email -->
+              <div class="contact-info-item">
+                <div class="contact-info-icon" aria-hidden="true">
+                  <i class="bi bi-envelope"></i>
+                </div>
+                <div class="contact-info-content">
+                  <h4>Email Support</h4>
+                  <p>
+                    <a href="mailto:support@internboot.com" id="contactEmailLink">support@internboot.com</a>
+                    <button class="btn btn-sm btn-link p-0 ms-2 text-decoration-none text-muted" type="button"
+                      onclick="copyToClipboard('support@internboot.com', this)" title="Copy email">
+                      <i class="bi bi-clipboard"></i>
+                    </button>
+                  </p>
+                  <p class="text-muted small mt-1">Fast candidate query turnaround &bull; Avg reply in 15 mins</p>
+                </div>
+              </div>
+
+              <!-- Item 3: Phone / Helpline -->
+              <div class="contact-info-item">
+                <div class="contact-info-icon" aria-hidden="true">
+                  <i class="bi bi-telephone"></i>
+                </div>
+                <div class="contact-info-content">
+                  <h4>Candidate Helpdesk</h4>
+                  <p>
+                    <a href="tel:+919557019604">+919557019604</a>
+                    <button class="btn btn-sm btn-link p-0 ms-2 text-decoration-none text-muted" type="button"
+                      onclick="copyToClipboard('+919557019604', this)" title="Copy phone">
+                      <i class="bi bi-clipboard"></i>
+                    </button>
+                  </p>
+                  <p class="text-muted small mt-1">Toll-free helpline for exam slots &amp; candidate onboarding</p>
+                </div>
+              </div>
+
+              <!-- Item 4: Social Media -->
+              <div class="contact-info-item">
+                <div class="contact-info-icon" aria-hidden="true">
+                  <i class="bi bi-chat-square-text"></i>
+                </div>
+                <div class="contact-info-content">
+                  <h4>Social Media &amp; Community</h4>
+                  <div class="social-links-grid">
+                    <a href="https://www.linkedin.com/showcase/internboot/" target="_blank" rel="noopener noreferrer"
+                      class="social-link-row">
+                      <i class="bi bi-linkedin"></i>
+                      <span>LinkedIn / InternBoot</span>
+                    </a>
+                    <!-- <a href="https://twitter.com" target="_blank" rel="noopener noreferrer" class="social-link-row">
+                      <i class="bi bi-twitter-x"></i>
+                      <span>Twitter / X</span>
+                    </a> -->
+                    <!-- <a href="https://github.com" target="_blank" rel="noopener noreferrer" class="social-link-row">
+                      <i class="bi bi-github"></i>
+                      <span>GitHub</span>
+                    </a> -->
+                    <a href="https://www.instagram.com/employmentexpressllp/" target="_blank" rel="noopener noreferrer"
+                      class="social-link-row">
+                      <i class="bi bi-instagram"></i>
+                      <span>Instagram / Employment Express</span>
+                    </a>
+                  </div>
+                </div>
+              </div>
+
+            </div>
+
+            <!-- "What you get from us" Box matching reference -->
+            <div class="what-you-get-box">
+              <h3>What you get from us</h3>
+              <ul class="what-you-get-list">
+                <li>
+                  <i class="bi bi-check2"></i>
+                  <span><strong>Detailed answers</strong> to your program and level tier questions</span>
+                </li>
+                <li>
+                  <i class="bi bi-check2"></i>
+                  <span><strong>Guidance on the selection process</strong> and evaluation benchmarks</span>
+                </li>
+                <li>
+                  <i class="bi bi-check2"></i>
+                  <span><strong>Information about exam slots</strong>, weekend timings, and retake policies</span>
+                </li>
+                <li>
+                  <i class="bi bi-check2"></i>
+                  <span><strong>Clarifications on curriculum modules</strong> and placement partner visibility</span>
+                </li>
+              </ul>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- RIGHT COLUMN: Interactive Contact Form Card -->
+        <div class="col-lg-6">
+          <div class="contact-form-card" id="contactCard">
+
+            <!-- Form Element -->
+            <form id="candidateContactForm" novalidate>
+
+              <!-- Row 1: First Name & Last Name -->
+              <div class="row g-3 mb-3">
+                <div class="col-sm-6">
+                  <label for="firstName" class="form-group-label">FIRST NAME <span class="text-danger">*</span></label>
+                  <input type="text" class="form-custom-input" id="firstName" name="first_name" placeholder="John"
+                    required autocomplete="given-name">
+                  <div class="invalid-feedback small">Please provide your first name.</div>
+                </div>
+                <div class="col-sm-6">
+                  <label for="lastName" class="form-group-label">LAST NAME</label>
+                  <input type="text" class="form-custom-input" id="lastName" name="last_name" placeholder="Doe"
+                    autocomplete="family-name">
+                </div>
+              </div>
+
+              <!-- Row 2: Email Address -->
+              <div class="mb-3">
+                <label for="email" class="form-group-label">EMAIL ADDRESS <span class="text-danger">*</span></label>
+                <input type="email" class="form-custom-input" id="email" name="email" placeholder="john@example.com"
+                  required autocomplete="email">
+                <div class="invalid-feedback small">Please enter a valid email address.</div>
+              </div>
+
+              <!-- Row 3: Phone Number -->
+              <div class="mb-3">
+                <label for="phone" class="form-group-label">PHONE NUMBER</label>
+                <div class="phone-input-wrap">
+                  <select class="phone-country-code" id="phoneCountryCode" name="phone_country_code"
+                    aria-label="Country calling code">
+                    <option value="+93">Afghanistan (+93)</option>
+                    <option value="+355">Albania (+355)</option>
+                    <option value="+213">Algeria (+213)</option>
+                    <option value="+376">Andorra (+376)</option>
+                    <option value="+244">Angola (+244)</option>
+                    <option value="+1264">Anguilla (+1264)</option>
+                    <option value="+1268">Antigua and Barbuda (+1268)</option>
+                    <option value="+54">Argentina (+54)</option>
+                    <option value="+374">Armenia (+374)</option>
+                    <option value="+297">Aruba (+297)</option>
+                    <option value="+61">Australia (+61)</option>
+                    <option value="+43">Austria (+43)</option>
+                    <option value="+994">Azerbaijan (+994)</option>
+                    <option value="+1242">Bahamas (+1242)</option>
+                    <option value="+973">Bahrain (+973)</option>
+                    <option value="+880">Bangladesh (+880)</option>
+                    <option value="+1246">Barbados (+1246)</option>
+                    <option value="+375">Belarus (+375)</option>
+                    <option value="+32">Belgium (+32)</option>
+                    <option value="+501">Belize (+501)</option>
+                    <option value="+229">Benin (+229)</option>
+                    <option value="+1441">Bermuda (+1441)</option>
+                    <option value="+975">Bhutan (+975)</option>
+                    <option value="+591">Bolivia (+591)</option>
+                    <option value="+387">Bosnia and Herzegovina (+387)</option>
+                    <option value="+267">Botswana (+267)</option>
+                    <option value="+55">Brazil (+55)</option>
+                    <option value="+673">Brunei (+673)</option>
+                    <option value="+359">Bulgaria (+359)</option>
+                    <option value="+226">Burkina Faso (+226)</option>
+                    <option value="+257">Burundi (+257)</option>
+                    <option value="+855">Cambodia (+855)</option>
+                    <option value="+237">Cameroon (+237)</option>
+                    <option value="+1">Canada / United States (+1)</option>
+                    <option value="+238">Cape Verde (+238)</option>
+                    <option value="+1345">Cayman Islands (+1345)</option>
+                    <option value="+236">Central African Republic (+236)</option>
+                    <option value="+235">Chad (+235)</option>
+                    <option value="+56">Chile (+56)</option>
+                    <option value="+86">China (+86)</option>
+                    <option value="+57">Colombia (+57)</option>
+                    <option value="+269">Comoros (+269)</option>
+                    <option value="+242">Congo (+242)</option>
+                    <option value="+243">Congo, Democratic Republic (+243)</option>
+                    <option value="+682">Cook Islands (+682)</option>
+                    <option value="+506">Costa Rica (+506)</option>
+                    <option value="+385">Croatia (+385)</option>
+                    <option value="+53">Cuba (+53)</option>
+                    <option value="+599">Curacao / Caribbean Netherlands (+599)</option>
+                    <option value="+357">Cyprus (+357)</option>
+                    <option value="+420">Czech Republic (+420)</option>
+                    <option value="+45">Denmark (+45)</option>
+                    <option value="+253">Djibouti (+253)</option>
+                    <option value="+1767">Dominica (+1767)</option>
+                    <option value="+1809">Dominican Republic (+1809)</option>
+                    <option value="+593">Ecuador (+593)</option>
+                    <option value="+20">Egypt (+20)</option>
+                    <option value="+503">El Salvador (+503)</option>
+                    <option value="+240">Equatorial Guinea (+240)</option>
+                    <option value="+291">Eritrea (+291)</option>
+                    <option value="+372">Estonia (+372)</option>
+                    <option value="+268">Eswatini (+268)</option>
+                    <option value="+251">Ethiopia (+251)</option>
+                    <option value="+500">Falkland Islands (+500)</option>
+                    <option value="+298">Faroe Islands (+298)</option>
+                    <option value="+679">Fiji (+679)</option>
+                    <option value="+358">Finland (+358)</option>
+                    <option value="+33">France (+33)</option>
+                    <option value="+594">French Guiana (+594)</option>
+                    <option value="+689">French Polynesia (+689)</option>
+                    <option value="+241">Gabon (+241)</option>
+                    <option value="+220">Gambia (+220)</option>
+                    <option value="+995">Georgia (+995)</option>
+                    <option value="+49">Germany (+49)</option>
+                    <option value="+233">Ghana (+233)</option>
+                    <option value="+350">Gibraltar (+350)</option>
+                    <option value="+30">Greece (+30)</option>
+                    <option value="+299">Greenland (+299)</option>
+                    <option value="+1473">Grenada (+1473)</option>
+                    <option value="+590">Guadeloupe / Saint Barthelemy (+590)</option>
+                    <option value="+502">Guatemala (+502)</option>
+                    <option value="+224">Guinea (+224)</option>
+                    <option value="+245">Guinea-Bissau (+245)</option>
+                    <option value="+592">Guyana (+592)</option>
+                    <option value="+509">Haiti (+509)</option>
+                    <option value="+504">Honduras (+504)</option>
+                    <option value="+852">Hong Kong (+852)</option>
+                    <option value="+36">Hungary (+36)</option>
+                    <option value="+354">Iceland (+354)</option>
+                    <option value="+91" selected>India (+91)</option>
+                    <option value="+62">Indonesia (+62)</option>
+                    <option value="+98">Iran (+98)</option>
+                    <option value="+964">Iraq (+964)</option>
+                    <option value="+353">Ireland (+353)</option>
+                    <option value="+972">Israel (+972)</option>
+                    <option value="+39">Italy (+39)</option>
+                    <option value="+1876">Jamaica (+1876)</option>
+                    <option value="+81">Japan (+81)</option>
+                    <option value="+962">Jordan (+962)</option>
+                    <option value="+7">Kazakhstan / Russia (+7)</option>
+                    <option value="+254">Kenya (+254)</option>
+                    <option value="+686">Kiribati (+686)</option>
+                    <option value="+383">Kosovo (+383)</option>
+                    <option value="+965">Kuwait (+965)</option>
+                    <option value="+996">Kyrgyzstan (+996)</option>
+                    <option value="+856">Laos (+856)</option>
+                    <option value="+371">Latvia (+371)</option>
+                    <option value="+961">Lebanon (+961)</option>
+                    <option value="+266">Lesotho (+266)</option>
+                    <option value="+231">Liberia (+231)</option>
+                    <option value="+218">Libya (+218)</option>
+                    <option value="+423">Liechtenstein (+423)</option>
+                    <option value="+370">Lithuania (+370)</option>
+                    <option value="+352">Luxembourg (+352)</option>
+                    <option value="+853">Macau (+853)</option>
+                    <option value="+261">Madagascar (+261)</option>
+                    <option value="+265">Malawi (+265)</option>
+                    <option value="+60">Malaysia (+60)</option>
+                    <option value="+960">Maldives (+960)</option>
+                    <option value="+356">Malta (+356)</option>
+                    <option value="+692">Marshall Islands (+692)</option>
+                    <option value="+596">Martinique (+596)</option>
+                    <option value="+222">Mauritania (+222)</option>
+                    <option value="+230">Mauritius (+230)</option>
+                    <option value="+52">Mexico (+52)</option>
+                    <option value="+691">Micronesia (+691)</option>
+                    <option value="+373">Moldova (+373)</option>
+                    <option value="+377">Monaco (+377)</option>
+                    <option value="+976">Mongolia (+976)</option>
+                    <option value="+382">Montenegro (+382)</option>
+                    <option value="+212">Morocco (+212)</option>
+                    <option value="+258">Mozambique (+258)</option>
+                    <option value="+95">Myanmar (+95)</option>
+                    <option value="+264">Namibia (+264)</option>
+                    <option value="+674">Nauru (+674)</option>
+                    <option value="+977">Nepal (+977)</option>
+                    <option value="+31">Netherlands (+31)</option>
+                    <option value="+687">New Caledonia (+687)</option>
+                    <option value="+64">New Zealand (+64)</option>
+                    <option value="+505">Nicaragua (+505)</option>
+                    <option value="+227">Niger (+227)</option>
+                    <option value="+234">Nigeria (+234)</option>
+                    <option value="+683">Niue (+683)</option>
+                    <option value="+850">North Korea (+850)</option>
+                    <option value="+389">North Macedonia (+389)</option>
+                    <option value="+47">Norway (+47)</option>
+                    <option value="+968">Oman (+968)</option>
+                    <option value="+92">Pakistan (+92)</option>
+                    <option value="+680">Palau (+680)</option>
+                    <option value="+970">Palestine (+970)</option>
+                    <option value="+507">Panama (+507)</option>
+                    <option value="+675">Papua New Guinea (+675)</option>
+                    <option value="+595">Paraguay (+595)</option>
+                    <option value="+51">Peru (+51)</option>
+                    <option value="+63">Philippines (+63)</option>
+                    <option value="+48">Poland (+48)</option>
+                    <option value="+351">Portugal (+351)</option>
+                    <option value="+974">Qatar (+974)</option>
+                    <option value="+262">Reunion / Mayotte (+262)</option>
+                    <option value="+40">Romania (+40)</option>
+                    <option value="+250">Rwanda (+250)</option>
+                    <option value="+685">Samoa (+685)</option>
+                    <option value="+378">San Marino (+378)</option>
+                    <option value="+239">Sao Tome and Principe (+239)</option>
+                    <option value="+966">Saudi Arabia (+966)</option>
+                    <option value="+221">Senegal (+221)</option>
+                    <option value="+381">Serbia (+381)</option>
+                    <option value="+248">Seychelles (+248)</option>
+                    <option value="+232">Sierra Leone (+232)</option>
+                    <option value="+65">Singapore (+65)</option>
+                    <option value="+421">Slovakia (+421)</option>
+                    <option value="+386">Slovenia (+386)</option>
+                    <option value="+677">Solomon Islands (+677)</option>
+                    <option value="+252">Somalia (+252)</option>
+                    <option value="+27">South Africa (+27)</option>
+                    <option value="+82">South Korea (+82)</option>
+                    <option value="+211">South Sudan (+211)</option>
+                    <option value="+34">Spain (+34)</option>
+                    <option value="+94">Sri Lanka (+94)</option>
+                    <option value="+249">Sudan (+249)</option>
+                    <option value="+597">Suriname (+597)</option>
+                    <option value="+46">Sweden (+46)</option>
+                    <option value="+41">Switzerland (+41)</option>
+                    <option value="+963">Syria (+963)</option>
+                    <option value="+886">Taiwan (+886)</option>
+                    <option value="+992">Tajikistan (+992)</option>
+                    <option value="+255">Tanzania (+255)</option>
+                    <option value="+66">Thailand (+66)</option>
+                    <option value="+670">Timor-Leste (+670)</option>
+                    <option value="+228">Togo (+228)</option>
+                    <option value="+690">Tokelau (+690)</option>
+                    <option value="+676">Tonga (+676)</option>
+                    <option value="+1868">Trinidad and Tobago (+1868)</option>
+                    <option value="+216">Tunisia (+216)</option>
+                    <option value="+90">Turkey (+90)</option>
+                    <option value="+993">Turkmenistan (+993)</option>
+                    <option value="+688">Tuvalu (+688)</option>
+                    <option value="+256">Uganda (+256)</option>
+                    <option value="+380">Ukraine (+380)</option>
+                    <option value="+971">United Arab Emirates (+971)</option>
+                    <option value="+44">United Kingdom (+44)</option>
+                    <option value="+598">Uruguay (+598)</option>
+                    <option value="+998">Uzbekistan (+998)</option>
+                    <option value="+678">Vanuatu (+678)</option>
+                    <option value="+58">Venezuela (+58)</option>
+                    <option value="+84">Vietnam (+84)</option>
+                    <option value="+681">Wallis and Futuna (+681)</option>
+                    <option value="+967">Yemen (+967)</option>
+                    <option value="+260">Zambia (+260)</option>
+                    <option value="+263">Zimbabwe (+263)</option>
+                  </select>
+                  <input type="tel" class="form-custom-input" id="phone" name="phone" placeholder="98765 43210"
+                    autocomplete="tel" inputmode="tel">
+                </div>
+                <div class="form-text text-muted small mt-1">We send exam slot confirmations &amp; reminders via SMS.
+                </div>
+              </div>
+
+              <!-- Row 4: Type of Inquiry -->
+              <div class="mb-3">
+                <label for="inquiryType" class="form-group-label">TYPE OF INQUIRY</label>
+                <select class="form-custom-select" id="inquiryType" name="inquiry_type">
+                  <option value="Exam Slot &amp; Scheduling">Exam Slot &amp; Weekend Scheduling</option>
+                  <option value="Level Assessment &amp; Syllabus">Level Assessment &amp; Syllabus Details</option>
+                  <option value="Fee &amp; Payment Support">Fee &amp; Payment Support</option>
+                  <option value="Certificate Verification">Certificate Verification</option>
+                  <option value="Placement Partner Visibility">Placement Partner Visibility</option>
+                  <option value="Technical Support">Technical &amp; Portal Login Issue</option>
+                  <option value="General Inquiry" selected>General Inquiry</option>
+                </select>
+
+                <!-- Quick category chips for fast clicking -->
+                <div class="inquiry-chips-wrap" id="inquiryChips">
+                  <span class="inquiry-chip active" data-val="General Inquiry">General</span>
+                  <span class="inquiry-chip" data-val="Exam Slot &amp; Scheduling">Exam Slots</span>
+                  <span class="inquiry-chip" data-val="Fee &amp; Payment Support">Fee / Payment</span>
+                  <span class="inquiry-chip" data-val="Certificate Verification">Certificate</span>
+                  <span class="inquiry-chip" data-val="Placement Partner Visibility">Placement</span>
+                </div>
+              </div>
+
+              <!-- Row 5: Message -->
+              <div class="mb-2">
+                <label for="message" class="form-group-label">MESSAGE <span class="text-danger">*</span></label>
+                <textarea class="form-custom-textarea" id="message" name="message" rows="4"
+                  placeholder="How can we help you? Tell us about your assessment questions or queries..." required
+                  minlength="5"></textarea>
+                <div class="invalid-feedback small">Please enter your message (at least 5 characters).</div>
+              </div>
+
+              <!-- Error alert box (hidden by default) -->
+              <div class="alert alert-danger d-none mt-3 py-2 small" id="formErrorAlert" role="alert">
+                <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                <span id="formErrorMessage">Please check all required fields and try again.</span>
+              </div>
+
+              <!-- Row 6: Consent Disclaimer matching screenshot -->
+              <p class="form-disclaimer">
+                By submitting this form, I confirm that I have read the <a href="index.html#faq">privacy policy</a> and
+                agree that my name and email address will be collected and used by InternBoot for the purposes of
+                answering my inquiry and sending program updates. You can withdraw your consent at any time by
+                contacting us.
+              </p>
+
+              <!-- Row 7: Send Message Button -->
+              <button type="submit" class="btn-submit-message" id="submitBtn">
+                <span id="btnText">Send Message</span>
+                <i class="bi bi-arrow-right" id="btnIcon"></i>
+                <span class="spinner-border spinner-border-sm d-none" id="btnSpinner" role="status"
+                  aria-hidden="true"></span>
+              </button>
+
+            </form>
+
+            <!-- SUCCESS CONFIRMATION STATE (Revealed upon AJAX submission) -->
+            <div class="contact-success-state" id="contactSuccessState">
+              <div class="success-icon-badge">
+                <i class="bi bi-check-lg"></i>
+              </div>
+              <h3 class="fw-bold mb-2 text-navy">Message Received!</h3>
+              <p class="text-muted mb-3" id="successGreeting">
+                Thank you! Your inquiry has been routed to our Candidate Support Desk.
+              </p>
+
+              <div class="ticket-pill-display">
+                <i class="bi bi-ticket-perforated"></i>
+                <span>Ticket: <strong id="ticketIdDisplay">IB-TKT-260922-XXXX</strong></span>
+                <button type="button" class="btn-copy-ticket" id="copyTicketBtn" title="Copy ticket ID">
+                  <i class="bi bi-clipboard"></i>
+                </button>
+              </div>
+
+              <p class="small text-muted mb-4">
+                A confirmation has been recorded. Our team typically replies within <strong>15–30 minutes</strong>
+                during active desk hours.
+              </p>
+
+              <div class="d-flex flex-wrap gap-2 justify-content-center">
+                <button type="button" class="btn btn-outline-primary btn-sm px-4" id="btnSendAnother">
+                  <i class="bi bi-plus-lg me-1"></i> Send Another Message
+                </button>
+                <a href="index.html" class="btn btn-ib-primary btn-sm px-4">
+                  Back to Homepage
+                </a>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </main>
+
+  <!-- ============ QUICK SUPPORT FAQ STRIP ============ -->
+  <section class="contact-faq-section">
+    <div class="container">
+      <div class="row justify-content-center text-center mb-5">
+        <div class="col-lg-7">
+          <span class="faq-pill-badge">Candidate Helpdesk FAQ</span>
+          <h2 class="fw-bold mb-2">Common Questions &amp; Answers</h2>
+          <p class="text-muted">Quick answers to what candidates ask most frequently before registering.</p>
+        </div>
+      </div>
+
+      <div class="row g-4 justify-content-center">
+        <div class="col-lg-8">
+          <div class="accordion accordion-contact" id="contactFaqAccordion">
+
+            <!-- FAQ 1 -->
+            <div class="accordion-item">
+              <h2 class="accordion-header" id="faqHeadingOne">
+                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                  data-bs-target="#faqCollapseOne" aria-expanded="false" aria-controls="faqCollapseOne">
+                  How soon do I get my exam slot after registering?
+                </button>
+              </h2>
+              <div id="faqCollapseOne" class="accordion-collapse collapse" aria-labelledby="faqHeadingOne"
+                data-bs-parent="#contactFaqAccordion">
+                <div class="accordion-body">
+                  Exam slots are allocated immediately upon completing registration and assessment fee confirmation.
+                  Slots run every Saturday and Sunday with flexible morning and afternoon windows. You can also
+                  reschedule your slot up to 24 hours prior without additional charge.
+                </div>
+              </div>
+            </div>
+
+            <!-- FAQ 2 -->
+            <div class="accordion-item">
+              <h2 class="accordion-header" id="faqHeadingTwo">
+                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                  data-bs-target="#faqCollapseTwo" aria-expanded="false" aria-controls="faqCollapseTwo">
+                  What if I encounter an internet or power outage during the test?
+                </button>
+              </h2>
+              <div id="faqCollapseTwo" class="accordion-collapse collapse" aria-labelledby="faqHeadingTwo"
+                data-bs-parent="#contactFaqAccordion">
+                <div class="accordion-body">
+                  Our proctoring system autosaves candidate progress continuously per question. If a disconnect occurs,
+                  you can reconnect within 15 minutes to resume where you left off. In rare catastrophic outages, our
+                  support desk can grant an emergency re-attempt token.
+                </div>
+              </div>
+            </div>
+
+            <!-- FAQ 3 -->
+            <div class="accordion-item">
+              <h2 class="accordion-header" id="faqHeadingThree">
+                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                  data-bs-target="#faqCollapseThree" aria-expanded="false" aria-controls="faqCollapseThree">
+                  How does certificate verification work for employers?
+                </button>
+              </h2>
+              <div id="faqCollapseThree" class="accordion-collapse collapse" aria-labelledby="faqHeadingThree"
+                data-bs-parent="#contactFaqAccordion">
+                <div class="accordion-body">
+                  Every InternBoot Level Certificate includes an immutable Certificate Number and QR Code. Anyone or any
+                  hiring partner can visit <a href="verify-certificate.php" class="text-primary fw-semibold">Certificate
+                    Verification</a> to validate candidate authenticity, awarded level tier, and exam score timestamp.
+                </div>
+              </div>
+            </div>
+
+            <!-- FAQ 4 -->
+            <div class="accordion-item">
+              <h2 class="accordion-header" id="faqHeadingFour">
+                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                  data-bs-target="#faqCollapseFour" aria-expanded="false" aria-controls="faqCollapseFour">
+                  How do placement callbacks work for certified candidates?
+                </button>
+              </h2>
+              <div id="faqCollapseFour" class="accordion-collapse collapse" aria-labelledby="faqHeadingFour"
+                data-bs-parent="#contactFaqAccordion">
+                <div class="accordion-body">
+                  Candidates achieving Level 3, 4, or 5 are automatically ranked and presented to our network of 650+
+                  hiring partners. Top level achievers receive priority interview callbacks and expedited screening
+                  within 5 business days of certificate generation.
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ FOOTER ============ -->
+  <footer class="ib-footer">
+    <div class="container">
+      <div class="row g-4">
+        <div class="col-lg-4">
+          <a class="navbar-brand d-inline-flex mb-3 align-items-center" href="index.html" aria-label="InternBoot Home">
+            <img src="assets/internboot-logo.png" alt="InternBoot" class="footer-logo-img">
+          </a>
+          <p class="footer-note">
+            InternBoot standardizes fresher talent assessment and connects ambitious graduates with verified internships
+            and full-time hiring partners across India.
+          </p>
+        </div>
+
+        <div class="col-6 col-lg-2">
+          <h4>Platform</h4>
+          <ul class="list-unstyled">
+            <li><a href="index.html#how">How it works</a></li>
+            <li><a href="index.html#levels">Level Tiers</a></li>
+            <li><a href="index.html#pattern">Exam Pattern</a></li>
+            <li><a href="index.html#fee">Fee Structure</a></li>
+            <li><a href="index.html#faq">Candidate FAQs</a></li>
+          </ul>
+        </div>
+
+        <div class="col-6 col-lg-2">
+          <h4>Candidate</h4>
+          <ul class="list-unstyled">
+            <li><a href="register.php">Register</a></li>
+            <li><a href="login.php">Login</a></li>
+            <li><a href="dashboard.html">Dashboard</a></li>
+            <li><a href="contact.html" class="text-primary fw-bold">Candidate Support</a></li>
+          </ul>
+        </div>
+
+        <div class="col-lg-4">
+          <h4>Reach us</h4>
+          <ul class="list-unstyled footer-contact">
+            <li><i class="bi bi-envelope"></i> <a href="mailto:support@internboot.com">support@internboot.com</a></li>
+            <li><i class="bi bi-chat-dots"></i> <a href="contact.html">Candidate Helpdesk &amp; Support</a></li>
+            <li><i class="bi bi-globe"></i> <a href="https://internboot.com">internboot.com</a></li>
+            <li><i class="bi bi-geo-alt"></i> <span>Noida, India</span></li>
+          </ul>
+          <div class="footer-social">
+            <a href="https://www.linkedin.com/showcase/internboot/" aria-label="LinkedIn"><i
+                class="bi bi-linkedin"></i></a>
+            <a href="https://www.instagram.com/employmentexpressllp/" aria-label="Instagram"><i
+                class="bi bi-instagram"></i></a>
+            <a href="https://www.youtube.com/@internboot" aria-label="YouTube"><i class="bi bi-youtube"></i></a>
+            <a href="https://www.facebook.com/internboot" aria-label="Facebook"><i class="bi bi-facebook"></i></a>
+          </div>
+        </div>
+      </div>
+
+      <div class="footer-base">
+        <span>&copy; <span id="year">2026</span> InternBoot — Employment Express Verband LLP</span>
+        <span><a href="#">Privacy Policy</a> &middot; <a href="#">Terms of Service</a></span>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Toast Notification -->
+  <div class="position-fixed bottom-0 end-0 p-3" style="z-index: 1080;">
+    <div id="actionToast" class="toast align-items-center text-bg-primary border-0" role="alert" aria-live="assertive"
+      aria-atomic="true">
+      <div class="d-flex">
+        <div class="toast-body" id="toastMessage">
+          Copied to clipboard!
+        </div>
+        <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"
+          aria-label="Close"></button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Bootstrap 5 JS Bundle -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
+    integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
+    crossorigin="anonymous"></script>
+
+  <!-- Interactive JavaScript Logic -->
+  <script>
+    // Set dynamic copyright year
+    document.getElementById('year').textContent = new Date().getFullYear();
+
+    // Clipboard copy helper
+    function copyToClipboard(text, btnElement) {
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(text).then(() => showToast('Copied: ' + text));
+      } else {
+        const input = document.createElement('textarea');
+        input.value = text;
+        document.body.appendChild(input);
+        input.select();
+        document.execCommand('copy');
+        document.body.removeChild(input);
+        showToast('Copied: ' + text);
+      }
+    }
+
+    function showToast(message) {
+      const toastEl = document.getElementById('actionToast');
+      const toastBody = document.getElementById('toastMessage');
+      if (toastEl && toastBody) {
+        toastBody.textContent = message;
+        const bsToast = new bootstrap.Toast(toastEl, { delay: 2400 });
+        bsToast.show();
+      }
+    }
+
+    // Category chips click handler
+    const inquirySelect = document.getElementById('inquiryType');
+    const chips = document.querySelectorAll('.inquiry-chip');
+
+    chips.forEach(chip => {
+      chip.addEventListener('click', () => {
+        chips.forEach(c => c.classList.remove('active'));
+        chip.classList.add('active');
+        const val = chip.getAttribute('data-val');
+        if (inquirySelect) {
+          inquirySelect.value = val;
+        }
+      });
+    });
+
+    if (inquirySelect) {
+      inquirySelect.addEventListener('change', () => {
+        const selectedVal = inquirySelect.value;
+        let matched = false;
+        chips.forEach(c => {
+          if (c.getAttribute('data-val') === selectedVal) {
+            c.classList.add('active');
+            matched = true;
+          } else {
+            c.classList.remove('active');
+          }
+        });
+      });
+    }
+
+    // Form Submission Handling with AJAX
+    const contactForm = document.getElementById('candidateContactForm');
+    const submitBtn = document.getElementById('submitBtn');
+    const btnText = document.getElementById('btnText');
+    const btnIcon = document.getElementById('btnIcon');
+    const btnSpinner = document.getElementById('btnSpinner');
+    const errorAlert = document.getElementById('formErrorAlert');
+    const errorMessage = document.getElementById('formErrorMessage');
+    const successState = document.getElementById('contactSuccessState');
+    const ticketIdDisplay = document.getElementById('ticketIdDisplay');
+    const successGreeting = document.getElementById('successGreeting');
+    const copyTicketBtn = document.getElementById('copyTicketBtn');
+    const btnSendAnother = document.getElementById('btnSendAnother');
+
+    contactForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      errorAlert.classList.add('d-none');
+
+      // HTML5 Validation Check
+      if (!contactForm.checkValidity()) {
+        e.stopPropagation();
+        contactForm.classList.add('was-validated');
+        return;
+      }
+
+      // Collect data
+      const formData = new FormData(contactForm);
+      const payload = {
+        first_name: formData.get('first_name')?.trim(),
+        last_name: formData.get('last_name')?.trim(),
+        email: formData.get('email')?.trim(),
+        phone: formData.get('phone')?.trim()
+          ? formData.get('phone_country_code') + ' ' + formData.get('phone').trim()
+          : '',
+        inquiry_type: formData.get('inquiry_type'),
+        message: formData.get('message')?.trim()
+      };
+
+      // Loading state
+      submitBtn.disabled = true;
+      btnText.textContent = 'Submitting...';
+      btnIcon.classList.add('d-none');
+      btnSpinner.classList.remove('d-none');
+
+      try {
+        const response = await fetch('api/contact.php', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json'
+          },
+          body: JSON.stringify(payload)
+        });
+
+        const result = await response.json();
+
+        if (response.ok && result.status === 'success') {
+          // Success Transition
+          contactForm.classList.add('d-none');
+          successState.style.display = 'block';
+
+          const ticketId = result.data?.ticket_id || 'IB-TKT-' + Math.floor(1000 + Math.random() * 9000);
+          ticketIdDisplay.textContent = ticketId;
+
+          const userName = payload.first_name || 'Candidate';
+          successGreeting.textContent = `Thank you, ${userName}! Your message regarding "${payload.inquiry_type}" has been received.`;
+
+          copyTicketBtn.onclick = () => copyToClipboard(ticketId, copyTicketBtn);
+        } else {
+          // Error Handling
+          const errMsg = result.message || 'Unable to submit your inquiry right now. Please try again.';
+          errorMessage.textContent = errMsg;
+          errorAlert.classList.remove('d-none');
+        }
+      } catch (err) {
+        // Fallback for network issues
+        errorMessage.textContent = 'Connection error. Please check your network or email us directly at support@internboot.com.';
+        errorAlert.classList.remove('d-none');
+      } finally {
+        submitBtn.disabled = false;
+        btnText.textContent = 'Send Message';
+        btnIcon.classList.remove('d-none');
+        btnSpinner.classList.add('d-none');
+      }
+    });
+
+    // Reset for another message
+    if (btnSendAnother) {
+      btnSendAnother.addEventListener('click', () => {
+        contactForm.reset();
+        contactForm.classList.remove('was-validated');
+        contactForm.classList.remove('d-none');
+        successState.style.display = 'none';
+        errorAlert.classList.add('d-none');
+        chips.forEach(c => c.classList.remove('active'));
+        if (chips[0]) chips[0].classList.add('active');
+      });
+    }
+
+    // Navbar scroll effect
+    window.addEventListener('scroll', () => {
+      const nav = document.getElementById('ibNav');
+      if (window.scrollY > 30) {
+        nav.classList.add('scrolled');
+      } else {
+        nav.classList.remove('scrolled');
+      }
+    });
+
+    // ── FAQ Hover-to-Open / Hover-away-to-Close ──────────────────────────────
+    (function () {
+      const faqItems = document.querySelectorAll('#contactFaqAccordion .accordion-item');
+      let hoverTimer = null;
+      let currentOpen = null;
+
+      faqItems.forEach(item => {
+        const collapseEl = item.querySelector('.accordion-collapse');
+        const btnEl = item.querySelector('.accordion-button');
+        if (!collapseEl || !btnEl) return;
+
+        item.addEventListener('mouseenter', () => {
+          clearTimeout(hoverTimer);
+          hoverTimer = setTimeout(() => {
+            if (currentOpen && currentOpen !== collapseEl) {
+              // Close the previously opened item
+              const prevInstance = bootstrap.Collapse.getInstance(currentOpen);
+              if (prevInstance) prevInstance.hide();
+            }
+            // Open this item if not already open
+            if (!collapseEl.classList.contains('show')) {
+              let instance = bootstrap.Collapse.getInstance(collapseEl);
+              if (!instance) instance = new bootstrap.Collapse(collapseEl, { toggle: false });
+              instance.show();
+            }
+            currentOpen = collapseEl;
+          }, 120); // 120ms hover intent delay
+        });
+
+        item.addEventListener('mouseleave', () => {
+          clearTimeout(hoverTimer);
+        });
+      });
+
+      // When the whole accordion is left with no item hovered, close current
+      const accordion = document.getElementById('contactFaqAccordion');
+      if (accordion) {
+        accordion.addEventListener('mouseleave', () => {
+          clearTimeout(hoverTimer);
+          hoverTimer = setTimeout(() => {
+            if (currentOpen) {
+              const instance = bootstrap.Collapse.getInstance(currentOpen);
+              if (instance) instance.hide();
+              currentOpen = null;
+            }
+          }, 200);
+        });
+      }
+    })();
+  </script>
+</body>
+
+</html>

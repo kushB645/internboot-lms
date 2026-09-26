@@ -48,8 +48,6 @@
 
   const label = (value) => {
     const map = {
-      issued: "Issued",
-      "not-issued": "Not Issued",
       "not-started": "Not Started",
       not_started: "Not Started",
       in_progress: "In Progress",
@@ -119,10 +117,10 @@
 
   const typeForStatus = (value) => {
     if (
-      ["success", "completed", "evaluated", "approved", "placed", "verified", "issued"].includes(value)
+      ["success", "completed", "evaluated", "approved", "placed", "verified"].includes(value)
     )
       return "green";
-    if (["eligible", "shortlisted", "interviewing", "pending", "submitted", "not-issued"].includes(value))
+    if (["eligible", "shortlisted", "interviewing", "pending", "submitted"].includes(value))
       return "amber";
     if (["failed", "rejected", "not_placed", "expired"].includes(value))
       return "red";
@@ -526,40 +524,6 @@
       }
     }
 
-    // Run integrity check in background with 5-min cache
-    setTimeout(async () => {
-      try {
-        const now = Date.now();
-        const cached = sessionStorage.getItem("integrityCheck");
-        let desyncCount = 0;
-        
-        if (cached) {
-          const parsed = JSON.parse(cached);
-          if (now - parsed.time < 5 * 60 * 1000) {
-            desyncCount = parsed.count;
-          }
-        }
-        
-        if (desyncCount === 0 && (!cached || now - JSON.parse(cached).time >= 5 * 60 * 1000)) {
-          const checkData = await api("integrity_check");
-          desyncCount = checkData.desync_count || 0;
-          sessionStorage.setItem("integrityCheck", JSON.stringify({ time: now, count: desyncCount }));
-        }
-
-        const banner = $("#integrityWarningBanner");
-        if (banner) {
-          if (desyncCount > 0) {
-            $("#integrityDesyncCount").textContent = desyncCount;
-            banner.classList.remove("hidden");
-          } else {
-            banner.classList.add("hidden");
-          }
-        }
-      } catch (e) {
-        console.warn("Integrity check failed:", e);
-      }
-    }, 100);
-
     const recent = $("#recentCandidates");
     if (recent) {
       recent.innerHTML = data.recent_candidates?.length
@@ -651,19 +615,18 @@
       ? data.candidates
           .map(
             (c) => `
-      <tr class="hover:bg-slate-50" data-candidate="true" data-payment="${escapeHtml(c.payment_status)}" data-enrollment="${escapeHtml(c.enrollment_status)}" data-assessment="${escapeHtml(c.assessment_status)}" data-certificate="${escapeHtml(c.certificate_status)}">
+      <tr class="hover:bg-slate-50" data-candidate="true" data-payment="${escapeHtml(c.payment_status)}" data-enrollment="${escapeHtml(c.enrollment_status)}" data-assessment="${escapeHtml(c.assessment_status)}">
         <td class="px-6 py-4 font-medium">${escapeHtml(c.full_name)}</td>
         <td class="px-6 py-4 text-slate-500">${escapeHtml(c.email)}</td>
         <td class="px-6 py-4">${badge(label(c.payment_status), typeForStatus(c.payment_status === "success" ? "success" : c.payment_status))}</td>
         <td class="px-6 py-4">${badge(c.enrollment_status === "eligible" ? "Enrolled" : "Pending", c.enrollment_status === "eligible" ? "green" : "amber")}</td>
         <td class="px-6 py-4">${badge(label(c.assessment_status), typeForStatus(c.assessment_status === "completed" ? "completed" : c.assessment_status))}</td>
         <td class="px-6 py-4">${c.level_assigned ? `Level ${escapeHtml(c.level_assigned)}` : "—"}</td>
-        <td class="px-6 py-4">${badge(label(c.certificate_status), typeForStatus(c.certificate_status))}</td>
         <td class="px-6 py-4"><button class="font-medium text-intern-blue hover:underline view-candidate-btn" type="button" data-id="${c.id}">View</button></td>
       </tr>`,
           )
           .join("")
-      : `<tr><td class="px-6 py-8 text-center text-sm text-slate-500" colspan="8">No candidates found</td></tr>`;
+      : `<tr><td class="px-6 py-8 text-center text-sm text-slate-500" colspan="7">No candidates found</td></tr>`;
 
     $$(".view-candidate-btn").forEach((btn) =>
       btn.addEventListener("click", async () => {
@@ -694,74 +657,36 @@
     wireCandidateFilters();
   }
 
-  function exportCandidatesCsv() {
-    const rows = $$("#candidatesTableBody tr[data-candidate]").filter(row => row.style.display !== "none");
-    if (rows.length === 0) {
-      notify("No candidates to export");
-      return;
-    }
-
-    const header = ["Name", "Email", "Payment", "Enrollment", "Assessment", "Level", "Certificate"];
-    let csvContent = header.join(",") + "\r\n";
-
-    rows.forEach(row => {
-      const cells = [];
-      for (let i = 0; i < 7; i++) {
-        const text = row.children[i].textContent.trim();
-        cells.push('"' + text.replace(/"/g, '""') + '"');
-      }
-      csvContent += cells.join(",") + "\r\n";
-    });
-
-    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = `candidates-export-${new Date().toISOString().slice(0,10)}.csv`;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
-  }
-
   function wireCandidateFilters() {
     const search = $("#candidateSearch"),
       payment = $("#paymentFilter"),
       enrollment = $("#enrollmentFilter"),
       assessment = $("#assessmentFilter"),
-      certificate = $("#certificateFilter"),
       count = $("#candidateCount");
     const run = () => {
       const q = (search?.value || "").toLowerCase().trim();
       const p = (payment?.value || "").toLowerCase();
       const en = (enrollment?.value || "").toLowerCase();
       const a = (assessment?.value || "").toLowerCase();
-      const c = (certificate?.value || "").toLowerCase();
       let visible = 0;
       $$("#candidatesTableBody tr[data-candidate]").forEach((row) => {
         const ok =
           row.textContent.toLowerCase().includes(q) &&
           sameFilterValue(row.dataset.payment, p) &&
           sameFilterValue(row.dataset.enrollment, en) &&
-          sameFilterValue(row.dataset.assessment, a) &&
-          sameFilterValue(row.dataset.certificate, c);
+          sameFilterValue(row.dataset.assessment, a);
         row.style.display = ok ? "" : "none";
         if (ok) visible++;
       });
       if (count)
         count.textContent = `${visible} Candidate${visible !== 1 ? "s" : ""}`;
     };
-    [search, payment, enrollment, assessment, certificate].forEach((el) =>
+    [search, payment, enrollment, assessment].forEach((el) =>
       el?.addEventListener("input", run),
     );
-    [payment, enrollment, assessment, certificate].forEach((el) =>
+    [payment, enrollment, assessment].forEach((el) =>
       el?.addEventListener("change", run),
     );
-    const exportBtn = $("#exportCandidatesCsv");
-    if (exportBtn && !exportBtn.dataset.bound) {
-      exportBtn.dataset.bound = "1";
-      exportBtn.addEventListener("click", exportCandidatesCsv);
-    }
     run();
   }
 
@@ -1025,23 +950,8 @@
           .map((q) => {
             const m = String(q.question_bank || "").match(/level\s*([1-5])/i);
             const level = m ? m[1] : "—";
-            const allOptsHtml = (q.all_options || '').split('|||').map(o => {
-              if (!o.trim()) return '';
-              const isCorrect = o.startsWith('[✓]');
-              const text = o.replace(/^\[[✓ ]\] /, '');
-              return `<div class="text-sm mt-1 ${isCorrect ? 'text-green-600 font-medium' : 'text-slate-500'}">
-                <span class="inline-block w-4">${isCorrect ? '✓' : '•'}</span> ${escapeHtml(text)}
-              </div>`;
-            }).join('');
-
             return `<tr data-question="true" data-level="${m ? `level ${m[1]}` : ""}" data-status="${escapeHtml(q.approval_status)}">
-        <td class="px-6 py-4">
-          <p class="max-w-xl font-medium text-slate-800">${escapeHtml(q.question_text)}</p>
-          <div class="mt-3 mb-3 pl-2 border-l-2 border-slate-200">
-            ${allOptsHtml}
-          </div>
-          <p class="mt-1 text-xs text-slate-400">${escapeHtml(q.question_bank)} · ${Number(q.option_count || 0)} options</p>
-        </td>
+        <td class="px-6 py-4"><p class="max-w-xl font-medium text-slate-800">${escapeHtml(q.question_text)}</p><p class="mt-1 text-xs text-slate-400">${escapeHtml(q.question_bank)} · ${Number(q.option_count || 0)} options</p></td>
         <td class="px-6 py-4">${level === "—" ? "—" : badge(`Level ${level}`, "blue")}</td>
         <td class="px-6 py-4 text-slate-500">${escapeHtml(q.type || "MCQ")}</td>
         <td class="px-6 py-4">${badge(label(q.approval_status), typeForStatus(q.approval_status))}</td>
@@ -1419,6 +1329,53 @@
           });
         });
       }
+    }
+
+    const form = $("#createBatchForm");
+    if (form && !form.dataset.bound) {
+      form.dataset.bound = "1";
+      form.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        const name = $("#batchName")?.value.trim(),
+          date = $("#batchDate")?.value,
+          capacity = Number($("#batchCapacity")?.value || 0),
+          start_time = $("#batchStartTime")?.value,
+          end_time = $("#batchEndTime")?.value;
+          
+        const selectedDate = date ? new Date(`${date}T00:00:00`) : null;
+        const isWeekend =
+          selectedDate &&
+          !Number.isNaN(selectedDate.getTime()) &&
+          (selectedDate.getDay() === 0 || selectedDate.getDay() === 6);
+        if (!name || !date || !isWeekend || capacity < 100) {
+          notify(
+            date && !isWeekend
+              ? "Assessment can be scheduled only on Saturday or Sunday."
+              : "Enter a batch name, weekend date and capacity of at least 100.",
+            true,
+          );
+          return;
+        }
+        
+        let payload = { batch_number: name, exam_date: date, capacity };
+        if (start_time) payload.start_time = start_time + ':00';
+        if (end_time) payload.end_time = end_time + ':00';
+        
+        try {
+          await api("batch", {
+            method: "POST",
+            body: payload,
+          });
+          notify("Batch created successfully.");
+          form.reset();
+          $("#batchCapacity").value = 100;
+          if ($("#batchStartTime")) $("#batchStartTime").value = "10:00";
+          if ($("#batchEndTime")) $("#batchEndTime").value = "11:00";
+          await loadBatches();
+        } catch (err) {
+          notify(err.message, true);
+        }
+      });
     }
 
     const createSlot = $("#createSlotButton");
@@ -1915,23 +1872,15 @@
                 <input type="text" id="aif_topic" class="w-full rounded-lg border border-slate-300 p-2.5 text-sm outline-none focus:border-purple-600 focus:ring-1 focus:ring-purple-600" placeholder="e.g. PHP Data Types & Functions" required>
               </div>
 
-              <div>
-                <label class="block text-sm font-medium text-slate-700 mb-1">Question Type (Optional)</label>
-                <input type="text" id="aif_type" class="w-full rounded-lg border border-slate-300 p-2.5 text-sm outline-none focus:border-purple-600 focus:ring-1 focus:ring-purple-600" placeholder="e.g. Code Snippet, Conceptual, Scenario-based">
-              </div>
+              <div class="grid grid-cols-2 gap-4">
+                <div>
+                  <label class="block text-sm font-medium text-slate-700 mb-1">Number of Questions <span class="text-red-500">*</span></label>
+                  <input type="number" id="aif_count" min="1" max="50" value="5" class="w-full rounded-lg border border-slate-300 p-2.5 text-sm outline-none focus:border-purple-600 focus:ring-1 focus:ring-purple-600" required>
+                </div>
 
-              <div class="grid grid-cols-3 gap-4">
                 <div>
-                  <label class="block text-sm font-medium text-slate-700 mb-1">Easy</label>
-                  <input type="number" id="aif_easy" min="0" value="2" class="w-full rounded-lg border border-slate-300 p-2.5 text-sm outline-none focus:border-purple-600 focus:ring-1 focus:ring-purple-600" required>
-                </div>
-                <div>
-                  <label class="block text-sm font-medium text-slate-700 mb-1">Medium</label>
-                  <input type="number" id="aif_medium" min="0" value="2" class="w-full rounded-lg border border-slate-300 p-2.5 text-sm outline-none focus:border-purple-600 focus:ring-1 focus:ring-purple-600" required>
-                </div>
-                <div>
-                  <label class="block text-sm font-medium text-slate-700 mb-1">Hard</label>
-                  <input type="number" id="aif_hard" min="0" value="1" class="w-full rounded-lg border border-slate-300 p-2.5 text-sm outline-none focus:border-purple-600 focus:ring-1 focus:ring-purple-600" required>
+                  <label class="block text-sm font-medium text-slate-700 mb-1">Difficulty Mix</label>
+                  <input type="text" id="aif_diff" class="w-full rounded-lg border border-slate-300 p-2.5 text-sm outline-none focus:border-purple-600 focus:ring-1 focus:ring-purple-600" placeholder="easy:2,medium:2,hard:1">
                 </div>
               </div>
 
@@ -1966,21 +1915,11 @@
 
             const qbankId = $("#aif_bank").value;
             const topic = $("#aif_topic").value.trim();
-            const qType = $("#aif_type").value.trim();
-            const easyCount = parseInt($("#aif_easy").value, 10) || 0;
-            const mediumCount = parseInt($("#aif_medium").value, 10) || 0;
-            const hardCount = parseInt($("#aif_hard").value, 10) || 0;
-            
-            const totalCount = easyCount + mediumCount + hardCount;
+            const count = parseInt($("#aif_count").value, 10);
+            const difficultyMix = $("#aif_diff").value.trim();
 
             if (!qbankId || !topic) {
               errBox.textContent = "Question bank and topic description are required.";
-              errBox.classList.remove("hidden");
-              return;
-            }
-            
-            if (totalCount <= 0) {
-              errBox.textContent = "You must generate at least 1 question.";
               errBox.classList.remove("hidden");
               return;
             }
@@ -1994,14 +1933,12 @@
                 body: {
                   question_bank_id: parseInt(qbankId, 10),
                   topic: topic,
-                  question_type: qType,
-                  easy_count: easyCount,
-                  medium_count: mediumCount,
-                  hard_count: hardCount
+                  count: count || 5,
+                  difficulty_mix: difficultyMix
                 }
               });
 
-              notify(`Generated ${res.inserted || totalCount} question(s), pending admin approval.`);
+              notify(`Generated ${res.inserted || count} question(s), pending admin approval.`);
               $("#m7Modal").remove();
               await loadQuestions();
             } catch (err) {
@@ -2037,23 +1974,19 @@
     if (cBtn && !cBtn.dataset.bound) {
       cBtn.dataset.bound = "1";
       cBtn.onclick = async () => {
-        if (!confirm("Generate missing certificates for all eligible candidates?")) return;
-        
-        cBtn.textContent = "Generating...";
-        cBtn.disabled = true;
-        
+        if (
+          !confirm("Generate a certificate for the oldest result without one?")
+        )
+          return;
         try {
-          const data = await api("certificate-bulk", {
+          const data = await api("certificate-next", {
             method: "POST",
             body: {},
           });
-          notify(`Successfully generated ${data.count} certificates.`);
+          notify(`Certificate ${data.certificate_number} generated.`);
           await loadCertificates();
         } catch (e) {
           notify(e.message, true);
-        } finally {
-          cBtn.textContent = "Generate Certificate";
-          cBtn.disabled = false;
         }
       };
     }

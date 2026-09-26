@@ -199,9 +199,6 @@ $s = $conn->prepare("SELECT id FROM assessments WHERE id = ?");
             $candidateId = (int)$p['candidate_id'];
             $assessmentId = (int)$p['assessment_id'];
 
-            // Note: The payments table has AFTER INSERT and AFTER UPDATE triggers 
-            // that automatically synchronize successful payments to enrollments.
-            // This application-level insert is kept as an additional defense-in-depth measure.
             $s = $conn->prepare("INSERT INTO enrollments (candidate_id, assessment_id, payment_id, eligibility_status) VALUES (?, ?, ?, 'eligible') ON DUPLICATE KEY UPDATE payment_id = VALUES(payment_id), eligibility_status = 'eligible'");
             $s->bind_param('iii', $candidateId, $assessmentId, $paymentId);
             $s->execute();

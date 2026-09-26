@@ -93,16 +93,7 @@ function get_candidates(mysqli $conn): array
           WHEN EXISTS(SELECT 1 FROM attempts ax WHERE ax.candidate_id=c.id AND ax.status IN ('in_progress','submitted','expired')) THEN 'pending'
           ELSE 'not-started'
         END assessment_status,
-        (SELECT r.level_assigned FROM results r JOIN attempts ax ON ax.id=r.attempt_id WHERE ax.candidate_id=c.id ORDER BY r.created_at DESC LIMIT 1) level_assigned,
-        CASE
-          WHEN EXISTS(
-            SELECT 1 FROM certificates cert
-            JOIN results r2 ON r2.id = cert.result_id
-            JOIN attempts ax2 ON ax2.id = r2.attempt_id
-            WHERE ax2.candidate_id = c.id
-          ) THEN 'issued'
-          ELSE 'not-issued'
-        END certificate_status
+        (SELECT r.level_assigned FROM results r JOIN attempts ax ON ax.id=r.attempt_id WHERE ax.candidate_id=c.id ORDER BY r.created_at DESC LIMIT 1) level_assigned
       FROM candidates c
       JOIN users u ON u.id=c.user_id
       ORDER BY c.created_at DESC");
@@ -242,25 +233,16 @@ function get_all_question_banks(mysqli $conn): array
 function get_questions(mysqli $conn, bool $isAdmin = false): array
 {
     $correctOptionSql = $isAdmin 
-        ? "opt.correct_option, opt.all_options"
-        : "NULL as correct_option, NULL as all_options";
+        ? "(SELECT GROUP_CONCAT(CASE WHEN o.is_correct=1 THEN o.option_text END SEPARATOR ' | ') FROM options o WHERE o.question_id=q.id) correct_option"
+        : "NULL as correct_option";
 
     return q_all($conn, "SELECT q.id, q.question_text, q.difficulty, q.approval_status,
         qb.id question_bank_id, qb.name question_bank, a.id assessment_id, a.title assessment_title,
-        COALESCE(opt.option_count, 0) AS option_count,
+        (SELECT COUNT(*) FROM options o WHERE o.question_id=q.id) option_count,
         $correctOptionSql
       FROM questions q
       JOIN question_banks qb ON qb.id=q.question_bank_id
       JOIN assessments a ON a.id=qb.assessment_id
-      LEFT JOIN (
-        SELECT 
-          question_id,
-          COUNT(*) AS option_count,
-          GROUP_CONCAT(CASE WHEN is_correct=1 THEN option_text END SEPARATOR ' | ') AS correct_option,
-          GROUP_CONCAT(CONCAT(IF(is_correct=1, '[✓] ', '[ ] '), option_text) SEPARATOR '|||') AS all_options
-        FROM options
-        GROUP BY question_id
-      ) opt ON opt.question_id = q.id
       ORDER BY q.created_at DESC");
 }
 
@@ -407,8 +389,8 @@ function upsert_result(mysqli $conn, int $attemptId, float $score, float $percen
 
 function upsert_certificate(mysqli $conn, int $candidateId, int $resultId, int $level): array
 {
-    $existing = q_one($conn, 'SELECT id, certificate_number, issue_date FROM certificates WHERE result_id=?', 'i', [$resultId]);
-    if ($existing) return $existing;
+    $existing=q_one($conn,'SELECT id, certificate_number, issue_date FROM certificates WHERE result_id=?','i',[$resultId]);
+    if($existing) return $existing;
 
     require_once __DIR__ . '/../m5_batch_slots/queries.php';
     $minCertLevel = (int)(get_setting_value('min_certificate_level', $conn) ?? 4);
@@ -416,49 +398,13 @@ function upsert_certificate(mysqli $conn, int $candidateId, int $resultId, int $
         throw new InvalidArgumentException("Result level {$level} does not qualify for certificate issuance (minimum Level {$minCertLevel} required).");
     }
 
-    $maxAttempts = 3;
-    for ($attempt = 0; $attempt < $maxAttempts; $attempt++) {
-        $conn->begin_transaction();
-        try {
-            $existing = q_one($conn, 'SELECT id, certificate_number, issue_date FROM certificates WHERE result_id=?', 'i', [$resultId]);
-            if ($existing) {
-                $conn->commit();
-                return $existing;
-            }
-
-            $row = q_one(
-                $conn,
-                "SELECT certificate_number FROM certificates ORDER BY id DESC LIMIT 1 FOR UPDATE"
-            );
-
-            if ($row && !empty($row['certificate_number']) && preg_match('/^C(\d+)$/', $row['certificate_number'], $matches)) {
-                $currentNum = (int)$matches[1];
-                $number = 'C' . ($currentNum + 1);
-            } else {
-                $number = 'C100';
-            }
-
-            $stmt = $conn->prepare('INSERT INTO certificates(certificate_number, candidate_id, result_id, level, issue_date) VALUES(?, ?, ?, ?, CURDATE())');
-            $stmt->bind_param('siii', $number, $candidateId, $resultId, $level);
-            $stmt->execute();
-            $id = $stmt->insert_id;
-            $stmt->close();
-
-            $conn->commit();
-            return ['id' => $id, 'certificate_number' => $number, 'issue_date' => date('Y-m-d')];
-        } catch (mysqli_sql_exception $e) {
-            $conn->rollback();
-            if (($e->getCode() === 1062 || str_contains($e->getMessage(), 'Duplicate entry')) && $attempt < $maxAttempts - 1) {
-                continue;
-            }
-            throw $e;
-        } catch (Throwable $e) {
-            $conn->rollback();
-            throw $e;
-        }
+    $number='IB-'.date('Y').'-'.strtoupper(bin2hex(random_bytes(5)));
+    while(q_one($conn,'SELECT id FROM certificates WHERE certificate_number=?','s',[$number])){
+        $number='IB-'.date('Y').'-'.strtoupper(bin2hex(random_bytes(5)));
     }
-
-    throw new RuntimeException("Failed to generate unique certificate number after {$maxAttempts} attempts.");
+    $stmt=$conn->prepare('INSERT INTO certificates(certificate_number,candidate_id,result_id,level,issue_date) VALUES(?,?,?,?,CURDATE())');
+    $stmt->bind_param('siii',$number,$candidateId,$resultId,$level); $stmt->execute(); $id=$stmt->insert_id; $stmt->close();
+    return ['id'=>$id,'certificate_number'=>$number,'issue_date'=>date('Y-m-d')];
 }
 
 function update_placement(mysqli $conn,int $id,string $status,?string $company,?string $notes): void
@@ -471,37 +417,12 @@ function update_question_status(mysqli $conn, int $questionId, string $status): 
 {
     $allowed=['pending','approved','rejected'];
     if (!in_array($status,$allowed,true)) throw new InvalidArgumentException('Invalid question status.');
-    
-    if ($status === 'rejected') {
-        $conn->begin_transaction();
-        try {
-            $stmt = $conn->prepare('DELETE FROM options WHERE question_id=?');
-            $stmt->bind_param('i', $questionId);
-            $stmt->execute();
-            $stmt->close();
-
-            $stmt = $conn->prepare('DELETE FROM questions WHERE id=?');
-            $stmt->bind_param('i', $questionId);
-            $stmt->execute();
-            if ($stmt->affected_rows === 0) {
-                throw new InvalidArgumentException('Question not found.');
-            }
-            $stmt->close();
-            $conn->commit();
-        } catch (Throwable $e) {
-            $conn->rollback();
-            throw $e;
-        }
-    } else {
-        $stmt=$conn->prepare('UPDATE questions SET approval_status=?, updated_at=NOW() WHERE id=?');
-        $stmt->bind_param('si',$status,$questionId);
-        $stmt->execute();
-        if ($stmt->affected_rows === 0) {
-            $exists=q_one($conn,'SELECT id FROM questions WHERE id=?','i',[$questionId]);
-            if(!$exists) throw new InvalidArgumentException('Question not found.');
-        }
-        $stmt->close();
-    }
+    $exists=q_one($conn,'SELECT id FROM questions WHERE id=?','i',[$questionId]);
+    if(!$exists) throw new InvalidArgumentException('Question not found.');
+    $stmt=$conn->prepare('UPDATE questions SET approval_status=?, updated_at=NOW() WHERE id=?');
+    $stmt->bind_param('si',$status,$questionId);
+    $stmt->execute();
+    $stmt->close();
 }
 
 function update_setting(mysqli $conn, string $key, string $value): void
@@ -553,10 +474,10 @@ function create_batch(mysqli $conn, string $batchNumber, int $assessmentId, stri
     if($date < new DateTime('today')) throw new InvalidArgumentException('Exam date cannot be in the past.');
 
     if($assessmentId>0){
-        $assessment=q_one($conn,"SELECT id,title,duration_minutes,status FROM assessments WHERE id=? AND status<>'archived'",'i',[$assessmentId]);
+        $assessment=q_one($conn,'SELECT id,title,duration_minutes,status FROM assessments WHERE id=? AND status<>"archived"','i',[$assessmentId]);
     }else{
-        $assessment=q_one($conn,"SELECT id,title,duration_minutes,status FROM assessments WHERE status='active' ORDER BY id DESC LIMIT 1");
-        if(!$assessment) $assessment=q_one($conn,"SELECT id,title,duration_minutes,status FROM assessments WHERE status<>'archived' ORDER BY id DESC LIMIT 1");
+        $assessment=q_one($conn,'SELECT id,title,duration_minutes,status FROM assessments WHERE status="active" ORDER BY id DESC LIMIT 1');
+        if(!$assessment) $assessment=q_one($conn,'SELECT id,title,duration_minutes,status FROM assessments WHERE status<>"archived" ORDER BY id DESC LIMIT 1');
     }
     if(!$assessment) throw new InvalidArgumentException('No active assessment exists. Create or activate an assessment first.');
     $assessmentId=(int)$assessment['id'];
@@ -794,63 +715,3 @@ function create_admin_log(mysqli $conn, ?int $userId, string $action, ?string $d
     $stmt->close();
 }
 
-function check_payment_enrollment_integrity(mysqli $conn): array
-{
-    return q_all($conn, "SELECT p.candidate_id, p.assessment_id, p.id AS payment_id
-        FROM payments p
-        LEFT JOIN enrollments e
-          ON e.candidate_id = p.candidate_id AND e.assessment_id = p.assessment_id
-        WHERE p.status = 'success'
-          AND (e.id IS NULL OR e.eligibility_status <> 'eligible')");
-}
-
-
-function create_provisional_batch(mysqli $conn, string $batchNumber, int $assessmentId, string $examDate, int $capacity, ?string $startTime = null, ?string $endTime = null): array
-{
-    $batchNumber=trim($batchNumber);
-    if($batchNumber==='' || strlen($batchNumber)>50) throw new InvalidArgumentException('Batch name must be between 1 and 50 characters.');
-    if($capacity<1) throw new InvalidArgumentException('Batch capacity must be positive.');
-
-    $date=DateTime::createFromFormat('!Y-m-d',$examDate);
-    $errors=DateTime::getLastErrors();
-    if(!$date || ($errors!==false && ($errors['warning_count']||$errors['error_count'])) || $date->format('Y-m-d')!==$examDate){
-        throw new InvalidArgumentException('Enter a valid exam date.');
-    }
-    if((int)$date->format('N')<6) throw new InvalidArgumentException('Exam date must be Saturday or Sunday.');
-    if($date < new DateTime('today')) throw new InvalidArgumentException('Exam date cannot be in the past.');
-
-    if($assessmentId>0){
-        $assessment=q_one($conn,"SELECT id,title,duration_minutes,status FROM assessments WHERE id=? AND status<>'archived'",'i',[$assessmentId]);
-    }else{
-        $assessment=q_one($conn,"SELECT id,title,duration_minutes,status FROM assessments WHERE status='active' ORDER BY id DESC LIMIT 1");
-        if(!$assessment) $assessment=q_one($conn,"SELECT id,title,duration_minutes,status FROM assessments WHERE status<>'archived' ORDER BY id DESC LIMIT 1");
-    }
-    if(!$assessment) throw new InvalidArgumentException('No active assessment exists. Create or activate an assessment first.');
-    $assessmentId=(int)$assessment['id'];
-
-    $duplicate=q_one($conn,'SELECT id FROM batches WHERE batch_number=?','s',[$batchNumber]);
-    if($duplicate) throw new InvalidArgumentException('A batch with this name already exists.');
-
-    $duration=max(1,(int)$assessment['duration_minutes']);
-
-    $conn->begin_transaction();
-    try{
-        $stmt=$conn->prepare('INSERT INTO batches(batch_number,assessment_id) VALUES(?,?)');
-        $stmt->bind_param('si',$batchNumber,$assessmentId); $stmt->execute(); $batchId=$stmt->insert_id; $stmt->close();
-
-        // Create as PROVISIONAL
-        $stmt=$conn->prepare("INSERT INTO exam_schedules(batch_id,exam_date,status) VALUES(?,?,'provisional')");
-        $stmt->bind_param('is',$batchId,$examDate); $stmt->execute(); $scheduleId=$stmt->insert_id; $stmt->close();
-
-        $start1 = $startTime ?? '10:00:00';
-        $end1 = $endTime ?? (new DateTime('2000-01-01 ' . $start1))->modify("+{$duration} minutes")->format('H:i:s');
-
-        $stmt=$conn->prepare('INSERT INTO exam_slots(exam_schedule_id,start_time,end_time,capacity,seats_remaining) VALUES(?,?,?,?,?)');
-        $stmt->bind_param('issii',$scheduleId,$start1,$end1,$capacity,$capacity); $stmt->execute(); $slot1=$stmt->insert_id; $stmt->close();
-
-        $conn->commit();
-        return ['batch_id'=>$batchId,'batch_number'=>$batchNumber,'assessment_id'=>$assessmentId,'assessment_title'=>$assessment['title'],'schedule_id'=>$scheduleId,'exam_date'=>$examDate,'capacity'=>$capacity,'slots'=>[
-            ['slot_id'=>$slot1,'start_time'=>$start1,'end_time'=>$end1,'capacity'=>$capacity]
-        ]];
-    }catch(Throwable $e){$conn->rollback();throw $e;}
-}

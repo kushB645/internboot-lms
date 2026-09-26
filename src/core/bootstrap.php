@@ -11,13 +11,8 @@ require_once __DIR__ . '/candidate_resolver.php';
 
 $appEnv = get_app_env();
 
-if ($appEnv !== 'development' && demo_mode()) {
-    die("FATAL: M4_DEMO_MODE cannot be enabled outside development environments.");
-}
-
-$otpPepper = env_value('OTP_PEPPER', '');
-if ($appEnv !== 'development' && ($otpPepper === '' || $otpPepper === 'change_this_pepper_in_production')) {
-    die("FATAL: OTP_PEPPER must be set to a unique, non-default secret outside development environments.");
+if ($appEnv === 'production' && demo_mode()) {
+    die("FATAL: M4_DEMO_MODE cannot be enabled in production environment.");
 }
 
 error_reporting(E_ALL);

@@ -31,11 +31,11 @@ document.querySelectorAll('.ib-toggle-password').forEach(btn => {
     const input = document.getElementById(btn.dataset.target);
     if (input.type === 'password') {
       input.type = 'text';
-      btn.textContent = '🙈';
+      btn.classList.add('is-visible');
       btn.setAttribute('aria-label', 'Hide password');
     } else {
       input.type = 'password';
-      btn.textContent = '👁️';
+      btn.classList.remove('is-visible');
       btn.setAttribute('aria-label', 'Show password');
     }
   });
@@ -54,7 +54,7 @@ if (registerForm) {
     const payload = {
       full_name: document.getElementById('full_name').value.trim(),
       email: document.getElementById('email').value.trim(),
-      phone: document.getElementById('phone').value.trim(),
+      phone: `${document.getElementById('country_code').value}${document.getElementById('phone').value.trim()}`,
       password: document.getElementById('password').value,
       confirm_password: document.getElementById('confirm_password').value,
     };
@@ -167,12 +167,12 @@ if (loginForm) {
       } else {
         showAlert(alertBox, 'error', data.message || 'Login failed.');
         btn.disabled = false;
-        btn.textContent = 'Log in';
+        btn.textContent = 'Login to Dashboard';
       }
     } catch (err) {
       showAlert(alertBox, 'error', 'Something went wrong. Please try again.');
       btn.disabled = false;
-      btn.textContent = 'Log in';
+      btn.textContent = 'Login to Dashboard';
     }
   });
 }

@@ -110,14 +110,10 @@ function fetch_approved_qbank_questions(int $qbankId, mysqli $conn, bool $isAdmi
 function generate_questions_via_ai(
     int $qbankId,
     string $topic,
-    string $qType,
-    int $easyCount,
-    int $mediumCount,
-    int $hardCount,
+    int $count,
+    string $difficultyMix,
     mysqli $conn
 ): array {
-    set_time_limit(180);
-
     // 1. Validate Question Bank exists
     $stmt = $conn->prepare("SELECT id FROM question_banks WHERE id = ?");
     $stmt->bind_param("i", $qbankId);
@@ -145,17 +141,10 @@ function generate_questions_via_ai(
     }
 
     // 3. Build AI Prompt
-    $totalCount = $easyCount + $mediumCount + $hardCount;
-    $difficultyMix = "{$easyCount} Easy, {$mediumCount} Medium, {$hardCount} Hard";
-    
-    $prompt = "Generate exactly {$totalCount} multiple-choice test questions (MCQs) about the topic: \"{$topic}\". These must be strictly MCQ-based test questions.\n";
+    $prompt = "Generate exactly {$count} multiple-choice test questions about the topic: \"{$topic}\".\n";
     if (!empty($difficultyMix)) {
         $prompt .= "Target difficulty distribution/mix: {$difficultyMix}.\n";
     }
-    if (!empty($qType)) {
-        $prompt .= "Question style: {$qType}.\n";
-    }
-    
     $prompt .= "Return ONLY a valid JSON array of question objects. Do NOT include markdown code blocks, backticks, prose, or extra text before or after the JSON.\n";
     $prompt .= "Each question object in the JSON array MUST have this exact schema:\n";
     $prompt .= "[\n";
@@ -201,12 +190,8 @@ function generate_questions_via_ai(
                 CURLOPT_POST => true,
                 CURLOPT_HTTPHEADER => ['Content-Type: application/json'],
                 CURLOPT_POSTFIELDS => json_encode($payload),
-                CURLOPT_TIMEOUT => 120,
-                CURLOPT_CONNECTTIMEOUT => 60,
-                CURLOPT_SSL_VERIFYPEER => false,
-                CURLOPT_SSL_VERIFYHOST => 0,
-                CURLOPT_IPRESOLVE => CURL_IPRESOLVE_V4,
-                CURLOPT_RESOLVE => ['generativelanguage.googleapis.com:443:172.217.113.4']
+                CURLOPT_TIMEOUT => 30,
+                CURLOPT_CONNECTTIMEOUT => 10
             ]);
             $response = curl_exec($ch);
             $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
@@ -217,7 +202,6 @@ function generate_questions_via_ai(
                 throw new RuntimeException("AI provider request failed: " . ($curlErr ?: 'Network or cURL timeout error'));
             }
             if ($httpCode !== 200) {
-                error_log("DUMP: " . $response);
                 $errData = json_decode((string)$response, true);
                 $errMsg = $errData['error']['message'] ?? "HTTP response code {$httpCode}";
                 throw new RuntimeException("AI provider request failed: {$errMsg}");
@@ -246,11 +230,8 @@ function generate_questions_via_ai(
                     'Authorization: Bearer ' . $apiKey
                 ],
                 CURLOPT_POSTFIELDS => json_encode($payload),
-                CURLOPT_TIMEOUT => 120,
-                CURLOPT_CONNECTTIMEOUT => 60,
-                CURLOPT_SSL_VERIFYPEER => false,
-                CURLOPT_SSL_VERIFYHOST => 0,
-                CURLOPT_IPRESOLVE => CURL_IPRESOLVE_V4
+                CURLOPT_TIMEOUT => 30,
+                CURLOPT_CONNECTTIMEOUT => 10
             ]);
             $response = curl_exec($ch);
             $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
@@ -423,7 +404,7 @@ function generate_questions_via_ai(
         $conn->commit();
 
         return [
-            'requested' => $totalCount,
+            'requested' => $count,
             'inserted' => count($questionIds),
             'question_ids' => $questionIds,
             'skipped' => count($validationErrors),
@@ -434,6 +415,8 @@ function generate_questions_via_ai(
         throw new Exception("Database insertion failed: " . $e->getMessage());
     }
 }
+?>
+
 
 function edit_manual_question(int $questionId, string $questionText, string $difficulty, array $options, mysqli $conn, bool $forcePending = false): void {
     $correctCount = 0;

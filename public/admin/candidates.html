@@ -108,20 +108,12 @@
                     <option value="pending">Pending</option>
                     <option value="not-started">Not Started</option>
                 </select>
-                <select id="certificateFilter" class="px-3 py-2 rounded-lg border border-slate-200 text-sm bg-white min-w-[140px]">
-                    <option value="">All Certificates</option>
-                    <option value="issued">Issued</option>
-                    <option value="not-issued">Not Issued</option>
-                </select>
-                <button id="exportCandidatesCsv" class="bg-intern-blue hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium text-sm flex items-center gap-2">
-                    <i data-lucide="download" class="h-4 w-4"></i> Export CSV
-                </button>
             </div>
 
             <div class="overflow-x-auto">
                 <table class="w-full text-left text-sm text-slate-600">
                     <thead class="bg-slate-50 text-slate-500 uppercase text-xs">
-                        <tr><th class="px-6 py-3 font-medium">Name</th><th class="px-6 py-3 font-medium">Email</th><th class="px-6 py-3 font-medium">Payment</th><th class="px-6 py-3 font-medium">Enrollment</th><th class="px-6 py-3 font-medium">Assessment</th><th class="px-6 py-3 font-medium">Level</th><th class="px-6 py-3 font-medium">Certificate</th><th class="px-6 py-3 font-medium w-24">Action</th></tr>
+                        <tr><th class="px-6 py-3 font-medium">Name</th><th class="px-6 py-3 font-medium">Email</th><th class="px-6 py-3 font-medium">Payment</th><th class="px-6 py-3 font-medium">Enrollment</th><th class="px-6 py-3 font-medium">Assessment</th><th class="px-6 py-3 font-medium">Level</th><th class="px-6 py-3 font-medium w-24">Action</th></tr>
                     </thead>
                     <tbody id="candidatesTableBody" class="divide-y divide-slate-100"></tbody>
                 </table>

@@ -61,7 +61,8 @@ if ($method === 'GET') {
 
     $response = [
         'current_preference' => [
-            'provisional_schedule_id' => $enrollment['provisional_schedule_id'] ?? null,
+            'preferred_date' => $enrollment['preferred_date'] ?? null,
+            'preferred_time_slot' => $enrollment['preferred_time_slot'] ?? null,
         ],
         'options' => $options
     ];
@@ -79,10 +80,11 @@ if ($method === 'GET') {
     }
 
     $assessmentId = isset($input['assessment_id']) ? (int)$input['assessment_id'] : 0;
-    $provisionalScheduleId = isset($input['provisional_schedule_id']) ? (int)$input['provisional_schedule_id'] : 0;
+    $preferredDate = isset($input['preferred_date']) ? trim($input['preferred_date']) : '';
+    $preferredTimeSlot = isset($input['preferred_time_slot']) ? trim($input['preferred_time_slot']) : '';
 
-    if ($assessmentId <= 0 || $provisionalScheduleId <= 0) {
-        send_json_response('error', 'assessment_id and provisional_schedule_id are required', null, 400);
+    if ($assessmentId <= 0 || empty($preferredDate) || empty($preferredTimeSlot)) {
+        send_json_response('error', 'assessment_id, preferred_date, and preferred_time_slot are required', null, 400);
     }
 
     try {

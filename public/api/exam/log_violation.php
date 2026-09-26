@@ -17,23 +17,8 @@ try {
     $stmt = $conn->prepare('SELECT violations, status FROM attempts WHERE id = ? AND candidate_id = ? FOR UPDATE');
     $stmt->bind_param('ii', $attemptId, $candidateId);
     $stmt->execute();
-    $row = $stmt->get_result()->fetch_assoc();
+    $v = $stmt->get_result()->fetch_assoc()['violations'] ?? 0;
     $stmt->close();
-
-    if ($row === null) {
-        // attempt_id does not exist or belongs to a different candidate
-        send_json_response('error', 'Attempt not found or access denied', null, 404);
-    }
-
-    if ($row['status'] !== 'in_progress') {
-        // UPDATE above was a no-op (attempt already submitted/expired).
-        // Return current stored count with 409 so the frontend knows the
-        // increment did not apply — avoids silently returning a stale count
-        // that could be mistaken for "no violations yet".
-        send_json_response('error', 'Attempt is no longer in progress', ['violations' => (int)$row['violations']], 409);
-    }
-
-    $v = (int)$row['violations'];
 
     send_json_response('success', 'Logged', ['violations' => $v], 200);
 } catch (Throwable $e) {

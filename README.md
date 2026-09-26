@@ -144,14 +144,6 @@ DB_USER=root
 DB_PASSWORD=YOUR_RAILWAY_PASSWORD
 DB_NAME=railway
 
-# Optional: Aiven / SSL Database Support
-# If your MySQL host requires SSL (e.g. Aiven's free tier, which enforces
-# ssl-mode=REQUIRED), set DB_SSL_CA to the path of your CA certificate file.
-# The path can be relative to the project root (db.php's directory) or absolute.
-# If the file is absent, the connection falls back to plain (non-SSL) automatically —
-# so local dev and Railway deployments continue to work without this variable.
-# DB_SSL_CA=aiven-ca.pem
-
 # DEV/DEMO Safeguards (MUST be disabled in production)
 M4_DEMO_MODE=0
 M4_DEMO_SECRET=generate_a_long_random_secret_here
@@ -251,7 +243,6 @@ The platform uses 23 relational tables defined in `schema.sql`:
   - `POST /api/payment/payment.php` (`{"action":"verify", "payment_id":1, "token":"..."}`) — Performs server-side token verification, marks `payments.status = 'success'`, and updates `enrollments.eligibility_status = 'eligible'`.
   - `GET  /api/dashboard.php?candidate_id=1` — Returns complete dashboard status metrics.
   - `GET  /api/enrollment.php?candidate_id=1` — Returns candidate enrollment records.
-- **Synchronization Triggers:** The `payments` table uses `AFTER INSERT` and `AFTER UPDATE` database triggers to strictly enforce synchronization of `status='success'` payments into the `enrollments` table as `eligibility_status='eligible'`. This guarantees structural data integrity independently of PHP application-level writes (which are kept as defense-in-depth).
 
 ---
 

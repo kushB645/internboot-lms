@@ -1,5 +1,4 @@
 <?php
-// VERIFICATION_TOKEN: VERIFY-25BCE14D1F630DEA
 // Path: src/modules/m5_batch_slots/queries.php
 
 /**
@@ -157,7 +156,7 @@ function insert_exam_slot(int $scheduleId, string $startTime, string $endTime, i
  * Fetches candidate enrollment details for an assessment.
  */
 function get_candidate_enrollment(int $candidateId, int $assessmentId, mysqli $conn): ?array {
-    $sql = "SELECT id, candidate_id, assessment_id, batch_id, eligibility_status, provisional_schedule_id 
+    $sql = "SELECT id, candidate_id, assessment_id, batch_id, eligibility_status 
             FROM enrollments 
             WHERE candidate_id = ? AND assessment_id = ? 
             LIMIT 1";
@@ -203,7 +202,7 @@ function get_candidate_booked_attempt(int $candidateId, int $assessmentId, mysql
  * Serializes parallel booking requests for the same candidate and assessment.
  */
 function get_candidate_enrollment_for_update(int $candidateId, int $assessmentId, mysqli $conn): ?array {
-    $sql = "SELECT id, candidate_id, assessment_id, batch_id, eligibility_status, provisional_schedule_id 
+    $sql = "SELECT id, candidate_id, assessment_id, batch_id, eligibility_status 
             FROM enrollments 
             WHERE candidate_id = ? AND assessment_id = ? 
             LIMIT 1 
@@ -481,29 +480,3 @@ function set_candidate_preference(int $enrollmentId, string $preferredDate, stri
         }
     }
 }
-
-
-function get_provisional_slot_live_counts(int $assessmentId, mysqli $conn): array {
-    $sql = "SELECT s.id AS schedule_id, s.exam_date, es.start_time, es.end_time,
-                   COUNT(e.id) AS current_count
-            FROM exam_schedules s
-            JOIN batches b ON s.batch_id = b.id
-            JOIN exam_slots es ON es.exam_schedule_id = s.id
-            LEFT JOIN enrollments e ON e.provisional_schedule_id = s.id 
-                                   AND e.eligibility_status = 'eligible' 
-                                   AND e.batch_id IS NULL
-            WHERE s.status = 'provisional' AND b.assessment_id = ?
-            GROUP BY s.id, s.exam_date, es.start_time, es.end_time
-            ORDER BY s.exam_date ASC, es.start_time ASC";
-    $stmt = $conn->prepare($sql);
-    if (!$stmt) {
-        throw new Exception("Database query preparation failed: " . @$conn->error);
-    }
-    $stmt->bind_param("i", $assessmentId);
-    $stmt->execute();
-    $result = $stmt->get_result();
-    $slots = $result->fetch_all(MYSQLI_ASSOC);
-    $stmt->close();
-    return $slots;
-}
-

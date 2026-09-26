@@ -297,12 +297,6 @@ function is_request_https(): bool
  */
 function hash_otp(string $otp): string
 {
-    $pepper = env_value('OTP_PEPPER', '');
-    if ($pepper === '' || $pepper === 'change_this_pepper_in_production') {
-        if (!is_dev_env()) {
-            throw new RuntimeException("FATAL: OTP_PEPPER is missing or insecure.");
-        }
-        $pepper = 'default_pepper_if_unset';
-    }
+    $pepper = env_value('OTP_PEPPER', 'default_pepper_if_unset');
     return hash('sha256', $otp . $pepper);
 }

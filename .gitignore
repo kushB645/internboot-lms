@@ -11,5 +11,3 @@ composer.phar
 
 public/uploads/*
 !public/uploads/.gitkeep
-.phpunit.cache/
-aiven-ca.pem

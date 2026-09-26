@@ -94,22 +94,7 @@ if ($isRailway && str_contains((string)$host, '.proxy.rlwy.net')) {
 mysqli_report(MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT);
 
 try {
-    $caCertPath = env_value('DB_SSL_CA');
-    if ($caCertPath !== null && $caCertPath !== '') {
-        if (!str_starts_with($caCertPath, '/') && !preg_match('/^[A-Za-z]:[\\\\\/]/', $caCertPath)) {
-            $caCertPath = __DIR__ . '/' . $caCertPath;
-        }
-    } else {
-        $caCertPath = __DIR__ . '/aiven-ca.pem';
-    }
-
-    if (file_exists($caCertPath)) {
-        $conn = mysqli_init();
-        $conn->ssl_set(NULL, NULL, $caCertPath, NULL, NULL);
-        $conn->real_connect($host, $user, $password, $dbname, $port, null, MYSQLI_CLIENT_SSL);
-    } else {
-        $conn = new mysqli($host, $user, $password, $dbname, $port);
-    }
+    $conn = new mysqli($host, $user, $password, $dbname, $port);
     $conn->set_charset('utf8mb4');
     // Synchronize MySQL DB session time zone with PHP timezone offset (e.g. +05:30)
     $conn->query("SET time_zone = '" . date('P') . "'");
@@ -122,14 +107,14 @@ try {
         header('Content-Type: application/json; charset=utf-8');
         echo json_encode([
             'status' => 'error',
-            'message' => 'Database connection failed: ' . $e->getMessage(),
+            'message' => 'Database connection failed. Check Railway public MySQL credentials and host/port in .env.',
             'data' => null
         ]);
         exit;
     }
     http_response_code(500);
     header('Content-Type: text/html; charset=utf-8');
-    echo '<!DOCTYPE html><html><head><title>Database Connection Error</title><style>body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;background:#0f172a;color:#e2e8f0;display:flex;align-items:center;justify-content:center;min-height:100vh;margin:0;padding:20px;box-sizing:border-box}.card{background:#1e293b;border:1px solid #334155;border-radius:12px;padding:32px;max-width:480px;width:100%;text-align:center}h1{font-size:20px;margin:0 0 12px;color:#f87171}p{font-size:14px;color:#94a3b8;line-height:1.6;margin:0}</style></head><body><div class="card"><h1>Database Connection Failed</h1><p>' . htmlspecialchars($e->getMessage()) . '</p></div></body></html>';
+    echo '<!DOCTYPE html><html><head><title>Database Connection Error</title><style>body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;background:#0f172a;color:#e2e8f0;display:flex;align-items:center;justify-content:center;min-height:100vh;margin:0;padding:20px;box-sizing:border-box}.card{background:#1e293b;border:1px solid #334155;border-radius:12px;padding:32px;max-width:480px;width:100%;text-align:center}h1{font-size:20px;margin:0 0 12px;color:#f87171}p{font-size:14px;color:#94a3b8;line-height:1.6;margin:0}</style></head><body><div class="card"><h1>Database Connection Failed</h1><p>Database connection failed. Check DB_* or Railway MYSQL_* credentials in .env.</p></div></body></html>';
     exit;
 }
 

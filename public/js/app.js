@@ -325,32 +325,6 @@ function renderProfileState(source) {
             profileBadge.className = "badge gray";
         }
     }
-
-    const certContent = document.getElementById("profile-certificate-content");
-    if (certContent) {
-        const cert = source.certificate;
-        const result = source.result;
-        const resultId = result?.id || cert?.result_id;
-        const isIssued = cert && (cert.status === "Issued" || (cert.number && cert.number !== "Not issued" && cert.number !== "—"));
-
-        if (isIssued && resultId) {
-            const downloadUrl = `api/admin/certificate_pdf.php?result_id=${resultId}`;
-            const certNumber = cert.number || cert.certificate_number || "—";
-            const certLevel = cert.level || (result?.level && result.level !== "—" ? result.level : "—");
-            const issueDate = cert.issueDate || cert.issue_date || "—";
-
-            certContent.innerHTML = `
-                <div class="row"><span class="label">Certificate Number</span><span class="value"><strong>${certNumber}</strong></span></div>
-                <div class="row"><span class="label">Level</span><span class="value"><span class="badge blue">${certLevel}</span></span></div>
-                <div class="row"><span class="label">Issue Date</span><span class="value">${issueDate}</span></div>
-                <div class="row" style="align-items: center;"><span class="label">Certificate PDF</span><span class="value"><a href="${downloadUrl}" class="button" target="_blank" style="background: #1652d6; color: white; padding: 6px 14px; text-decoration: none; border-radius: 4px; font-weight: bold; display: inline-block; font-size: 13px;">Download Certificate</a></span></div>
-            `;
-        } else {
-            certContent.innerHTML = `
-                <div class="row"><span class="label">Status</span><span class="value"><span class="badge gray">Not issued yet</span></span></div>
-            `;
-        }
-    }
 }
 
 function renderEnrollmentState(source) {

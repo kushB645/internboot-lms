@@ -40,14 +40,14 @@ $pageTitle = 'Reset Password — InternBoot';
         <label for="new_password">New Password</label>
         <div class="ib-password-wrap">
           <input type="password" class="ib-input" id="new_password" name="new_password" required minlength="8">
-          <button type="button" class="ib-toggle-password" data-target="new_password" aria-label="Show password">👁️</button>
+          <button type="button" class="ib-toggle-password" data-target="new_password" aria-label="Show password"></button>
         </div>
       </div>
       <div class="ib-form-row">
         <label for="confirm_password">Confirm Password</label>
         <div class="ib-password-wrap">
           <input type="password" class="ib-input" id="confirm_password" name="confirm_password" required minlength="8">
-          <button type="button" class="ib-toggle-password" data-target="confirm_password" aria-label="Show password">👁️</button>
+          <button type="button" class="ib-toggle-password" data-target="confirm_password" aria-label="Show password"></button>
         </div>
       </div>
 

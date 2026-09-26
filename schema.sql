@@ -113,8 +113,6 @@ CREATE TABLE IF NOT EXISTS `enrollments` (
   `assessment_id` BIGINT UNSIGNED NOT NULL,
   `payment_id` BIGINT UNSIGNED DEFAULT NULL,
   `batch_id` BIGINT UNSIGNED DEFAULT NULL COMMENT 'Allocated batch once threshold is met',
-  `provisional_schedule_id` BIGINT UNSIGNED DEFAULT NULL COMMENT 'Candidate preferred provisional schedule before finalization',
-  `preferred_exam_date` DATE DEFAULT NULL,
   `eligibility_status` ENUM('pending', 'eligible') NOT NULL DEFAULT 'pending',
   `created_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `updated_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
@@ -123,12 +121,10 @@ CREATE TABLE IF NOT EXISTS `enrollments` (
   CONSTRAINT `fk_enrollments_assessment` FOREIGN KEY (`assessment_id`) REFERENCES `assessments` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
   CONSTRAINT `fk_enrollments_payment` FOREIGN KEY (`payment_id`) REFERENCES `payments` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
   CONSTRAINT `fk_enrollments_batch` FOREIGN KEY (`batch_id`) REFERENCES `batches` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
-  CONSTRAINT `fk_enrollment_prov_sched` FOREIGN KEY (`provisional_schedule_id`) REFERENCES `exam_schedules` (`id`) ON DELETE SET NULL,
   INDEX `idx_enrollments_candidate` (`candidate_id`),
   INDEX `idx_enrollments_assessment` (`assessment_id`),
   INDEX `idx_enrollments_payment` (`payment_id`),
   INDEX `idx_enrollments_batch` (`batch_id`),
-  INDEX `idx_enrollments_prov_sched` (`provisional_schedule_id`),
   INDEX `idx_enrollments_eligibility` (`eligibility_status`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Candidate registrations. Retakes create new attempts, not new enrollments.';
 
@@ -140,7 +136,7 @@ CREATE TABLE IF NOT EXISTS `exam_schedules` (
   `id` BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
   `batch_id` BIGINT UNSIGNED NOT NULL,
   `exam_date` DATE NOT NULL COMMENT 'Exam date restricted to Saturday or Sunday',
-  `status` ENUM('scheduled', 'in_progress', 'completed', 'cancelled', 'provisional') NOT NULL DEFAULT 'scheduled',
+  `status` ENUM('scheduled', 'in_progress', 'completed', 'cancelled') NOT NULL DEFAULT 'scheduled',
   `created_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `updated_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   CONSTRAINT `fk_schedules_batch` FOREIGN KEY (`batch_id`) REFERENCES `batches` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
@@ -233,6 +229,7 @@ CREATE TABLE IF NOT EXISTS `attempts` (
   `start_time` DATETIME DEFAULT NULL,
   `end_time` DATETIME DEFAULT NULL COMMENT 'Server-side calculated mandatory completion deadline',
   `submitted_at` DATETIME DEFAULT NULL,
+  `violations` INT UNSIGNED NOT NULL DEFAULT 0,
   `violations` INT UNSIGNED NOT NULL DEFAULT 0,
   `created_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `updated_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
@@ -432,39 +429,6 @@ BEGIN
     END IF;
 END$$
 
--- Trigger 3: Sync enrollments on successful payment INSERT
--- Note: This enforces the "success => eligible" forward-only synchronization to prevent desyncs.
--- If a payment is later refunded, eligibility is not automatically revoked (matches existing app behavior).
-DROP TRIGGER IF EXISTS `trg_payments_after_insert`$$
-CREATE TRIGGER `trg_payments_after_insert`
-AFTER INSERT ON `payments`
-FOR EACH ROW
-BEGIN
-    IF NEW.status = 'success' THEN
-        INSERT INTO `enrollments` (`candidate_id`, `assessment_id`, `payment_id`, `eligibility_status`)
-        VALUES (NEW.candidate_id, NEW.assessment_id, NEW.id, 'eligible')
-        ON DUPLICATE KEY UPDATE 
-            `payment_id` = VALUES(`payment_id`), 
-            `eligibility_status` = 'eligible';
-    END IF;
-END$$
-
--- Trigger 4: Sync enrollments on successful payment UPDATE
--- Note: ON DUPLICATE KEY UPDATE strictly touches payment_id and eligibility_status so batch_id is preserved.
-DROP TRIGGER IF EXISTS `trg_payments_after_update`$$
-CREATE TRIGGER `trg_payments_after_update`
-AFTER UPDATE ON `payments`
-FOR EACH ROW
-BEGIN
-    IF NEW.status = 'success' AND OLD.status != 'success' THEN
-        INSERT INTO `enrollments` (`candidate_id`, `assessment_id`, `payment_id`, `eligibility_status`)
-        VALUES (NEW.candidate_id, NEW.assessment_id, NEW.id, 'eligible')
-        ON DUPLICATE KEY UPDATE 
-            `payment_id` = VALUES(`payment_id`), 
-            `eligibility_status` = 'eligible';
-    END IF;
-END$$
-
 
 
 DELIMITER ;
@@ -570,20 +534,3 @@ ALTER TABLE `enrollments`
   ADD COLUMN `preferred_time_slot` VARCHAR(50) NULL COMMENT 'Candidate preferred time slot (e.g. 10:00:00-11:00:00)';
 
 ALTER TABLE `enrollments` ADD INDEX `idx_pref` (`preferred_date`, `preferred_time_slot`);
-
-
--- ----------------------------------------------------------------------------
--- Notifications
--- ----------------------------------------------------------------------------
-CREATE TABLE IF NOT EXISTS `notifications` (
-  `id` BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-  `candidate_id` BIGINT UNSIGNED NOT NULL,
-  `type` ENUM('batch_not_formed','slot_reassignment_required','batch_confirmed','cutoff_missed') NOT NULL,
-  `related_schedule_id` BIGINT UNSIGNED DEFAULT NULL,
-  `message` TEXT NOT NULL,
-  `is_read` TINYINT(1) NOT NULL DEFAULT 0,
-  `created_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  CONSTRAINT `fk_notifications_candidate` FOREIGN KEY (`candidate_id`) REFERENCES `candidates` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
-  CONSTRAINT `fk_notifications_schedule` FOREIGN KEY (`related_schedule_id`) REFERENCES `exam_schedules` (`id`) ON DELETE SET NULL,
-  INDEX `idx_notifications_candidate` (`candidate_id`, `is_read`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;

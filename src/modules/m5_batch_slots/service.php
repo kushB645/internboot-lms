@@ -1,5 +1,4 @@
 <?php
-// VERIFICATION_TOKEN: VERIFY-25BCE14D1F630DEA
 // Path: src/modules/m5_batch_slots/service.php
 
 require_once __DIR__ . '/queries.php';
@@ -505,8 +504,8 @@ function record_candidate_preference(int $candidateId, int $assessmentId, string
 
     set_candidate_preference((int)$enrollment['id'], $preferredDate, $preferredTimeSlot, $conn);
 
-    // Automatic batching removed per user request: Admin must manually trigger it from Admin Panel.
-    // $batchingResults = process_automated_preference_batching($assessmentId, $conn);
+    // Run the batching process to see if we crossed the threshold
+    $batchingResults = process_automated_preference_batching($assessmentId, $conn);
 
     // Did this candidate just get batched? Check the enrollment again
     $checkSql = "SELECT b.id AS batch_id, b.batch_number 

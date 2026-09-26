@@ -33,8 +33,8 @@ function handle_register_request(array $data, mysqli $conn): void {
     if (!is_valid_email($email)) {
         send_json_response('error', 'Enter a valid email address.', null, 422);
     }
-    if (!preg_match('/^[6-9]\d{9}$/', $phone)) {
-        send_json_response('error', 'Enter a valid 10-digit phone number.', null, 422);
+    if (!preg_match('/^\+\d{1,3}\d{6,14}$/', $phone)) {
+        send_json_response('error', 'Enter a valid international phone number.', null, 422);
     }
     if (strlen($password) < 8) {
         send_json_response('error', 'Password must be at least 8 characters.', null, 422);
