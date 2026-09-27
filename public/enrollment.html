@@ -1,13 +1,653 @@
-<!doctype html><html lang='en'><head><meta charset='utf-8'><meta name='viewport' content='width=device-width,initial-scale=1'><title>InternBoot | Enrollment</title><link rel='stylesheet' href='css/style.css'></head><body><div class='app'><aside class='sidebar'>
-      <div class='brand'><a href='dashboard.html'><img src='assets/internboot-logo.png' alt='InternBoot logo'></a></div>
-      <nav class='side-nav'><a class='nav-item' href='dashboard.html'><span>Dashboard</span></a><a class='nav-item' href='profile.html'><span>My Profile</span></a><a class='nav-item' href='payment.html'><span>Payments</span></a><a class='nav-item active' href='enrollment.html'><span>Enrollment</span></a><a class='nav-item' href='batches-slots.html'><span>Batches & Slots</span></a><a class='nav-item' href='exam.html'><span>Exam</span></a><a class='nav-item' href='results.html'><span>Results</span></a><a class='nav-item' href='certificates.html'><span>Certificates</span></a><a class='nav-item' href='placement.html'><span>Placement</span></a></nav>
-      <div class='nav-bottom'>
-        <a class='nav-item ' href='settings.html'><svg viewBox='0 0 24 24'><circle cx='12' cy='12' r='3'/><path d='M19 15l2 1-2 3-2-1a7 7 0 0 1-2 1l-.3 2h-3.4L11 19a7 7 0 0 1-2-1l-2 1-2-3 2-1a7 7 0 0 1 0-4L5 10l2-3 2 1a7 7 0 0 1 2-1l.3-2h3.4l.3 2a7 7 0 0 1 2 1l2-1 2 3-2 1a7 7 0 0 1 0 4z'/></svg><span>Settings</span></a>
-        <a class='nav-item logout' href='api/auth/logout.php'><svg viewBox='0 0 24 24'><path d='M10 5H5v14h5M14 8l4 4-4 4M18 12H9'/></svg><span>Logout</span></a>
-      </div>
-    </aside><main class='main'><header class='topbar'><div class='title'><h1>Enrollment</h1><p>Enrollment status and details</p></div><a class='profile-trigger' href='profile.html' title='Open My Profile'><div class='avatar' data-candidate="initials">--</div><div class='user'><strong><span data-candidate="name"></span></strong><small>Candidate</small></div></a></header><section class='content'>
-<div class='hero' id='enrollment-hero'><h2 id='enrollment-hero-title'>Enrollment Confirmed</h2><p id='enrollment-hero-desc'>Your payment has been verified and your enrollment has been created successfully.</p></div>
-<div class='grid'><section class='card card-pad'><h2 class='section-title'>Enrollment Details</h2><div class='row'><span class='label'>Enrollment ID</span><span class='value'><span data-enrollment="id"></span></span></div><div class='row'><span class='label'>Candidate</span><span class='value'><span data-candidate="name"></span></span></div><div class='row'><span class='label'>Enrollment Date</span><span class='value'><span data-candidate="registrationDate"></span></span></div><div class='row'><span class='label'>Status</span><span class='value'><span class='badge green' id='enrollment-status-badge' data-enrollment="status">Enrolled</span></span></div></section>
-<section class='card card-pad'><h2 class='section-title'>Next Step</h2><div class='notice' id='enrollment-next-step'>Your next step is batch and slot assignment. You will see the details here once they are assigned.</div></section></div>
-</section><footer class='footer'><span>© 2026 InternBoot. All rights reserved.</span><span>Privacy Policy　 |　 Terms of Service　 |　 Support</span></footer></main></div><script src="js/app.js"></script>
-</body></html>
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+
+    <title>InternBoot | Enrollment</title>
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              "intern-blue": "#2563eb",
+              "intern-dark": "#17243a",
+            },
+          },
+        },
+      };
+    </script>
+
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <style>
+      html {
+        overflow-x: hidden;
+      }
+
+      body {
+        margin: 0;
+        overflow-x: hidden;
+      }
+
+      /* Hide sidebar scrollbar */
+      aside,
+      nav {
+        scrollbar-width: none;
+        -ms-overflow-style: none;
+      }
+
+      aside::-webkit-scrollbar,
+      nav::-webkit-scrollbar {
+        display: none;
+        width: 0;
+        height: 0;
+      }
+    </style>
+  </head>
+
+  <body class="min-h-screen bg-[#eef3ff] text-slate-900 antialiased">
+    <div class="min-h-screen">
+      <!-- =====================================================
+           SIDEBAR
+      ====================================================== -->
+
+      <aside
+        class="fixed inset-y-0 left-0 z-50 hidden lg:flex w-[293px] bg-gradient-to-b from-[#294fae] to-[#347de9] text-white flex-col overflow-hidden"
+      >
+        <!-- Logo -->
+        <div
+          class="h-16 px-6 flex items-center border-b border-white/10 shrink-0"
+        >
+          <a href="dashboard.html" class="flex items-center gap-3">
+            <div
+              class="w-11 h-11 rounded-xl bg-white flex items-center justify-center shrink-0 overflow-hidden"
+            >
+              <img
+                src="assets/internboot-logo.png"
+                alt="InternBoot logo"
+                class="h-9 w-auto object-contain"
+              />
+            </div>
+
+            <div>
+              <div class="text-lg font-bold leading-tight">Internboot</div>
+
+              <div class="text-xs text-blue-100">Student Dashboard</div>
+            </div>
+          </a>
+        </div>
+
+        <!-- Main Navigation -->
+        <nav class="flex-1 min-h-0 p-4 space-y-1 overflow-hidden">
+          <!-- Dashboard -->
+          <a
+            href="dashboard.html"
+            data-page="dashboard.html"
+            class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-blue-50 hover:bg-white/10 hover:text-white transition-all duration-200"
+          >
+            <i data-lucide="layout-dashboard" class="w-5 h-5 shrink-0"></i>
+
+            <span>Dashboard</span>
+          </a>
+
+          <!-- My Profile -->
+          <a
+            href="profile.html"
+            data-page="profile.html"
+            class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-blue-50 hover:bg-white/10 hover:text-white transition-all duration-200"
+          >
+            <i data-lucide="user-round" class="w-5 h-5 shrink-0"></i>
+
+            <span>My Profile</span>
+          </a>
+
+          <!-- Payments -->
+          <a
+            href="payment.html"
+            data-page="payment.html"
+            class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-blue-50 hover:bg-white/10 hover:text-white transition-all duration-200"
+          >
+            <i data-lucide="credit-card" class="w-5 h-5 shrink-0"></i>
+
+            <span>Payments</span>
+          </a>
+
+          <!-- Enrollment -->
+          <a
+            href="enrollment.html"
+            data-page="enrollment.html"
+            class="flex items-center gap-3 px-3 py-2.5 rounded-xl bg-white/20 text-white font-medium shadow-sm"
+          >
+            <i data-lucide="clipboard-check" class="w-5 h-5 shrink-0"></i>
+
+            <span>Enrollment</span>
+
+            <span class="ml-auto w-2 h-2 rounded-full bg-blue-200"></span>
+          </a>
+
+          <!-- Batches & Slots -->
+          <a
+            href="batches-slots.html"
+            data-page="batches-slots.html"
+            class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-blue-50 hover:bg-white/10 hover:text-white transition-all duration-200"
+          >
+            <i data-lucide="calendar-days" class="w-5 h-5 shrink-0"></i>
+
+            <span>Batches &amp; Slots</span>
+          </a>
+
+          <!-- Exam -->
+          <a
+            href="exam.html"
+            data-page="exam.html"
+            class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-blue-50 hover:bg-white/10 hover:text-white transition-all duration-200"
+          >
+            <i data-lucide="file-pen-line" class="w-5 h-5 shrink-0"></i>
+
+            <span>Exam</span>
+          </a>
+
+          <!-- Results -->
+          <a
+            href="results.html"
+            data-page="results.html"
+            class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-blue-50 hover:bg-white/10 hover:text-white transition-all duration-200"
+          >
+            <i
+              data-lucide="chart-no-axes-combined"
+              class="w-5 h-5 shrink-0"
+            ></i>
+
+            <span>Results</span>
+          </a>
+
+          <!-- Certificates -->
+          <a
+            href="certificates.html"
+            data-page="certificates.html"
+            class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-blue-50 hover:bg-white/10 hover:text-white transition-all duration-200"
+          >
+            <i data-lucide="award" class="w-5 h-5 shrink-0"></i>
+
+            <span>Certificates</span>
+          </a>
+
+          <!-- Placement -->
+          <a
+            href="placement.html"
+            data-page="placement.html"
+            class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-blue-50 hover:bg-white/10 hover:text-white transition-all duration-200"
+          >
+            <i data-lucide="briefcase-business" class="w-5 h-5 shrink-0"></i>
+
+            <span>Placement</span>
+          </a>
+        </nav>
+
+                <!-- Bottom Section -->
+        <div class="shrink-0 border-t border-white/10 p-4 space-y-2">
+
+          <!-- Live Student Profile -->
+          <a
+            href="profile.html"
+            class="flex items-center gap-3 rounded-xl bg-white/10 border border-white/10 px-3 py-2.5 hover:bg-white/15 transition-all duration-200"
+          >
+            <!-- Avatar -->
+            <div
+              id="sidebar-student-avatar"
+              class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-indigo-300 to-purple-400 text-white font-bold text-base"
+            >
+              <span data-candidate="initials">KB</span>
+            </div>
+
+            <!-- Student Details -->
+            <div class="min-w-0 flex-1">
+              <p
+                id="sidebar-student-name"
+                data-candidate="name"
+                class="truncate text-sm font-bold leading-tight text-white"
+              >
+                Student
+              </p>
+
+              <p class="mt-0.5 text-xs leading-tight text-blue-100/80">
+                Student
+              </p>
+            </div>
+
+            <!-- Online Status -->
+            <span
+              class="h-2.5 w-2.5 shrink-0 rounded-full bg-emerald-400"
+              title="Active"
+            ></span>
+          </a>
+
+          <!-- Logout -->
+          <a
+            href="api/auth/logout.php"
+            class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-blue-50 hover:bg-white/10 hover:text-white transition-all duration-200"
+          >
+            <i data-lucide="log-out" class="w-5 h-5 shrink-0"></i>
+
+            <span>Logout</span>
+          </a>
+        </div>
+      </aside>
+
+      <!-- =====================================================
+           MAIN CONTENT
+      ====================================================== -->
+
+      <main
+        class="lg:ml-[293px] lg:w-[calc(100%-293px)] w-full min-h-screen min-w-0"
+      >
+        <!-- =====================================================
+             FIXED HEADER
+        ====================================================== -->
+
+        <header
+          class="fixed top-0 right-0 left-0 lg:left-[293px] z-40 h-16 bg-white border-b border-slate-200 px-4 sm:px-5 lg:px-6 flex items-center justify-between"
+        >
+          <!-- Header Left -->
+          <div class="flex items-center gap-3 min-w-0">
+            <div
+              class="w-9 h-9 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center shrink-0"
+            >
+              <i data-lucide="clipboard-check" class="w-5 h-5"></i>
+            </div>
+
+            <div class="min-w-0">
+              <div class="flex items-center gap-2">
+                <h1
+                  class="text-base font-semibold text-slate-900 whitespace-nowrap"
+                >
+                  Enrollment
+                </h1>
+
+                <span
+                  class="hidden sm:inline-flex items-center px-2.5 py-1 rounded-full bg-slate-100 text-slate-600 text-xs font-medium"
+                >
+                  Status
+                </span>
+              </div>
+
+              <p class="hidden md:block text-xs text-slate-500">
+                View your enrollment information and next steps
+              </p>
+            </div>
+          </div>
+
+          <!-- Profile -->
+          <a
+            class="flex items-center gap-3 rounded-xl px-2 py-1.5 hover:bg-slate-50 transition shrink-0"
+            href="profile.html"
+            title="Open My Profile"
+          >
+            <div
+              class="w-9 h-9 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center font-semibold"
+              data-candidate="initials"
+            >
+              --
+            </div>
+
+            <div class="hidden sm:flex flex-col min-w-0">
+              <strong
+                class="text-sm font-semibold text-slate-800 truncate max-w-40"
+              >
+                <span data-candidate="name"></span>
+              </strong>
+
+              <small class="text-xs text-slate-500 truncate max-w-48">
+                <span data-candidate="email"></span>
+              </small>
+            </div>
+          </a>
+        </header>
+
+        <!-- =====================================================
+             PAGE CONTENT
+        ====================================================== -->
+
+        <section class="w-full p-4 sm:p-5 lg:p-6 pt-[84px] lg:pt-[88px]">
+          <div class="max-w-[1400px] mx-auto w-full">
+            <!-- =================================================
+                 ENROLLMENT HERO
+            ================================================== -->
+
+            <section
+              id="enrollment-hero"
+              class="relative overflow-hidden rounded-2xl bg-gradient-to-r from-[#21489f] via-[#2f63c8] to-[#4388f2] p-6 sm:p-7 lg:p-8 mb-6 text-white shadow-sm"
+            >
+              <!-- Decorative Background -->
+              <div
+                class="absolute -right-24 -top-28 w-80 h-80 rounded-full bg-white/10 pointer-events-none"
+              ></div>
+
+              <div
+                class="absolute right-24 -bottom-48 w-80 h-80 rounded-full bg-white/10 pointer-events-none"
+              ></div>
+
+              <div
+                class="relative z-10 flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6"
+              >
+                <!-- Hero Content -->
+                <div class="min-w-0">
+                  <span
+                    class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/15 text-white/90 text-xs font-semibold mb-4"
+                  >
+                    <i data-lucide="badge-check" class="w-4 h-4"></i>
+
+                    Enrollment
+                  </span>
+
+                  <h2
+                    id="enrollment-hero-title"
+                    class="text-2xl sm:text-3xl lg:text-4xl font-bold tracking-tight"
+                  >
+                    Enrollment Confirmed
+                  </h2>
+
+                  <p
+                    id="enrollment-hero-desc"
+                    class="mt-3 text-sm sm:text-base text-blue-100 max-w-3xl leading-6"
+                  >
+                    Your payment has been verified and your enrollment has been
+                    created successfully.
+                  </p>
+                </div>
+
+                <!-- Status -->
+                <div class="shrink-0">
+                  <div
+                    class="inline-flex items-center gap-2 px-5 py-3 rounded-xl bg-white text-blue-700 text-sm font-semibold shadow-sm"
+                  >
+                    <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
+
+                    Enrolled
+                  </div>
+                </div>
+              </div>
+            </section>
+
+            <!-- =================================================
+                 ENROLLMENT INFORMATION
+            ================================================== -->
+
+            <div
+              class="grid grid-cols-1 xl:grid-cols-[minmax(0,1.35fr)_minmax(340px,.8fr)] gap-5"
+            >
+              <!-- =================================================
+                   ENROLLMENT DETAILS
+              ================================================== -->
+
+              <section
+                class="bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden"
+              >
+                <!-- Card Header -->
+                <div class="px-5 sm:px-6 py-5 border-b border-slate-200">
+                  <div class="flex items-center gap-3">
+                    <div
+                      class="w-10 h-10 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center shrink-0"
+                    >
+                      <i data-lucide="file-check-2" class="w-5 h-5"></i>
+                    </div>
+
+                    <div>
+                      <h2 class="text-base font-semibold text-slate-900">
+                        Enrollment Details
+                      </h2>
+
+                      <p class="text-xs text-slate-500 mt-0.5">
+                        Your current enrollment information
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Details -->
+                <div class="p-5 sm:p-6">
+                  <div class="divide-y divide-slate-100">
+                    <!-- Enrollment ID -->
+                    <div class="py-4 first:pt-0">
+                      <div class="flex items-center justify-between gap-4">
+                        <div class="flex items-center gap-3 min-w-0">
+                          <div
+                            class="w-9 h-9 rounded-lg bg-slate-50 text-slate-500 flex items-center justify-center shrink-0"
+                          >
+                            <i data-lucide="hash" class="w-4 h-4"></i>
+                          </div>
+
+                          <span class="text-sm text-slate-500">
+                            Enrollment ID
+                          </span>
+                        </div>
+
+                        <span
+                          class="text-sm font-semibold text-slate-800 text-right break-all"
+                        >
+                          <span data-enrollment="id"></span>
+                        </span>
+                      </div>
+                    </div>
+
+                    <!-- Candidate -->
+                    <div class="py-4">
+                      <div class="flex items-center justify-between gap-4">
+                        <div class="flex items-center gap-3 min-w-0">
+                          <div
+                            class="w-9 h-9 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center shrink-0"
+                          >
+                            <i data-lucide="user-round" class="w-4 h-4"></i>
+                          </div>
+
+                          <span class="text-sm text-slate-500">
+                            Candidate
+                          </span>
+                        </div>
+
+                        <span
+                          class="text-sm font-semibold text-slate-800 text-right"
+                        >
+                          <span data-candidate="name"></span>
+                        </span>
+                      </div>
+                    </div>
+
+                    <!-- Enrollment Date -->
+                    <div class="py-4">
+                      <div class="flex items-center justify-between gap-4">
+                        <div class="flex items-center gap-3 min-w-0">
+                          <div
+                            class="w-9 h-9 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center shrink-0"
+                          >
+                            <i data-lucide="calendar-days" class="w-4 h-4"></i>
+                          </div>
+
+                          <span class="text-sm text-slate-500">
+                            Enrollment Date
+                          </span>
+                        </div>
+
+                        <span
+                          class="text-sm font-semibold text-slate-800 text-right"
+                        >
+                          <span data-candidate="registrationDate"></span>
+                        </span>
+                      </div>
+                    </div>
+
+                    <!-- Status -->
+                    <div class="pt-4">
+                      <div class="flex items-center justify-between gap-4">
+                        <div class="flex items-center gap-3 min-w-0">
+                          <div
+                            class="w-9 h-9 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center shrink-0"
+                          >
+                            <i data-lucide="circle-check" class="w-4 h-4"></i>
+                          </div>
+
+                          <span class="text-sm text-slate-500"> Status </span>
+                        </div>
+
+                        <span>
+                          <span
+                            id="enrollment-status-badge"
+                            data-enrollment="status"
+                            class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-emerald-50 text-emerald-700 text-xs font-semibold"
+                          >
+                            <span
+                              class="w-1.5 h-1.5 rounded-full bg-emerald-500"
+                            ></span>
+
+                            Enrolled
+                          </span>
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </section>
+
+              <!-- =================================================
+                   NEXT STEP
+              ================================================== -->
+
+              <section
+                class="bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden"
+              >
+                <!-- Header -->
+                <div class="px-5 sm:px-6 py-5 border-b border-slate-200">
+                  <div class="flex items-center gap-3">
+                    <div
+                      class="w-10 h-10 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center shrink-0"
+                    >
+                      <i data-lucide="arrow-right-circle" class="w-5 h-5"></i>
+                    </div>
+
+                    <div>
+                      <h2 class="text-base font-semibold text-slate-900">
+                        Next Step
+                      </h2>
+
+                      <p class="text-xs text-slate-500 mt-0.5">
+                        What happens after enrollment
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Next Step Content -->
+                <div class="p-5 sm:p-6">
+                  <div
+                    id="enrollment-next-step"
+                    class="rounded-xl border border-blue-100 bg-blue-50 p-5"
+                  >
+                    <div class="flex gap-3">
+                      <div
+                        class="w-10 h-10 shrink-0 rounded-xl bg-white text-blue-600 flex items-center justify-center shadow-sm"
+                      >
+                        <i data-lucide="calendar-days" class="w-5 h-5"></i>
+                      </div>
+
+                      <div class="min-w-0">
+                        <p class="text-sm font-semibold text-blue-900">
+                          Batch &amp; Slot Assignment
+                        </p>
+
+                        <p class="mt-1 text-sm leading-6 text-blue-700">
+                          Your next step is batch and slot assignment. You will
+                          see the details here once they are assigned.
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- Navigation -->
+                  <a
+                    href="batches-slots.html"
+                    class="mt-5 w-full inline-flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold transition"
+                  >
+                    View Batches &amp; Slots
+
+                    <i data-lucide="arrow-right" class="w-4 h-4"></i>
+                  </a>
+                </div>
+              </section>
+            </div>
+          </div>
+        </section>
+      </main>
+    </div>
+
+    <!-- =====================================================
+         EXISTING APPLICATION LOGIC
+         UNCHANGED
+    ====================================================== -->
+
+    <script src="js/app.js"></script>
+
+    <!-- =====================================================
+         LUCIDE
+    ====================================================== -->
+
+    <script>
+      document.addEventListener("DOMContentLoaded", function () {
+        if (window.lucide) {
+          lucide.createIcons();
+        }
+      });
+    </script>
+    <script>
+  document.addEventListener("DOMContentLoaded", () => {
+    const avatar = document.getElementById("sidebar-student-avatar");
+    const name = document.getElementById("sidebar-student-name");
+
+    function syncSidebarProfile() {
+      const sourceName = document.querySelector(
+        '[data-candidate="name"]'
+      );
+
+      const sourceInitials = document.querySelector(
+        '[data-candidate="initials"]'
+      );
+
+      if (sourceName && name) {
+        const value = sourceName.textContent.trim();
+
+        if (value) {
+          name.textContent = value;
+        }
+      }
+
+      if (sourceInitials && avatar) {
+        const value = sourceInitials.textContent.trim();
+
+        if (value) {
+          avatar.querySelector("span").textContent = value;
+        }
+      }
+    }
+
+    // Initial sync
+    syncSidebarProfile();
+
+    // Watch for real-time changes made by app.js/API rendering
+    const observer = new MutationObserver(() => {
+      syncSidebarProfile();
+    });
+
+    observer.observe(document.body, {
+      subtree: true,
+      childList: true,
+      characterData: true,
+    });
+  });
+</script>
+  </body>
+</html>

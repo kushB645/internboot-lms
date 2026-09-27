@@ -1,7 +1,73 @@
 // M4 Dashboard - Railway MySQL API Integration
 // Values available from the API are dynamic. Static descriptive UI text remains in dashboard.html.
 
+function initStudentResponsiveShell() {
+    const sidebar = document.querySelector("body > div aside");
+    const main = document.querySelector("body > div main");
+    const header = main?.querySelector("header");
+
+    if (!sidebar || !main || !header || sidebar.dataset.responsiveShellBound) return;
+    sidebar.dataset.responsiveShellBound = "1";
+
+    document.body.classList.add("overflow-x-hidden");
+    sidebar.classList.add("-translate-x-full", "transition-transform", "duration-200", "lg:translate-x-0");
+    main.classList.remove("ml-[293px]", "w-[calc(100%-293px)]");
+    main.classList.add("ml-0", "w-full", "lg:ml-[293px]", "lg:w-[calc(100%-293px)]");
+    header.classList.remove("left-[293px]");
+    header.classList.add("left-0", "lg:left-[293px]", "px-4", "sm:px-6");
+    main.querySelectorAll("table").forEach((table) => {
+        table.classList.add("min-w-[640px]");
+        table.parentElement?.classList.add("max-w-full", "overflow-x-auto");
+    });
+
+    const menuButton = document.createElement("button");
+    menuButton.type = "button";
+    menuButton.className = "inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-slate-200 text-slate-600 hover:bg-slate-50 lg:hidden";
+    menuButton.setAttribute("aria-label", "Open navigation");
+    menuButton.setAttribute("aria-expanded", "false");
+    menuButton.innerHTML = '<i data-lucide="menu" class="h-5 w-5"></i>';
+
+    const headerTitle = header.firstElementChild;
+    if (headerTitle) {
+        headerTitle.classList.add("min-w-0");
+        headerTitle.prepend(menuButton);
+        headerTitle.classList.add("gap-2", "sm:gap-3");
+    }
+
+    const overlay = document.createElement("button");
+    overlay.type = "button";
+    overlay.className = "fixed inset-0 z-40 hidden bg-slate-900/40 lg:hidden";
+    overlay.setAttribute("aria-label", "Close navigation");
+    document.body.appendChild(overlay);
+
+    const close = () => {
+        sidebar.classList.add("-translate-x-full");
+        overlay.classList.add("hidden");
+        menuButton.setAttribute("aria-expanded", "false");
+    };
+    const open = () => {
+        sidebar.classList.remove("-translate-x-full");
+        overlay.classList.remove("hidden");
+        menuButton.setAttribute("aria-expanded", "true");
+    };
+
+    menuButton.addEventListener("click", () => {
+        if (sidebar.classList.contains("-translate-x-full")) open();
+        else close();
+    });
+    overlay.addEventListener("click", close);
+    sidebar.querySelectorAll("a").forEach((link) => link.addEventListener("click", close));
+    window.addEventListener("resize", () => {
+        if (window.innerWidth >= 1024) close();
+    });
+
+    if (window.lucide && typeof window.lucide.createIcons === "function") {
+        window.lucide.createIcons();
+    }
+}
+
 document.addEventListener("DOMContentLoaded", async () => {
+    initStudentResponsiveShell();
     try {
         const response = await fetch("api/dashboard.php", {
             method: "GET",
@@ -22,7 +88,6 @@ document.addEventListener("DOMContentLoaded", async () => {
 
         const source = payload.data;
 
-        if (source.exam && source.exam.attempt_id) { localStorage.setItem('ib_attempt_id', source.exam.attempt_id); }
         fillSection("candidate", source.candidate);
         fillSection("payment", source.payment);
         fillSection("enrollment", source.enrollment);
@@ -38,20 +103,6 @@ document.addEventListener("DOMContentLoaded", async () => {
         renderCertificateState(source);
         renderProfileState(source);
         renderEnrollmentState(source);
-        renderResultsState(source);
-if (source.demo_mode) {
-            let alertBox = document.getElementById('demo-mode-alert');
-            if (!alertBox) {
-                const contentDiv = document.querySelector('.content');
-                if (contentDiv) {
-                    alertBox = document.createElement('div');
-                    alertBox.id = 'demo-mode-alert';
-                    alertBox.className = 'alert alert-warning text-center fw-bold mb-4';
-                    alertBox.innerHTML = '<i class="bi bi-exclamation-triangle-fill me-2"></i> TEST MODE: Demo Mode Active. Payment data shown is simulated.';
-                    contentDiv.insertBefore(alertBox, contentDiv.firstChild);
-                }
-            }
-        }
     } catch (error) {
         console.error("Dashboard API Error:", error);
 
@@ -60,6 +111,12 @@ if (source.demo_mode) {
             errorBox.textContent = "Unable to load dashboard data. Please try again.";
             errorBox.style.display = "block";
         }
+    }
+});
+
+document.addEventListener("DOMContentLoaded", () => {
+    if (window.lucide && typeof window.lucide.createIcons === "function") {
+        window.lucide.createIcons();
     }
 });
 
@@ -277,21 +334,6 @@ function renderCertificateState(source) {
     }
 }
 
-
-function renderResultsState(source) {
-    if (!source || location.pathname.indexOf('results.html') === -1) return;
-    
-    const resultSection = document.querySelector('.card-pad .empty');
-    const resultTitle = document.querySelector('.card-pad .section-title');
-    if (!resultSection) return;
-
-    if (source.result && source.result.evaluation === 'Evaluated') {
-        resultSection.innerHTML = `<div style='font-size:42px; margin-bottom:10px;'>??</div><h2 style='color:#17243a'>Result Evaluated Successfully</h2><p>Your assessment has been fully evaluated. See your detailed score and level below.</p>`;
-        resultSection.style.padding = '30px';
-        if (resultTitle) resultTitle.textContent = 'Final Assessment Result';
-    }
-}
-
 function renderProfileState(source) {
     if (!source) return;
 
@@ -323,6 +365,32 @@ function renderProfileState(source) {
         } else {
             profileBadge.textContent = "Basic Profile";
             profileBadge.className = "badge gray";
+        }
+    }
+
+    const certContent = document.getElementById("profile-certificate-content");
+    if (certContent) {
+        const cert = source.certificate;
+        const result = source.result;
+        const resultId = result?.id || cert?.result_id;
+        const isIssued = cert && (cert.status === "Issued" || (cert.number && cert.number !== "Not issued" && cert.number !== "—"));
+
+        if (isIssued && resultId) {
+            const downloadUrl = `api/admin/certificate_pdf.php?result_id=${resultId}`;
+            const certNumber = cert.number || cert.certificate_number || "—";
+            const certLevel = cert.level || (result?.level && result.level !== "—" ? result.level : "—");
+            const issueDate = cert.issueDate || cert.issue_date || "—";
+
+            certContent.innerHTML = `
+                <div class="row"><span class="label">Certificate Number</span><span class="value"><strong>${certNumber}</strong></span></div>
+                <div class="row"><span class="label">Level</span><span class="value"><span class="badge blue">${certLevel}</span></span></div>
+                <div class="row"><span class="label">Issue Date</span><span class="value">${issueDate}</span></div>
+                <div class="row" style="align-items: center;"><span class="label">Certificate PDF</span><span class="value"><a href="${downloadUrl}" class="button" target="_blank" style="background: #1652d6; color: white; padding: 6px 14px; text-decoration: none; border-radius: 4px; font-weight: bold; display: inline-block; font-size: 13px;">Download Certificate</a></span></div>
+            `;
+        } else {
+            certContent.innerHTML = `
+                <div class="row"><span class="label">Status</span><span class="value"><span class="badge gray">Not issued yet</span></span></div>
+            `;
         }
     }
 }

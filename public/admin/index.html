@@ -1,288 +1,375 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Admin Dashboard - InternBoot</title>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <script>
-    tailwind.config = {
-      theme: {
-        extend: {
-          colors: {
-            'intern-blue': '#2563eb',
-          }
-        }
-      }
-    }
-  </script>
-  <script src="https://unpkg.com/lucide@0.383.0/dist/umd/lucide.min.js"></script>
-</head>
-<body class="bg-slate-50 text-slate-900 flex h-screen overflow-hidden">
-
-  <!-- Sidebar -->
-  <aside id="sidebar" class="w-64 bg-white border-r border-slate-200 h-full flex-shrink-0 transition-transform absolute lg:relative z-40 -translate-x-full lg:translate-x-0">
-    <div class="h-16 flex items-center px-6 border-b border-slate-200">
-      <img src="../assets/internboot-logo.png" alt="InternBoot Logo" class="h-8">
-    </div>
-    <nav class="p-4 space-y-1">
-      <a href="index.html" class="flex items-center gap-3 px-3 py-2 rounded-lg bg-intern-blue font-medium text-white transition"><i data-lucide="layout-dashboard" class="h-5 w-5"></i> Dashboard</a>
-      <a href="candidates.html" class="flex items-center gap-3 px-3 py-2 rounded-lg text-slate-600 hover:bg-slate-50 transition"><i data-lucide="users" class="h-5 w-5"></i> Candidates</a>
-      <a href="results.html" class="flex items-center gap-3 px-3 py-2 rounded-lg text-slate-600 hover:bg-slate-50 transition"><i data-lucide="file-check-2" class="h-5 w-5"></i> Results</a>
-      <a href="certificates.html" class="flex items-center gap-3 px-3 py-2 rounded-lg text-slate-600 hover:bg-slate-50 transition"><i data-lucide="award" class="h-5 w-5"></i> Certificates</a>
-      <a href="questions.html" class="flex items-center gap-3 px-3 py-2 rounded-lg text-slate-600 hover:bg-slate-50 transition"><i data-lucide="help-circle" class="h-5 w-5"></i> Questions</a>
-      <a href="batches.html" class="flex items-center gap-3 px-3 py-2 rounded-lg text-slate-600 hover:bg-slate-50 transition"><i data-lucide="calendar-days" class="h-5 w-5"></i> Batches</a>
-      <a href="placement.html" class="flex items-center gap-3 px-3 py-2 rounded-lg text-slate-600 hover:bg-slate-50 transition"><i data-lucide="building-2" class="h-5 w-5"></i> Placement</a>
-      <a href="setting.html" class="flex items-center gap-3 px-3 py-2 rounded-lg text-slate-600 hover:bg-slate-50 transition"><i data-lucide="settings" class="h-5 w-5"></i> Settings</a>
-    </nav>
-  </aside>
-
-  <!-- Overlay -->
-  <div id="sidebarOverlay" class="fixed inset-0 bg-slate-900/50 z-30 hidden lg:hidden"></div>
-
-  <!-- Main Content -->
-  <div class="flex-1 flex flex-col h-screen overflow-hidden">
-    <!-- Header -->
-    <header class="h-16 bg-white border-b border-slate-200 flex items-center justify-between px-6 flex-shrink-0">
-      <div class="flex items-center gap-4">
-        <button id="menuButton" class="lg:hidden text-slate-500 hover:text-slate-700">
-          <i data-lucide="menu" class="h-6 w-6"></i>
-        </button>
-        <h1 class="text-xl font-semibold text-slate-800">Admin Dashboard</h1>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Admin Dashboard - InternBoot</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              "intern-blue": "#2563eb",
+            },
+          },
+        },
+      };
+    </script>
+    <script src="https://unpkg.com/lucide@0.383.0/dist/umd/lucide.min.js"></script>
+  </head>
+  <body class="bg-slate-50 text-slate-900 flex h-screen overflow-hidden">
+    <!-- Sidebar -->
+    <aside
+      id="sidebar"
+      class="w-64 bg-white border-r border-slate-200 h-full flex-shrink-0 transition-transform absolute lg:relative z-40 -translate-x-full lg:translate-x-0"
+    >
+      <div class="h-16 flex items-center px-6 border-b border-slate-200">
+        <img
+          src="../assets/internboot-logo.png"
+          alt="InternBoot Logo"
+          class="h-8"
+        />
       </div>
+      <nav class="p-4 space-y-1">
+        <a
+          href="index.html"
+          class="flex items-center gap-3 px-3 py-2 rounded-lg bg-intern-blue font-medium text-white transition"
+          ><i data-lucide="layout-dashboard" class="h-5 w-5"></i> Dashboard</a
+        >
+        <a
+          href="candidates.html"
+          class="flex items-center gap-3 px-3 py-2 rounded-lg text-slate-600 hover:bg-slate-50 transition"
+          ><i data-lucide="users" class="h-5 w-5"></i> Candidates</a
+        >
+        <a
+          href="results.html"
+          class="flex items-center gap-3 px-3 py-2 rounded-lg text-slate-600 hover:bg-slate-50 transition"
+          ><i data-lucide="file-check-2" class="h-5 w-5"></i> Results</a
+        >
+        <a
+          href="certificates.html"
+          class="flex items-center gap-3 px-3 py-2 rounded-lg text-slate-600 hover:bg-slate-50 transition"
+          ><i data-lucide="award" class="h-5 w-5"></i> Certificates</a
+        >
+        <a
+          href="questions.html"
+          class="flex items-center gap-3 px-3 py-2 rounded-lg text-slate-600 hover:bg-slate-50 transition"
+          ><i data-lucide="help-circle" class="h-5 w-5"></i> Questions</a
+        >
+        <a
+          href="batches.html"
+          class="flex items-center gap-3 px-3 py-2 rounded-lg text-slate-600 hover:bg-slate-50 transition"
+          ><i data-lucide="calendar-days" class="h-5 w-5"></i> Batches</a
+        >
+        <a
+          href="placement.html"
+          class="flex items-center gap-3 px-3 py-2 rounded-lg text-slate-600 hover:bg-slate-50 transition"
+          ><i data-lucide="building-2" class="h-5 w-5"></i> Placement</a
+        >
+      </nav>
+    </aside>
 
-      <div class="flex items-center gap-4 relative">
-        <button id="notificationButton" class="text-slate-500 hover:text-slate-700 relative" onclick="toggleNotificationDropdown()">
-          <i data-lucide="bell" class="h-5 w-5"></i>
-          <span id="notif-badge" class="hidden absolute -top-1 -right-1 bg-red-500 text-white text-xs font-bold rounded-full min-w-[18px] h-[18px] flex items-center justify-center px-1"></span>
-        </button>
-        <div id="notificationDropdown" class="hidden absolute right-12 top-full mt-2 w-80 bg-white rounded-xl shadow-lg border border-slate-100 z-50" style="max-height:400px;overflow-y:auto;">
-          <div style="padding:14px 16px; border-bottom:1px solid #f1f5f9; font-weight:700; color:#1e293b; font-size:14px; display:flex; justify-content:space-between; align-items:center;">
-            <span>🔔 Notifications</span>
-            <button onclick="markAllNotificationsRead()" style="font-size:11px; color:#64748b; background:none; border:none; cursor:pointer;">Mark all read</button>
-          </div>
-          <div id="notif-list" style="padding:8px 0;">
-            <p class="text-sm text-slate-500 text-center" style="padding:16px;">Loading...</p>
-          </div>
+    <!-- Overlay -->
+    <div
+      id="sidebarOverlay"
+      class="fixed inset-0 bg-slate-900/50 z-30 hidden lg:hidden"
+    ></div>
+
+    <!-- Main Content -->
+    <div class="flex-1 flex flex-col h-screen overflow-hidden">
+      <!-- Header -->
+      <header
+        class="h-16 bg-white border-b border-slate-200 flex items-center justify-between px-6 flex-shrink-0"
+      >
+        <div class="flex items-center gap-4">
+          <button
+            id="menuButton"
+            class="lg:hidden text-slate-500 hover:text-slate-700"
+          >
+            <i data-lucide="menu" class="h-6 w-6"></i>
+          </button>
+          <h1 class="text-xl font-semibold text-slate-800">Admin Dashboard</h1>
         </div>
 
-        <button id="userButton" class="flex items-center gap-2">
-          <div id="adminAvatar" class="h-8 w-8 rounded-full bg-intern-blue text-white flex items-center justify-center font-medium overflow-hidden">
-            <span id="adminAvatarInitial">A</span>
-            <img id="adminAvatarImage" src="" alt="Avatar" class="h-full w-full object-cover hidden">
+        <div class="flex items-center gap-4 relative">
+          <button
+            id="notificationButton"
+            class="text-slate-500 hover:text-slate-700 relative"
+          >
+            <i data-lucide="bell" class="h-5 w-5"></i>
+          </button>
+          <div
+            id="notificationDropdown"
+            class="hidden absolute right-12 top-full mt-2 w-64 bg-white rounded-xl shadow-lg border border-slate-100 p-4 z-50"
+          >
+            <p class="text-sm text-slate-500 text-center">
+              No new notifications
+            </p>
           </div>
-          <span id="adminHeaderName" class="text-sm font-medium text-slate-700 hidden sm:block">Admin</span>
-          <i data-lucide="chevron-down" class="h-4 w-4 text-slate-400"></i>
-        </button>
 
-        <div id="userDropdown" class="hidden absolute right-0 top-full mt-2 w-48 bg-white rounded-xl shadow-lg border border-slate-100 py-1 z-50">
-          <a href="setting.html" class="block px-4 py-2 text-sm text-slate-700 hover:bg-slate-50">Profile</a>
-          <div class="border-t border-slate-100 my-1"></div><a href="#" class="block px-4 py-2 text-sm text-red-600 hover:bg-slate-50">Logout</a>
+          <button id="userButton" class="flex items-center gap-2">
+            <div
+              id="adminAvatar"
+              class="h-8 w-8 rounded-full bg-intern-blue text-white flex items-center justify-center font-medium overflow-hidden"
+            >
+              <span id="adminAvatarInitial">A</span>
+              <img
+                id="adminAvatarImage"
+                src=""
+                alt="Avatar"
+                class="h-full w-full object-cover hidden"
+              />
+            </div>
+            <span
+              id="adminHeaderName"
+              class="text-sm font-medium text-slate-700 hidden sm:block"
+              >Admin</span
+            >
+            <i data-lucide="chevron-down" class="h-4 w-4 text-slate-400"></i>
+          </button>
+
+          <div
+            id="userDropdown"
+            class="hidden absolute right-0 top-full mt-2 w-48 bg-white rounded-xl shadow-lg border border-slate-100 py-1 z-50"
+          >
+            <a
+              href="setting.html"
+              class="block px-4 py-2 text-sm text-slate-700 hover:bg-slate-50"
+              >Profile</a
+            >
+            <div class="border-t border-slate-100 my-1"></div>
+            <a
+              href="#"
+              class="block px-4 py-2 text-sm text-red-600 hover:bg-slate-50"
+              >Logout</a
+            >
+          </div>
         </div>
-      </div>
-    </header>
+      </header>
 
-    <!-- Main Scrollable Area -->
-    <main class="flex-1 overflow-auto bg-slate-50">
+      <!-- Main Scrollable Area -->
+      <main class="flex-1 overflow-auto bg-slate-50">
+        <div class="p-6">
+          <div
+            id="integrityWarningBanner"
+            class="hidden mb-6 rounded-2xl bg-red-50 p-4 border border-red-200"
+          >
+            <div class="flex items-center gap-3">
+              <i data-lucide="alert-triangle" class="h-6 w-6 text-red-600"></i>
+              <div>
+                <h4 class="font-medium text-red-900">
+                  Payment Synchronization Issue Detected
+                </h4>
+                <p class="text-sm text-red-700 mt-1">
+                  Found
+                  <span id="integrityDesyncCount" class="font-bold">0</span>
+                  paid candidate(s) missing eligible enrollments. Please run
+                  <code
+                    >php scripts/backfill_enrollments_from_payments.php</code
+                  >
+                  to fix data drift.
+                </p>
+              </div>
+            </div>
+          </div>
 
-      <div class="p-6">
-        <div class="flex justify-between items-center mb-6">
-            <h2 class="text-2xl font-semibold text-slate-800">Dashboard Overview</h2>
+          <div class="flex justify-between items-center mb-6">
+            <h2 class="text-2xl font-semibold text-slate-800">
+              Dashboard Overview
+            </h2>
             <div class="flex items-center gap-4">
-                <span id="currentDate" class="text-sm text-slate-500"></span>
-                <button id="refreshDashboard" class="text-slate-500 hover:text-intern-blue"><i data-lucide="refresh-cw" class="h-5 w-5"></i></button>
+              <span id="currentDate" class="text-sm text-slate-500"></span>
+              <button
+                id="refreshDashboard"
+                class="text-slate-500 hover:text-intern-blue"
+              >
+                <i data-lucide="refresh-cw" class="h-5 w-5"></i>
+              </button>
             </div>
-        </div>
+          </div>
 
-        <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-            <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
-                <p class="text-sm text-slate-500 mb-1">Total Registrations</p>
-                <h3 class="text-3xl font-bold text-slate-800" id="totalRegistrations">0</h3>
+          <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+            <div
+              class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100"
+            >
+              <p class="text-sm text-slate-500 mb-1">Total Registrations</p>
+              <h3
+                class="text-3xl font-bold text-slate-800"
+                id="totalRegistrations"
+              >
+                0
+              </h3>
             </div>
-            <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
-                <p class="text-sm text-slate-500 mb-1">Paid Candidates</p>
-                <h3 class="text-3xl font-bold text-slate-800" id="paidCandidates">0</h3>
+            <div
+              class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100"
+            >
+              <p class="text-sm text-slate-500 mb-1">Paid Candidates</p>
+              <h3 class="text-3xl font-bold text-slate-800" id="paidCandidates">
+                0
+              </h3>
             </div>
-            <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
-                <p class="text-sm text-slate-500 mb-1">Eligible Candidates</p>
-                <h3 class="text-3xl font-bold text-slate-800" id="eligibleCandidates">0</h3>
+            <div
+              class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100"
+            >
+              <p class="text-sm text-slate-500 mb-1">Eligible Candidates</p>
+              <h3
+                class="text-3xl font-bold text-slate-800"
+                id="eligibleCandidates"
+              >
+                0
+              </h3>
             </div>
-            <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
-                <p class="text-sm text-slate-500 mb-1">Upcoming Batches</p>
-                <h3 class="text-3xl font-bold text-slate-800" id="upcomingBatches">0</h3>
+            <div
+              class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100"
+            >
+              <p class="text-sm text-slate-500 mb-1">Upcoming Batches</p>
+              <h3
+                class="text-3xl font-bold text-slate-800"
+                id="upcomingBatches"
+              >
+                0
+              </h3>
             </div>
-            <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
-                <p class="text-sm text-slate-500 mb-1">Available Slots</p>
-                <h3 class="text-3xl font-bold text-slate-800" id="availableSlots">0</h3>
+            <div
+              class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100"
+            >
+              <p class="text-sm text-slate-500 mb-1">Available Slots</p>
+              <h3 class="text-3xl font-bold text-slate-800" id="availableSlots">
+                0
+              </h3>
             </div>
-            <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
-                <p class="text-sm text-slate-500 mb-1">Completed Assessments</p>
-                <h3 class="text-3xl font-bold text-slate-800" id="completedAssessments">0</h3>
+            <div
+              class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100"
+            >
+              <p class="text-sm text-slate-500 mb-1">Completed Assessments</p>
+              <h3
+                class="text-3xl font-bold text-slate-800"
+                id="completedAssessments"
+              >
+                0
+              </h3>
             </div>
-            <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
-                <p class="text-sm text-slate-500 mb-1">Certificates</p>
-                <h3 class="text-3xl font-bold text-slate-800" id="certificates">0</h3>
+            <div
+              class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100"
+            >
+              <p class="text-sm text-slate-500 mb-1">Certificates</p>
+              <h3 class="text-3xl font-bold text-slate-800" id="certificates">
+                0
+              </h3>
             </div>
-        </div>
+          </div>
 
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-            <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
-               <h3 class="font-medium text-slate-800 mb-4">Assessments</h3>
-               <div class="flex justify-between text-sm mb-2"><span id="completedAssessmentCount">0</span><span>Completed</span></div>
-               <div class="w-full bg-slate-100 rounded-full h-2 mb-4"><div id="completedAssessmentBar" class="bg-intern-blue h-2 rounded-full" style="width:0%"></div></div>
-               <div class="flex justify-between text-sm mb-2"><span id="pendingAssessmentCount">0</span><span>Pending</span></div>
-               <div class="w-full bg-slate-100 rounded-full h-2"><div id="pendingAssessmentBar" class="bg-amber-400 h-2 rounded-full" style="width:0%"></div></div>
+          <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+            <div
+              class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100"
+            >
+              <h3 class="font-medium text-slate-800 mb-4">Assessments</h3>
+              <div class="flex justify-between text-sm mb-2">
+                <span id="completedAssessmentCount">0</span
+                ><span>Completed</span>
+              </div>
+              <div class="w-full bg-slate-100 rounded-full h-2 mb-4">
+                <div
+                  id="completedAssessmentBar"
+                  class="bg-intern-blue h-2 rounded-full"
+                  style="width: 0%"
+                ></div>
+              </div>
+              <div class="flex justify-between text-sm mb-2">
+                <span id="pendingAssessmentCount">0</span><span>Pending</span>
+              </div>
+              <div class="w-full bg-slate-100 rounded-full h-2">
+                <div
+                  id="pendingAssessmentBar"
+                  class="bg-amber-400 h-2 rounded-full"
+                  style="width: 0%"
+                ></div>
+              </div>
             </div>
-            <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
-               <h3 class="font-medium text-slate-800 mb-4">Levels</h3>
-               <!-- Level 1 -->
-               <div class="flex justify-between text-sm mb-2"><span id="level1Count">0</span><span>Level 1</span></div>
-               <div class="w-full bg-slate-100 rounded-full h-2 mb-2"><div id="level1Bar" class="bg-intern-blue h-2 rounded-full" style="width:0%"></div></div>
-               <!-- Level 2 -->
-               <div class="flex justify-between text-sm mb-2"><span id="level2Count">0</span><span>Level 2</span></div>
-               <div class="w-full bg-slate-100 rounded-full h-2 mb-2"><div id="level2Bar" class="bg-intern-blue h-2 rounded-full" style="width:0%"></div></div>
-               <!-- Level 3 -->
-               <div class="flex justify-between text-sm mb-2"><span id="level3Count">0</span><span>Level 3</span></div>
-               <div class="w-full bg-slate-100 rounded-full h-2 mb-2"><div id="level3Bar" class="bg-intern-blue h-2 rounded-full" style="width:0%"></div></div>
-               <!-- Level 4 -->
-               <div class="flex justify-between text-sm mb-2"><span id="level4Count">0</span><span>Level 4</span></div>
-               <div class="w-full bg-slate-100 rounded-full h-2 mb-2"><div id="level4Bar" class="bg-intern-blue h-2 rounded-full" style="width:0%"></div></div>
-               <!-- Level 5 -->
-               <div class="flex justify-between text-sm mb-2"><span id="level5Count">0</span><span>Level 5</span></div>
-               <div class="w-full bg-slate-100 rounded-full h-2"><div id="level5Bar" class="bg-intern-blue h-2 rounded-full" style="width:0%"></div></div>
+            <div
+              class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100"
+            >
+              <h3 class="font-medium text-slate-800 mb-4">Levels</h3>
+              <!-- Level 1 -->
+              <div class="flex justify-between text-sm mb-2">
+                <span id="level1Count">0</span><span>Level 1</span>
+              </div>
+              <div class="w-full bg-slate-100 rounded-full h-2 mb-2">
+                <div
+                  id="level1Bar"
+                  class="bg-intern-blue h-2 rounded-full"
+                  style="width: 0%"
+                ></div>
+              </div>
+              <!-- Level 2 -->
+              <div class="flex justify-between text-sm mb-2">
+                <span id="level2Count">0</span><span>Level 2</span>
+              </div>
+              <div class="w-full bg-slate-100 rounded-full h-2 mb-2">
+                <div
+                  id="level2Bar"
+                  class="bg-intern-blue h-2 rounded-full"
+                  style="width: 0%"
+                ></div>
+              </div>
+              <!-- Level 3 -->
+              <div class="flex justify-between text-sm mb-2">
+                <span id="level3Count">0</span><span>Level 3</span>
+              </div>
+              <div class="w-full bg-slate-100 rounded-full h-2 mb-2">
+                <div
+                  id="level3Bar"
+                  class="bg-intern-blue h-2 rounded-full"
+                  style="width: 0%"
+                ></div>
+              </div>
+              <!-- Level 4 -->
+              <div class="flex justify-between text-sm mb-2">
+                <span id="level4Count">0</span><span>Level 4</span>
+              </div>
+              <div class="w-full bg-slate-100 rounded-full h-2 mb-2">
+                <div
+                  id="level4Bar"
+                  class="bg-intern-blue h-2 rounded-full"
+                  style="width: 0%"
+                ></div>
+              </div>
+              <!-- Level 5 -->
+              <div class="flex justify-between text-sm mb-2">
+                <span id="level5Count">0</span><span>Level 5</span>
+              </div>
+              <div class="w-full bg-slate-100 rounded-full h-2">
+                <div
+                  id="level5Bar"
+                  class="bg-intern-blue h-2 rounded-full"
+                  style="width: 0%"
+                ></div>
+              </div>
             </div>
-        </div>
+          </div>
 
-        <div class="bg-white rounded-2xl shadow-sm border border-slate-100 p-6 mb-8">
+          <div
+            class="bg-white rounded-2xl shadow-sm border border-slate-100 p-6 mb-8"
+          >
             <h3 class="font-medium text-slate-800 mb-4">Recent Candidates</h3>
-            <table class="w-full"><tbody id="recentCandidates"></tbody></table>
-        </div>
+            <table class="w-full">
+              <tbody id="recentCandidates"></tbody>
+            </table>
+          </div>
 
-        <div class="bg-white rounded-2xl shadow-sm border border-slate-100 p-6 mb-8">
+          <div
+            class="bg-white rounded-2xl shadow-sm border border-slate-100 p-6 mb-8"
+          >
             <h3 class="font-medium text-slate-800 mb-4">Upcoming Batches</h3>
-            <table class="w-full"><tbody id="upcomingBatchesTable"></tbody></table>
+            <table class="w-full">
+              <tbody id="upcomingBatchesTable"></tbody>
+            </table>
+          </div>
         </div>
-      </div>
-    </main>
-  </div>
+      </main>
+    </div>
 
-  <script src="admin.js"></script>
-  <script>
-  // ── Admin Notification System ──────────────────────────────────────────
-  function toggleNotificationDropdown() {
-      const dd = document.getElementById('notificationDropdown');
-      const isHidden = dd.classList.contains('hidden');
-      document.getElementById('userDropdown')?.classList.add('hidden');
-      if (isHidden) {
-          dd.classList.remove('hidden');
-          loadAdminNotifications();
-      } else {
-          dd.classList.add('hidden');
-      }
-  }
-
-  document.addEventListener('click', (e) => {
-      if (!e.target.closest('#notificationButton') && !e.target.closest('#notificationDropdown')) {
-          document.getElementById('notificationDropdown')?.classList.add('hidden');
-      }
-  });
-
-  async function loadAdminNotifications() {
-      try {
-          const res = await fetch('../api/notifications/list.php?limit=15', { credentials: 'same-origin' });
-          const payload = await res.json();
-          if (!res.ok || payload.status !== 'success') return;
-
-          const { notifications, unread_count } = payload.data;
-          const badge = document.getElementById('notif-badge');
-          const list = document.getElementById('notif-list');
-
-          // Update badge
-          if (unread_count > 0) {
-              badge.textContent = unread_count > 9 ? '9+' : unread_count;
-              badge.classList.remove('hidden');
-          } else {
-              badge.classList.add('hidden');
-          }
-
-          // Render list
-          if (!notifications.length) {
-              list.innerHTML = '<p style="padding:16px; text-align:center; color:#94a3b8; font-size:13px;">No notifications yet</p>';
-              return;
-          }
-
-          list.innerHTML = notifications.map(n => {
-              const isBatchReady = n.type === 'batch_ready';
-              const timeAgo = getTimeAgo(n.created_at);
-              return `
-                <div style="padding:12px 16px; border-bottom:1px solid #f8fafc; background:${n.is_read ? '#fff' : '#fffbeb'};">
-                    <div style="display:flex; gap:10px; align-items:flex-start;">
-                        <span style="font-size:18px; flex-shrink:0;">${isBatchReady ? '🚀' : '🔔'}</span>
-                        <div style="flex:1; min-width:0;">
-                            <div style="font-weight:${n.is_read ? '500' : '700'}; font-size:13px; color:#1e293b; margin-bottom:2px;">${escapeHtml(n.title)}</div>
-                            <div style="font-size:12px; color:#64748b; line-height:1.4;">${escapeHtml(n.message)}</div>
-                            ${isBatchReady && n.related_id ? `<a href="../admin/batches.html" style="display:inline-block; margin-top:6px; font-size:11px; font-weight:700; color:#2563eb; text-decoration:none;">→ Go to Batches & Create Batch</a>` : ''}
-                            <div style="font-size:11px; color:#94a3b8; margin-top:4px;">${timeAgo}</div>
-                        </div>
-                        ${!n.is_read ? `<span style="flex-shrink:0; width:8px; height:8px; background:#f59e0b; border-radius:50%; margin-top:4px;"></span>` : ''}
-                    </div>
-                </div>`;
-          }).join('');
-
-      } catch (e) {
-          console.error('Notification load failed', e);
-      }
-  }
-
-  async function markAllNotificationsRead() {
-      try {
-          const token = document.querySelector('meta[name="csrf-token"]')?.content || '';
-          await fetch('../api/notifications/list.php', {
-              method: 'PATCH',
-              credentials: 'same-origin',
-              headers: { 'Content-Type': 'application/json', 'X-CSRF-Token': token },
-              body: JSON.stringify({ action: 'mark_all_read' })
-          });
-          loadAdminNotifications();
-      } catch(e) {}
-  }
-
-  function escapeHtml(str) {
-      if (!str) return '';
-      return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
-  }
-
-  function getTimeAgo(dateStr) {
-      if (!dateStr) return '';
-      const diff = Math.floor((Date.now() - new Date(dateStr).getTime()) / 1000);
-      if (diff < 60) return 'Just now';
-      if (diff < 3600) return Math.floor(diff/60) + 'm ago';
-      if (diff < 86400) return Math.floor(diff/3600) + 'h ago';
-      return Math.floor(diff/86400) + 'd ago';
-  }
-
-  // Poll every 30 seconds for new notifications
-  async function pollNotifications() {
-      try {
-          const res = await fetch('../api/notifications/list.php?unread=1&limit=1', { credentials: 'same-origin' });
-          const payload = await res.json();
-          if (res.ok && payload.status === 'success') {
-              const count = payload.data.unread_count;
-              const badge = document.getElementById('notif-badge');
-              if (count > 0) {
-                  badge.textContent = count > 9 ? '9+' : count;
-                  badge.classList.remove('hidden');
-              } else {
-                  badge.classList.add('hidden');
-              }
-          }
-      } catch(e) {}
-  }
-
-  // Initial poll + repeat
-  pollNotifications();
-  setInterval(pollNotifications, 30000);
-  </script>
-</body>
+    <script src="admin.js"></script>
+  </body>
 </html>
-

@@ -1,77 +1,710 @@
 <!doctype html>
-<html lang='en'>
-<head>
-  <meta charset='utf-8'>
-  <meta name='viewport' content='width=device-width,initial-scale=1'>
-  <title>InternBoot | Batches &amp; Slots</title>
-  <link rel='stylesheet' href='css/style.css'>
-</head>
-<body>
-  <div class='app'>
-    <aside class='sidebar'>
-      <div class='brand'><a href='dashboard.html'><img src='assets/internboot-logo.png' alt='InternBoot logo'></a></div>
-      <nav class='side-nav'>
-        <a class='nav-item' href='dashboard.html'><span>Dashboard</span></a>
-        <a class='nav-item' href='profile.html'><span>My Profile</span></a>
-        <a class='nav-item' href='payment.html'><span>Payments</span></a>
-        <a class='nav-item' href='enrollment.html'><span>Enrollment</span></a>
-        <a class='nav-item active' href='batches-slots.html'><span>Batches &amp; Slots</span></a>
-        <a class='nav-item' href='exam.html'><span>Exam</span></a>
-        <a class='nav-item' href='results.html'><span>Results</span></a>
-        <a class='nav-item' href='certificates.html'><span>Certificates</span></a><a class='nav-item' href='placement.html'><span>Placement</span></a></nav>
-      <div class='nav-bottom'>
-        <a class='nav-item' href='settings.html'><svg viewBox='0 0 24 24'><circle cx='12' cy='12' r='3'/><path d='M19 15l2 1-2 3-2-1a7 7 0 0 1-2 1l-.3 2h-3.4L11 19a7 7 0 0 1-2-1l-2 1-2-3 2-1a7 7 0 0 1 0-4L5 10l2-3 2 1a7 7 0 0 1 2-1l.3-2h3.4l.3 2a7 7 0 0 1 2 1l2-1 2 3-2 1a7 7 0 0 1 0 4z'/></svg><span>Settings</span></a>
-        <a class='nav-item logout' href='api/auth/logout.php'><svg viewBox='0 0 24 24'><path d='M10 5H5v14h5M14 8l4 4-4 4M18 12H9'/></svg><span>Logout</span></a>
-      </div>
-    </aside>
-    <main class='main'>
-      <header class='topbar'>
-        <div class='title'>
-          <h1>Batches &amp; Slots</h1>
-          <p>Batch assignment and exam slot booking</p>
-        </div>
-        <a class='profile-trigger' href='profile.html' title='Open My Profile'>
-          <div class='avatar' data-candidate="initials">--</div>
-          <div class='user'><strong><span data-candidate="name"></span></strong><small>Candidate</small></div>
-        </a>
-      </header>
-      <section class='content'>
-        <div id='notice-container'></div>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
 
-        <div class='grid'>
-          <section class='card card-pad' id='batch-details-card'>
-            <h2 class='section-title'>Batch Details</h2>
-            <div class='row'><span class='label'>Batch Name</span><span class='value' id='batch-name'>—</span></div>
-            <div class='row'><span class='label'>Batch Status</span><span class='value'><span class='badge gray' id='batch-status-badge'>—</span></span></div>
-            <div class='row'><span class='label'>Candidates Count</span><span class='value' id='batch-candidates'>—</span></div>
-          </section>
+    <title>InternBoot | Batches & Slots</title>
 
-          <section class='card card-pad' id='my-booked-slot-card'>
-            <h2 class='section-title'>My Booked Slot</h2>
-            <div id='booked-slot-content'>
-              <div class='row'><span class='label'>Exam Date</span><span class='value' id='booked-exam-date'>—</span></div>
-              <div class='row'><span class='label'>Slot Time</span><span class='value' id='booked-slot-time'>—</span></div>
-              <div class='row'><span class='label'>Status</span><span class='value'><span class='badge gray' id='booked-slot-status'>—</span></span></div>
+    <!-- Tailwind -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              "intern-blue": "#2563eb",
+              "intern-dark": "#17243a",
+            },
+          },
+        },
+      };
+    </script>
+
+    <!-- Lucide -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <style>
+      /* Keep sidebar scrollbar visually hidden */
+      .side-nav::-webkit-scrollbar {
+        width: 0;
+        height: 0;
+      }
+
+      .side-nav {
+        scrollbar-width: none;
+        -ms-overflow-style: none;
+      }
+    </style>
+  </head>
+
+  <body class="min-h-screen bg-[#eef3ff] text-slate-900">
+    <div class="min-h-screen">
+      <!-- =====================================================
+         SIDEBAR
+    ====================================================== -->
+
+      <aside
+        class="fixed inset-y-0 left-0 z-50 w-[293px] bg-gradient-to-b from-[#2852b5] via-[#2d68cf] to-[#3180ed] text-white flex flex-col"
+      >
+        <!-- Logo -->
+        <div
+          class="h-16 px-6 flex items-center border-b border-white/15 shrink-0"
+        >
+          <a href="dashboard.html" class="flex items-center gap-3">
+            <div
+              class="w-12 h-12 rounded-2xl bg-white flex items-center justify-center shrink-0"
+            >
+              <img
+                src="assets/internboot-logo.png"
+                alt="InternBoot"
+                class="h-10 w-auto object-contain"
+              />
             </div>
-          </section>
+
+            <div class="leading-tight">
+              <div class="text-[20px] font-bold tracking-tight">Internboot</div>
+
+              <div class="text-xs text-white/85">Student Dashboard</div>
+            </div>
+          </a>
         </div>
 
-        <br>
+        <!-- =====================================================
+           NAVIGATION
+      ====================================================== -->
 
-        <section class='card card-pad' id='available-slots-card'>
-          <h2 class='section-title'>Available Exam Slots</h2>
-          <div id='slots-list'>
-            <p style='color:#60728b;'>Loading available slots...</p>
+        <nav class="side-nav flex-1 min-h-0 overflow-y-auto p-4 space-y-1">
+          <!-- Dashboard -->
+          <a
+            href="dashboard.html"
+            data-page="dashboard.html"
+            class="nav-item flex items-center gap-3 px-3 py-2.5 rounded-xl text-white/95 hover:bg-white/10 transition"
+          >
+            <i data-lucide="layout-dashboard" class="w-5 h-5 shrink-0"></i>
+
+            <span>Dashboard</span>
+          </a>
+
+          <!-- Profile -->
+          <a
+            href="profile.html"
+            data-page="profile.html"
+            class="nav-item flex items-center gap-3 px-3 py-2.5 rounded-xl text-white/95 hover:bg-white/10 transition"
+          >
+            <i data-lucide="user-round" class="w-5 h-5 shrink-0"></i>
+
+            <span>My Profile</span>
+          </a>
+
+          <!-- Payments -->
+          <a
+            href="payment.html"
+            data-page="payment.html"
+            class="nav-item flex items-center gap-3 px-3 py-2.5 rounded-xl text-white/95 hover:bg-white/10 transition"
+          >
+            <i data-lucide="credit-card" class="w-5 h-5 shrink-0"></i>
+
+            <span>Payments</span>
+          </a>
+
+          <!-- Enrollment -->
+          <a
+            href="enrollment.html"
+            data-page="enrollment.html"
+            class="nav-item flex items-center gap-3 px-3 py-2.5 rounded-xl text-white/95 hover:bg-white/10 transition"
+          >
+            <i data-lucide="clipboard-check" class="w-5 h-5 shrink-0"></i>
+
+            <span>Enrollment</span>
+          </a>
+
+          <!-- Batches & Slots -->
+          <a
+            href="batches-slots.html"
+            data-page="batches-slots.html"
+            class="nav-item active flex items-center gap-3 px-3 py-2.5 rounded-xl bg-white/20 text-white font-semibold shadow-sm"
+          >
+            <i data-lucide="calendar-days" class="w-5 h-5 shrink-0"></i>
+
+            <span>Batches &amp; Slots</span>
+          </a>
+
+          <!-- Exam -->
+          <a
+            href="exam.html"
+            data-page="exam.html"
+            class="nav-item flex items-center gap-3 px-3 py-2.5 rounded-xl text-white/95 hover:bg-white/10 transition"
+          >
+            <i data-lucide="file-pen-line" class="w-5 h-5 shrink-0"></i>
+
+            <span>Exam</span>
+          </a>
+
+          <!-- Results -->
+          <a
+            href="results.html"
+            data-page="results.html"
+            class="nav-item flex items-center gap-3 px-3 py-2.5 rounded-xl text-white/95 hover:bg-white/10 transition"
+          >
+            <i
+              data-lucide="chart-no-axes-combined"
+              class="w-5 h-5 shrink-0"
+            ></i>
+
+            <span>Results</span>
+          </a>
+
+          <!-- Certificates -->
+          <a
+            href="certificates.html"
+            data-page="certificates.html"
+            class="nav-item flex items-center gap-3 px-3 py-2.5 rounded-xl text-white/95 hover:bg-white/10 transition"
+          >
+            <i data-lucide="award" class="w-5 h-5 shrink-0"></i>
+
+            <span>Certificates</span>
+          </a>
+
+          <!-- Placement -->
+          <a
+            href="placement.html"
+            data-page="placement.html"
+            class="nav-item flex items-center gap-3 px-3 py-2.5 rounded-xl text-white/95 hover:bg-white/10 transition"
+          >
+            <i data-lucide="briefcase-business" class="w-5 h-5 shrink-0"></i>
+
+            <span>Placement</span>
+          </a>
+        </nav>
+
+                <!-- Bottom Section -->
+        <div class="shrink-0 border-t border-white/10 p-4 space-y-2">
+
+          <!-- Live Student Profile -->
+          <a
+            href="profile.html"
+            class="flex items-center gap-3 rounded-xl bg-white/10 border border-white/10 px-3 py-2.5 hover:bg-white/15 transition-all duration-200"
+          >
+            <!-- Avatar -->
+            <div
+              id="sidebar-student-avatar"
+              class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-indigo-300 to-purple-400 text-white font-bold text-base"
+            >
+              <span data-candidate="initials">KB</span>
+            </div>
+
+            <!-- Student Details -->
+            <div class="min-w-0 flex-1">
+              <p
+                id="sidebar-student-name"
+                data-candidate="name"
+                class="truncate text-sm font-bold leading-tight text-white"
+              >
+                Student
+              </p>
+
+              <p class="mt-0.5 text-xs leading-tight text-blue-100/80">
+                Student
+              </p>
+            </div>
+
+            <!-- Online Status -->
+            <span
+              class="h-2.5 w-2.5 shrink-0 rounded-full bg-emerald-400"
+              title="Active"
+            ></span>
+          </a>
+
+          <!-- Logout -->
+          <a
+            href="api/auth/logout.php"
+            class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-blue-50 hover:bg-white/10 hover:text-white transition-all duration-200"
+          >
+            <i data-lucide="log-out" class="w-5 h-5 shrink-0"></i>
+
+            <span>Logout</span>
+          </a>
+        </div>
+      </aside>
+
+      <!-- =====================================================
+         MAIN CONTENT
+    ====================================================== -->
+
+      <main class="ml-[293px] w-[calc(100%-293px)] min-h-screen pt-[43px]">
+        <!-- ===================================================
+           FIXED HEADER
+      ==================================================== -->
+
+        <header
+          class="fixed top-0 right-0 left-[293px] z-40 h-16 bg-white border-b border-slate-200 px-6 flex items-center justify-between"
+        >
+          <!-- Header Left -->
+          <div class="flex items-center gap-3 min-w-0">
+            <div
+              class="w-9 h-9 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center shrink-0"
+            >
+              <i data-lucide="calendar-days" class="w-5 h-5"></i>
+            </div>
+
+            <div class="min-w-0">
+              <div class="flex items-center gap-2">
+                <h1
+                  class="text-base md:text-lg font-semibold text-slate-900 truncate"
+                >
+                  Batches &amp; Slots
+                </h1>
+
+                <span
+                  class="hidden sm:inline-flex items-center px-2.5 py-1 rounded-full bg-blue-50 text-blue-700 text-xs font-medium"
+                >
+                  Scheduling
+                </span>
+              </div>
+
+              <p class="hidden md:block text-xs text-slate-500">
+                Manage your assigned batch and examination slot
+              </p>
+            </div>
+          </div>
+
+          <!-- Header Right -->
+          <a
+            href="profile.html"
+            title="Open My Profile"
+            class="profile-trigger flex items-center gap-3 rounded-xl px-2 py-1.5 hover:bg-slate-50 transition shrink-0"
+          >
+            <div
+              class="avatar w-9 h-9 rounded-full bg-blue-50 text-intern-blue flex items-center justify-center font-semibold"
+              data-candidate="initials"
+            >
+              --
+            </div>
+
+            <div class="hidden sm:flex flex-col min-w-0">
+              <strong
+                class="text-sm font-semibold text-slate-800 truncate max-w-40"
+              >
+                <span data-candidate="name"></span>
+              </strong>
+
+              <small class="text-xs text-slate-500 truncate max-w-48">
+                <span data-candidate="email"></span>
+              </small>
+            </div>
+          </a>
+        </header>
+
+        <!-- ===================================================
+           PAGE CONTENT
+      ==================================================== -->
+
+        <section class="min-h-screen p-5 md:p-6 pt-[72px]">
+          <div class="max-w-[1400px] mx-auto w-full">
+            <!-- =================================================
+               HERO
+          ================================================== -->
+
+            <section
+              class="relative overflow-hidden rounded-2xl bg-gradient-to-r from-[#2852b5] via-[#2f64d3] to-[#4b8df0] p-6 md:p-7 mt-6 mb-6 text-white"
+            >
+              <!-- Background Decorations -->
+              <div
+                class="absolute -right-24 -top-32 w-80 h-80 rounded-full bg-white/10"
+              ></div>
+
+              <div
+                class="absolute right-20 -bottom-52 w-[420px] h-[420px] rounded-full bg-white/10"
+              ></div>
+
+              <div
+                class="relative z-10 flex items-center justify-between gap-6"
+              >
+                <!-- Hero Content -->
+                <div class="max-w-4xl">
+                  <div
+                    class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/15 border border-white/15 text-xs font-medium mb-4"
+                  >
+                    <i data-lucide="calendar-check-2" class="w-4 h-4"></i>
+
+                    <span>Scheduling</span>
+                  </div>
+
+                  <h2
+                    class="text-3xl md:text-[32px] leading-tight font-bold tracking-tight"
+                  >
+                    Batches &amp; Slots
+                  </h2>
+
+                  <p class="mt-3 text-sm md:text-base text-white/85 leading-6">
+                    View your assigned batch, manage your examination schedule,
+                    and check available exam slots.
+                  </p>
+                </div>
+
+                <!-- Hero Icon -->
+                <div
+                  class="hidden md:flex w-24 h-24 rounded-2xl border border-white/20 bg-white/10 items-center justify-center shrink-0"
+                >
+                  <i data-lucide="calendar-days" class="w-12 h-12"></i>
+                </div>
+              </div>
+            </section>
+
+            <!-- =================================================
+               NOTICE
+          ================================================== -->
+
+            <div id="notice-container" class="mb-6"></div>
+
+            <!-- =================================================
+               BATCH + BOOKED SLOT
+               HORIZONTAL
+          ================================================== -->
+
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
+              <!-- =================================================
+                 BATCH DETAILS
+            ================================================== -->
+
+              <section
+                id="batch-details-card"
+                class="bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden"
+              >
+                <!-- Header -->
+                <div
+                  class="p-5 border-b border-slate-100 flex items-center justify-between gap-4"
+                >
+                  <div class="flex items-center gap-3 min-w-0">
+                    <div
+                      class="w-10 h-10 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center shrink-0"
+                    >
+                      <i data-lucide="layers-3" class="w-5 h-5"></i>
+                    </div>
+
+                    <div class="min-w-0">
+                      <h2 class="text-base font-semibold text-slate-900">
+                        Batch Details
+                      </h2>
+
+                      <p class="text-xs text-slate-500 mt-0.5">
+                        Your assigned training batch
+                      </p>
+                    </div>
+                  </div>
+
+                  <span
+                    class="hidden sm:inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-blue-50 text-blue-700 text-xs font-semibold shrink-0"
+                  >
+                    <span class="w-1.5 h-1.5 rounded-full bg-blue-600"></span>
+
+                    Batch
+                  </span>
+                </div>
+
+                <!-- Details -->
+                <div class="px-5">
+                  <!-- Batch Name -->
+                  <div
+                    class="py-4 flex items-center justify-between gap-4 border-b border-slate-100"
+                  >
+                    <div class="flex items-center gap-3 min-w-0">
+                      <div
+                        class="w-9 h-9 rounded-xl bg-slate-50 text-slate-500 flex items-center justify-center shrink-0"
+                      >
+                        <i data-lucide="layers" class="w-4 h-4"></i>
+                      </div>
+
+                      <span class="text-sm text-slate-500"> Batch Name </span>
+                    </div>
+
+                    <span
+                      id="batch-name"
+                      class="text-sm font-semibold text-slate-900 text-right break-words"
+                    >
+                      —
+                    </span>
+                  </div>
+
+                  <!-- Batch Status -->
+                  <div
+                    class="py-4 flex items-center justify-between gap-4 border-b border-slate-100"
+                  >
+                    <div class="flex items-center gap-3 min-w-0">
+                      <div
+                        class="w-9 h-9 rounded-xl bg-slate-50 text-slate-500 flex items-center justify-center shrink-0"
+                      >
+                        <i data-lucide="activity" class="w-4 h-4"></i>
+                      </div>
+
+                      <span class="text-sm text-slate-500"> Batch Status </span>
+                    </div>
+
+                    <span
+                      id="batch-status-badge"
+                      class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-slate-100 text-slate-600 text-xs font-semibold shrink-0"
+                    >
+                      —
+                    </span>
+                  </div>
+
+                  <!-- Candidates -->
+                  <div class="py-4 flex items-center justify-between gap-4">
+                    <div class="flex items-center gap-3 min-w-0">
+                      <div
+                        class="w-9 h-9 rounded-xl bg-slate-50 text-slate-500 flex items-center justify-center shrink-0"
+                      >
+                        <i data-lucide="users-round" class="w-4 h-4"></i>
+                      </div>
+
+                      <span class="text-sm text-slate-500">
+                        Candidates Count
+                      </span>
+                    </div>
+
+                    <span
+                      id="batch-candidates"
+                      class="text-sm font-semibold text-slate-900 text-right"
+                    >
+                      —
+                    </span>
+                  </div>
+                </div>
+              </section>
+
+              <!-- =================================================
+                 MY BOOKED SLOT
+            ================================================== -->
+
+              <section
+                id="my-booked-slot-card"
+                class="bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden"
+              >
+                <!-- Header -->
+                <div
+                  class="p-5 border-b border-slate-100 flex items-center justify-between gap-4"
+                >
+                  <div class="flex items-center gap-3 min-w-0">
+                    <div
+                      class="w-10 h-10 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center shrink-0"
+                    >
+                      <i data-lucide="calendar-check-2" class="w-5 h-5"></i>
+                    </div>
+
+                    <div class="min-w-0">
+                      <h2 class="text-base font-semibold text-slate-900">
+                        My Booked Slot
+                      </h2>
+
+                      <p class="text-xs text-slate-500 mt-0.5">
+                        Your scheduled examination slot
+                      </p>
+                    </div>
+                  </div>
+
+                  <span
+                    class="hidden sm:inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-blue-50 text-blue-700 text-xs font-semibold shrink-0"
+                  >
+                    <span class="w-1.5 h-1.5 rounded-full bg-blue-600"></span>
+
+                    Exam
+                  </span>
+                </div>
+
+                <!-- Dynamic Slot -->
+                <div id="booked-slot-content" class="px-5">
+                  <!-- Exam Date -->
+                  <div
+                    class="py-4 flex items-center justify-between gap-4 border-b border-slate-100"
+                  >
+                    <div class="flex items-center gap-3 min-w-0">
+                      <div
+                        class="w-9 h-9 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center shrink-0"
+                      >
+                        <i data-lucide="calendar-days" class="w-4 h-4"></i>
+                      </div>
+
+                      <span class="text-sm text-slate-500"> Exam Date </span>
+                    </div>
+
+                    <span
+                      id="booked-exam-date"
+                      class="text-sm font-semibold text-slate-900 text-right"
+                    >
+                      —
+                    </span>
+                  </div>
+
+                  <!-- Slot Time -->
+                  <div
+                    class="py-4 flex items-center justify-between gap-4 border-b border-slate-100"
+                  >
+                    <div class="flex items-center gap-3 min-w-0">
+                      <div
+                        class="w-9 h-9 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center shrink-0"
+                      >
+                        <i data-lucide="clock-3" class="w-4 h-4"></i>
+                      </div>
+
+                      <span class="text-sm text-slate-500"> Slot Time </span>
+                    </div>
+
+                    <span
+                      id="booked-slot-time"
+                      class="text-sm font-semibold text-slate-900 text-right"
+                    >
+                      —
+                    </span>
+                  </div>
+
+                  <!-- Status -->
+                  <div class="py-4 flex items-center justify-between gap-4">
+                    <div class="flex items-center gap-3 min-w-0">
+                      <div
+                        class="w-9 h-9 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center shrink-0"
+                      >
+                        <i data-lucide="circle-check" class="w-4 h-4"></i>
+                      </div>
+
+                      <span class="text-sm text-slate-500"> Status </span>
+                    </div>
+
+                    <span
+                      id="booked-slot-status"
+                      class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-slate-100 text-slate-600 text-xs font-semibold shrink-0"
+                    >
+                      —
+                    </span>
+                  </div>
+                </div>
+              </section>
+            </div>
+
+            <!-- =================================================
+               AVAILABLE EXAM SLOTS
+          ================================================== -->
+
+            <section
+              id="available-slots-card"
+              class="mt-6 bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden"
+            >
+              <!-- Header -->
+              <div
+                class="p-5 border-b border-slate-100 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4"
+              >
+                <div class="flex items-center gap-3">
+                  <div
+                    class="w-10 h-10 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center shrink-0"
+                  >
+                    <i data-lucide="calendar-clock" class="w-5 h-5"></i>
+                  </div>
+
+                  <div>
+                    <h2 class="text-base font-semibold text-slate-900">
+                      Available Exam Slots
+                    </h2>
+
+                    <p class="text-xs text-slate-500 mt-0.5">
+                      Select an available slot when booking is open.
+                    </p>
+                  </div>
+                </div>
+
+                <span
+                  class="inline-flex items-center gap-2 self-start sm:self-auto px-3 py-1.5 rounded-full bg-blue-50 text-blue-700 text-xs font-semibold"
+                >
+                  <span class="w-1.5 h-1.5 rounded-full bg-blue-600"></span>
+
+                  Available Slots
+                </span>
+              </div>
+
+              <!-- Slots -->
+              <div id="slots-list" class="p-5">
+                <div
+                  class="flex items-center gap-3 rounded-xl border border-slate-200 bg-slate-50 px-4 py-4"
+                >
+                  <div
+                    class="w-8 h-8 rounded-lg bg-white border border-slate-200 flex items-center justify-center"
+                  >
+                    <i
+                      data-lucide="loader-circle"
+                      class="w-4 h-4 text-blue-600 animate-spin"
+                    ></i>
+                  </div>
+
+                  <p class="text-sm text-slate-500">
+                    Loading available slots...
+                  </p>
+                </div>
+              </div>
+            </section>
           </div>
         </section>
-      </section>
-      <footer class='footer'>
-        <span>© 2026 InternBoot. All rights reserved.</span>
-        <span>Privacy Policy　 |　 Terms of Service　 |　 Support</span>
-      </footer>
-    </main>
-  </div>
-  <script src="js/app.js"></script>
-  <script src="js/slots.js"></script>
-</body>
+      </main>
+    </div>
+
+    <!-- =====================================================
+       EXISTING SCRIPTS — PRESERVED
+  ====================================================== -->
+
+    <script src="js/app.js"></script>
+    <script src="js/slots.js"></script>
+
+    <script>
+      document.addEventListener("DOMContentLoaded", function () {
+        if (window.lucide) {
+          lucide.createIcons();
+        }
+      });
+    </script>
+    <script>
+  document.addEventListener("DOMContentLoaded", () => {
+    const avatar = document.getElementById("sidebar-student-avatar");
+    const name = document.getElementById("sidebar-student-name");
+
+    function syncSidebarProfile() {
+      const sourceName = document.querySelector(
+        '[data-candidate="name"]'
+      );
+
+      const sourceInitials = document.querySelector(
+        '[data-candidate="initials"]'
+      );
+
+      if (sourceName && name) {
+        const value = sourceName.textContent.trim();
+
+        if (value) {
+          name.textContent = value;
+        }
+      }
+
+      if (sourceInitials && avatar) {
+        const value = sourceInitials.textContent.trim();
+
+        if (value) {
+          avatar.querySelector("span").textContent = value;
+        }
+      }
+    }
+
+    // Initial sync
+    syncSidebarProfile();
+
+    // Watch for real-time changes made by app.js/API rendering
+    const observer = new MutationObserver(() => {
+      syncSidebarProfile();
+    });
+
+    observer.observe(document.body, {
+      subtree: true,
+      childList: true,
+      characterData: true,
+    });
+  });
+</script>
+  </body>
 </html>

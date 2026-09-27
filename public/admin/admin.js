@@ -48,6 +48,8 @@
 
   const label = (value) => {
     const map = {
+      issued: "Issued",
+      "not-issued": "Not Issued",
       "not-started": "Not Started",
       not_started: "Not Started",
       in_progress: "In Progress",
@@ -92,9 +94,10 @@
     const a = normalizeFilterValue(actual);
     const s = normalizeFilterValue(selected);
     if (!s) return true;
-    if (s === "pending") {
-      return a !== "evaluated" && a !== "completed";
-    }
+    if (s === "pending") return a === "pending";
+    if (s === "not-started") return a === "not-started" || a === "not_started";
+    if (s === "completed") return a === "completed" || a === "evaluated";
+    if (s === "issued") return a === "issued" || a === "verified";
     return a === s;
   };
 
@@ -117,10 +120,10 @@
 
   const typeForStatus = (value) => {
     if (
-      ["success", "completed", "evaluated", "approved", "placed", "verified"].includes(value)
+      ["success", "completed", "evaluated", "approved", "placed", "verified", "issued"].includes(value)
     )
       return "green";
-    if (["eligible", "shortlisted", "interviewing", "pending", "submitted"].includes(value))
+    if (["eligible", "shortlisted", "interviewing", "pending", "submitted", "not-issued"].includes(value))
       return "amber";
     if (["failed", "rejected", "not_placed", "expired"].includes(value))
       return "red";
@@ -355,6 +358,7 @@
 
     const sidebar = $("#sidebar") || document.querySelector("aside");
     if (!sidebar || document.getElementById("m7MobileMenuButton")) return;
+    if ($("#menuButton") && $("#sidebarOverlay")) return;
 
     const button = document.createElement("button");
     button.id = "m7MobileMenuButton";
@@ -432,14 +436,20 @@
     const menuButton = $("#menuButton");
     const sidebar = $("#sidebar");
     const overlay = $("#sidebarOverlay");
-    if (menuButton && sidebar)
+    if (menuButton && sidebar) {
+      menuButton.setAttribute("aria-expanded", "false");
       menuButton.addEventListener("click", () => {
-        sidebar.classList.toggle("-translate-x-full");
-        overlay?.classList.toggle("hidden");
+        const isOpen = sidebar.classList.toggle("m7-open");
+        sidebar.classList.toggle("-translate-x-full", !isOpen);
+        overlay?.classList.toggle("hidden", !isOpen);
+        menuButton.setAttribute("aria-expanded", String(isOpen));
       });
+    }
     overlay?.addEventListener("click", () => {
+      sidebar.classList.remove("m7-open");
       sidebar.classList.add("-translate-x-full");
       overlay.classList.add("hidden");
+      menuButton?.setAttribute("aria-expanded", "false");
     });
 
     const userButton = $("#userButton"),
@@ -523,6 +533,40 @@
         bar.style.width = `${total ? Math.round((count / total) * 100) : 0}%`;
       }
     }
+
+    // Run integrity check in background with 5-min cache
+    setTimeout(async () => {
+      try {
+        const now = Date.now();
+        const cached = sessionStorage.getItem("integrityCheck");
+        let desyncCount = 0;
+        
+        if (cached) {
+          const parsed = JSON.parse(cached);
+          if (now - parsed.time < 5 * 60 * 1000) {
+            desyncCount = parsed.count;
+          }
+        }
+        
+        if (desyncCount === 0 && (!cached || now - JSON.parse(cached).time >= 5 * 60 * 1000)) {
+          const checkData = await api("integrity_check");
+          desyncCount = checkData.desync_count || 0;
+          sessionStorage.setItem("integrityCheck", JSON.stringify({ time: now, count: desyncCount }));
+        }
+
+        const banner = $("#integrityWarningBanner");
+        if (banner) {
+          if (desyncCount > 0) {
+            $("#integrityDesyncCount").textContent = desyncCount;
+            banner.classList.remove("hidden");
+          } else {
+            banner.classList.add("hidden");
+          }
+        }
+      } catch (e) {
+        console.warn("Integrity check failed:", e);
+      }
+    }, 100);
 
     const recent = $("#recentCandidates");
     if (recent) {
@@ -615,18 +659,19 @@
       ? data.candidates
           .map(
             (c) => `
-      <tr class="hover:bg-slate-50" data-candidate="true" data-payment="${escapeHtml(c.payment_status)}" data-enrollment="${escapeHtml(c.enrollment_status)}" data-assessment="${escapeHtml(c.assessment_status)}">
+      <tr class="hover:bg-slate-50" data-candidate="true" data-payment="${escapeHtml(c.payment_status)}" data-enrollment="${escapeHtml(c.enrollment_status)}" data-assessment="${escapeHtml(c.assessment_status)}" data-certificate="${escapeHtml(c.certificate_status)}">
         <td class="px-6 py-4 font-medium">${escapeHtml(c.full_name)}</td>
         <td class="px-6 py-4 text-slate-500">${escapeHtml(c.email)}</td>
         <td class="px-6 py-4">${badge(label(c.payment_status), typeForStatus(c.payment_status === "success" ? "success" : c.payment_status))}</td>
         <td class="px-6 py-4">${badge(c.enrollment_status === "eligible" ? "Enrolled" : "Pending", c.enrollment_status === "eligible" ? "green" : "amber")}</td>
         <td class="px-6 py-4">${badge(label(c.assessment_status), typeForStatus(c.assessment_status === "completed" ? "completed" : c.assessment_status))}</td>
         <td class="px-6 py-4">${c.level_assigned ? `Level ${escapeHtml(c.level_assigned)}` : "—"}</td>
+        <td class="px-6 py-4">${badge(label(c.certificate_status), typeForStatus(c.certificate_status))}</td>
         <td class="px-6 py-4"><button class="font-medium text-intern-blue hover:underline view-candidate-btn" type="button" data-id="${c.id}">View</button></td>
       </tr>`,
           )
           .join("")
-      : `<tr><td class="px-6 py-8 text-center text-sm text-slate-500" colspan="7">No candidates found</td></tr>`;
+      : `<tr><td class="px-6 py-8 text-center text-sm text-slate-500" colspan="8">No candidates found</td></tr>`;
 
     $$(".view-candidate-btn").forEach((btn) =>
       btn.addEventListener("click", async () => {
@@ -657,36 +702,74 @@
     wireCandidateFilters();
   }
 
+  function exportCandidatesCsv() {
+    const rows = $$("#candidatesTableBody tr[data-candidate]").filter(row => row.style.display !== "none");
+    if (rows.length === 0) {
+      notify("No candidates to export");
+      return;
+    }
+
+    const header = ["Name", "Email", "Payment", "Enrollment", "Assessment", "Level", "Certificate"];
+    let csvContent = header.join(",") + "\r\n";
+
+    rows.forEach(row => {
+      const cells = [];
+      for (let i = 0; i < 7; i++) {
+        const text = row.children[i].textContent.trim();
+        cells.push('"' + text.replace(/"/g, '""') + '"');
+      }
+      csvContent += cells.join(",") + "\r\n";
+    });
+
+    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `candidates-export-${new Date().toISOString().slice(0,10)}.csv`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  }
+
   function wireCandidateFilters() {
     const search = $("#candidateSearch"),
       payment = $("#paymentFilter"),
       enrollment = $("#enrollmentFilter"),
       assessment = $("#assessmentFilter"),
+      certificate = $("#certificateFilter"),
       count = $("#candidateCount");
     const run = () => {
       const q = (search?.value || "").toLowerCase().trim();
       const p = (payment?.value || "").toLowerCase();
       const en = (enrollment?.value || "").toLowerCase();
       const a = (assessment?.value || "").toLowerCase();
+      const c = (certificate?.value || "").toLowerCase();
       let visible = 0;
       $$("#candidatesTableBody tr[data-candidate]").forEach((row) => {
         const ok =
           row.textContent.toLowerCase().includes(q) &&
           sameFilterValue(row.dataset.payment, p) &&
           sameFilterValue(row.dataset.enrollment, en) &&
-          sameFilterValue(row.dataset.assessment, a);
+          sameFilterValue(row.dataset.assessment, a) &&
+          sameFilterValue(row.dataset.certificate, c);
         row.style.display = ok ? "" : "none";
         if (ok) visible++;
       });
       if (count)
         count.textContent = `${visible} Candidate${visible !== 1 ? "s" : ""}`;
     };
-    [search, payment, enrollment, assessment].forEach((el) =>
+    [search, payment, enrollment, assessment, certificate].forEach((el) =>
       el?.addEventListener("input", run),
     );
-    [payment, enrollment, assessment].forEach((el) =>
+    [payment, enrollment, assessment, certificate].forEach((el) =>
       el?.addEventListener("change", run),
     );
+    const exportBtn = $("#exportCandidatesCsv");
+    if (exportBtn && !exportBtn.dataset.bound) {
+      exportBtn.dataset.bound = "1";
+      exportBtn.addEventListener("click", exportCandidatesCsv);
+    }
     run();
   }
 
@@ -814,11 +897,12 @@
         l = (level?.value || "").toLowerCase(),
         s = (status?.value || "").toLowerCase();
       $$("#resultsTableBody tr[data-result]").forEach((row) => {
-        const ok =
+        row.style.display =
           row.textContent.toLowerCase().includes(q) &&
           sameFilterValue(row.dataset.level, l) &&
-          sameFilterValue(row.dataset.status, s);
-        row.style.display = ok ? "" : "none";
+          sameFilterValue(row.dataset.status, s)
+            ? ""
+            : "none";
       });
     };
     [search, level, status].forEach((el) => el?.addEventListener("input", run));
@@ -926,23 +1010,14 @@
   async function loadQuestions() {
     const data = await api("questions");
     const rows = data.questions || [];
+    const counts = data.counts || {};
     const set = (id, v) => {
       const el = $("#" + id);
       if (el) el.textContent = v;
     };
-    set("totalQuestions", rows.length);
-    set(
-      "pendingQuestions",
-      rows.filter((q) => q.approval_status === "pending").length,
-    );
-    set(
-      "approvedQuestions",
-      rows.filter((q) => q.approval_status === "approved").length,
-    );
-    set(
-      "rejectedQuestions",
-      rows.filter((q) => q.approval_status === "rejected").length,
-    );
+    set("totalQuestions", counts.total ?? rows.length);
+    set("pendingQuestions", counts.pending ?? rows.filter((q) => q.approval_status === "pending").length);
+    set("approvedQuestions", counts.approved ?? rows.filter((q) => q.approval_status === "approved").length);
     const tbody = $("#questionsTableBody");
     if (!tbody) return;
     tbody.innerHTML = rows.length
@@ -950,8 +1025,23 @@
           .map((q) => {
             const m = String(q.question_bank || "").match(/level\s*([1-5])/i);
             const level = m ? m[1] : "—";
+            const allOptsHtml = (q.all_options || '').split('|||').map(o => {
+              if (!o.trim()) return '';
+              const isCorrect = o.startsWith('[✓]');
+              const text = o.replace(/^\[[✓ ]\] /, '');
+              return `<div class="text-sm mt-1 ${isCorrect ? 'text-green-600 font-medium' : 'text-slate-500'}">
+                <span class="inline-block w-4">${isCorrect ? '✓' : '•'}</span> ${escapeHtml(text)}
+              </div>`;
+            }).join('');
+
             return `<tr data-question="true" data-level="${m ? `level ${m[1]}` : ""}" data-status="${escapeHtml(q.approval_status)}">
-        <td class="px-6 py-4"><p class="max-w-xl font-medium text-slate-800">${escapeHtml(q.question_text)}</p><p class="mt-1 text-xs text-slate-400">${escapeHtml(q.question_bank)} · ${Number(q.option_count || 0)} options</p></td>
+        <td class="px-6 py-4">
+          <p class="max-w-xl font-medium text-slate-800">${escapeHtml(q.question_text)}</p>
+          <div class="mt-3 mb-3 pl-2 border-l-2 border-slate-200">
+            ${allOptsHtml}
+          </div>
+          <p class="mt-1 text-xs text-slate-400">${escapeHtml(q.question_bank)} · ${Number(q.option_count || 0)} options</p>
+        </td>
         <td class="px-6 py-4">${level === "—" ? "—" : badge(`Level ${level}`, "blue")}</td>
         <td class="px-6 py-4 text-slate-500">${escapeHtml(q.type || "MCQ")}</td>
         <td class="px-6 py-4">${badge(label(q.approval_status), typeForStatus(q.approval_status))}</td>
@@ -1025,15 +1115,6 @@
     const provForm = $("#createProvisionalSlotForm");
     if (provForm && !provForm.dataset.bound) {
       provForm.dataset.bound = "1";
-
-      const slotTypeSelect = provForm.querySelector('select[name="slot_type"]');
-      const createBtnText = $("#createBatchBtnText");
-      if (slotTypeSelect && createBtnText) {
-          slotTypeSelect.addEventListener('change', (e) => {
-              createBtnText.textContent = e.target.value === 'direct' ? 'Create Direct Batch' : 'Create Provisional Slot';
-          });
-      }
-
       provForm.onsubmit = async (e) => {
         e.preventDefault();
         const btn = provForm.querySelector('button[type="submit"]');
@@ -1042,14 +1123,11 @@
             btn.innerHTML = `<i class="ri-loader-4-line animate-spin"></i> Creating...`;
         }
         try {
-          const formData = Object.fromEntries(new FormData(provForm));
-          const endpoint = formData.slot_type === "direct" ? "batch" : "provisional_batch";
-          
-          await api(endpoint, {
+          await api("provisional_batch", {
             method: "POST",
-            body: formData,
+            body: Object.fromEntries(new FormData(provForm)),
           });
-          notify(formData.slot_type === "direct" ? "Direct batch created successfully!" : "Provisional slot created successfully!");
+          notify("Provisional slot created successfully!");
           provForm.reset();
           await loadBatches();
         } catch (err) {
@@ -1057,39 +1135,8 @@
         } finally {
             if (btn) {
                 btn.disabled = false;
-                const type = provForm.querySelector('select[name="slot_type"]')?.value;
-                btn.innerHTML = `<i data-lucide="calendar-check" class="h-4 w-4"></i> <span id="createBatchBtnText">${type === 'direct' ? 'Create Direct Batch' : 'Create Provisional Slot'}</span>`;
-                if (typeof lucide !== 'undefined') lucide.createIcons();
+                btn.innerHTML = `<i class="ri-calendar-check-line"></i> Create Provisional Slot`;
             }
-        }
-      };
-    }
-
-    const slotBatchSelect = $("#slotBatchSelect");
-    if (slotBatchSelect) {
-      slotBatchSelect.innerHTML = '<option value="">Select Batch</option>' + 
-        batches.map(b => `<option value="${b.id}">${escapeHtml(b.batch_number)}</option>`).join("");
-    }
-
-    const addSlotForm = $("#addSlotForm");
-    if (addSlotForm && !addSlotForm.dataset.bound) {
-      addSlotForm.dataset.bound = "1";
-      addSlotForm.onsubmit = async (e) => {
-        e.preventDefault();
-        const btn = addSlotForm.querySelector('button[type="submit"]');
-        if (btn) btn.disabled = true;
-        try {
-          await api("slot", {
-            method: "POST",
-            body: Object.fromEntries(new FormData(addSlotForm)),
-          });
-          notify("Slot added successfully!");
-          addSlotForm.reset();
-          await loadBatches();
-        } catch (err) {
-          notify(err.message, true);
-        } finally {
-          if (btn) btn.disabled = false;
         }
       };
     }
@@ -1114,34 +1161,11 @@
         <td class="px-6 py-4 text-slate-500">${escapeHtml(s.start_time?.slice(0, 5) || "")} - ${escapeHtml(s.end_time?.slice(0, 5) || "")}</td>
         <td class="px-6 py-4">${s.capacity}</td><td class="px-6 py-4">${s.allocated}</td><td class="px-6 py-4">${s.seats_remaining}</td>
         <td class="px-6 py-4">${badge(s.seats_remaining > 0 ? "Available" : "Full", s.seats_remaining > 0 ? "green" : "red")}</td>
-        <td class="px-6 py-4">
-            <button class="delete-slot-btn text-red-500 hover:text-red-700" data-slot-id="${s.slot_id}" title="Delete Slot">
-                <i data-lucide="trash-2" class="h-4 w-4"></i>
-            </button>
-        </td>
       </tr>`,
             )
             .join("")
-        : `<tr><td class="px-6 py-10 text-center text-sm text-slate-500" colspan="7">No slots created yet.</td></tr>`;
+        : `<tr><td class="px-6 py-10 text-center text-sm text-slate-500" colspan="6">No slots created yet.</td></tr>`;
     refreshIcons();
-
-    document.querySelectorAll('.delete-slot-btn').forEach(btn => {
-        btn.addEventListener('click', async (e) => {
-            const slotId = e.currentTarget.dataset.slotId;
-            if (confirm("Are you sure you want to delete this slot?")) {
-                try {
-                    await api("slot_delete", {
-                        method: "POST",
-                        body: { slot_id: slotId }
-                    });
-                    notify("Slot deleted successfully!");
-                    await loadBatches();
-                } catch (err) {
-                    notify(err.message || "Failed to delete slot", true);
-                }
-            }
-        });
-    });
 
     const allocBody = $("#allocationTableBody");
     const unallocated = eligible.filter((c) => !c.batch_id);
@@ -1208,56 +1232,19 @@
       if (pendingRequests.length === 0) {
         pendingRequestsBody.innerHTML = `<tr><td colspan="3" class="px-4 py-8 text-center text-sm text-slate-500">No pending batch requests.</td></tr>`;
       } else {
-        pendingRequestsBody.innerHTML = pendingRequests.map(r => {
-          const isClosed = Number(r.is_closed) === 1;
-          const isReady = r.candidate_count >= 100;
-          return `
-          <tr class="hover:bg-slate-50 ${isClosed ? 'opacity-60' : ''}">
+        pendingRequestsBody.innerHTML = pendingRequests.map(r => `
+          <tr class="hover:bg-slate-50">
+            <td class="px-4 py-4"><div class="font-medium text-slate-800">${escapeHtml(r.preferred_date)}</div><div class="text-xs text-slate-500">${escapeHtml(r.assessment_title)}<br>${escapeHtml(r.preferred_time_slot)}</div></td>
+            <td class="px-4 py-4 font-medium ${r.candidate_count >= 100 ? 'text-green-600' : 'text-amber-600'}">${r.candidate_count} <span class="text-xs text-slate-400 font-normal">/ 100</span></td>
             <td class="px-4 py-4">
-              <div class="flex items-center gap-2">
-                <div>
-                  <div class="font-medium text-slate-800">${escapeHtml(r.assessment_title || '')}</div>
-                  <div class="text-xs text-slate-500">${escapeHtml(r.preferred_date || '')} · ${escapeHtml(r.preferred_time_slot || '')}</div>
-                </div>
-                ${isClosed ? '<span style="background:#fee2e2;color:#dc2626;font-size:10px;font-weight:700;padding:2px 8px;border-radius:12px;white-space:nowrap;">🔒 CLOSED</span>' : ''}
-              </div>
+              <button class="btn-create-auto-batch rounded-lg px-3 py-2 text-xs font-medium text-white ${r.candidate_count >= 100 ? 'bg-intern-blue hover:bg-blue-700' : 'bg-slate-300 cursor-not-allowed'}" 
+                data-assessment="${r.assessment_id}" data-schedule="${r.schedule_id}" 
+                ${r.candidate_count >= 100 ? '' : 'disabled'}>
+                Create Batch
+              </button>
             </td>
-            <td class="px-4 py-4">
-              <div class="flex items-center gap-2 mb-1">
-                <span class="font-bold ${isReady ? 'text-green-600' : 'text-amber-600'}">${r.candidate_count}</span>
-                <span class="text-xs text-slate-400">/ 100</span>
-                ${isReady ? '<span style="background:#dcfce7;color:#166534;font-size:10px;font-weight:700;padding:2px 7px;border-radius:12px;">✅ READY</span>' : ''}
-              </div>
-              <div style="background:#e5e7eb;border-radius:99px;height:6px;overflow:hidden;width:120px;">
-                <div style="height:100%;width:${Math.min(100, Math.round((r.candidate_count/100)*100))}%;background:${isReady ? '#10b981' : '#f59e0b'};border-radius:99px;"></div>
-              </div>
-              <div style="font-size:10px;color:#94a3b8;margin-top:2px;">${isClosed ? 'Slot closed — no new selections' : `${Math.max(0, 100 - r.candidate_count)} more needed`}</div>
-            </td>
-            <td class="px-4 py-4">
-              <div style="display:flex;gap:8px;flex-wrap:wrap;">
-                ${!isClosed ? `
-                <button class="btn-create-auto-batch rounded-lg px-3 py-2 text-xs font-medium text-white ${isReady ? 'bg-intern-blue hover:bg-blue-700' : 'bg-slate-300 cursor-not-allowed'}" 
-                  data-assessment="${r.assessment_id}" data-schedule="${r.schedule_id}" 
-                  ${isReady ? '' : 'disabled'}>
-                  🚀 Create Batch
-                </button>
-                <button class="btn-close-slot rounded-lg px-3 py-2 text-xs font-medium text-white bg-red-500 hover:bg-red-600"
-                  data-schedule="${r.schedule_id}" data-action="close">
-                  🔒 Close Slot
-                </button>` : `
-                <button class="btn-create-auto-batch rounded-lg px-3 py-2 text-xs font-medium text-white ${isReady ? 'bg-intern-blue hover:bg-blue-700' : 'bg-slate-300 cursor-not-allowed'}" 
-                  data-assessment="${r.assessment_id}" data-schedule="${r.schedule_id}" 
-                  ${isReady ? '' : 'disabled'}>
-                  🚀 Create Batch
-                </button>
-                <button class="btn-close-slot rounded-lg px-3 py-2 text-xs font-medium text-white bg-emerald-500 hover:bg-emerald-600"
-                  data-schedule="${r.schedule_id}" data-action="reopen">
-                  🔓 Reopen Slot
-                </button>`}
-              </div>
-            </td>
-          </tr>`;
-        }).join("");
+          </tr>
+        `).join("");
 
         $$(".btn-create-auto-batch").forEach(btn => {
           btn.addEventListener("click", async () => {
@@ -1293,89 +1280,7 @@
             }
           });
         });
-
-        // Close Slot handler
-        $$(".btn-close-slot").forEach(btn => {
-          btn.addEventListener("click", async () => {
-            const scheduleId = Number(btn.dataset.schedule);
-            const action = btn.dataset.action || 'close';
-            
-            const msg = action === 'close' ? 
-              "Close this slot? Candidates will no longer be able to select it. You can reopen it later." : 
-              "Reopen this slot? Candidates will be able to select it again.";
-              
-            if (!confirm(msg)) return;
-            
-            btn.disabled = true;
-            btn.textContent = action === 'close' ? "Closing..." : "Reopening...";
-            
-            try {
-              const token = await getCsrfToken();
-              const res = await fetch("/api/admin/close_slot.php", {
-                method: "POST",
-                headers: { "Content-Type": "application/json", "Accept": "application/json", "X-CSRF-Token": token },
-                body: JSON.stringify({ schedule_id: scheduleId, action: action })
-              });
-              const payload = await res.json();
-              if (!res.ok || payload.status !== "success") throw new Error(payload.message || `Failed to ${action} slot`);
-              
-              notify(action === 'close' ? "Slot closed. Candidates can no longer select it." : "Slot reopened successfully.");
-              await loadBatches();
-            } catch (err) {
-              notify(err.message, true);
-              btn.disabled = false;
-              btn.innerHTML = action === 'close' ? "🔒 Close Slot" : "🔓 Reopen Slot";
-            }
-          });
-        });
       }
-    }
-
-    const form = $("#createBatchForm");
-    if (form && !form.dataset.bound) {
-      form.dataset.bound = "1";
-      form.addEventListener("submit", async (e) => {
-        e.preventDefault();
-        const name = $("#batchName")?.value.trim(),
-          date = $("#batchDate")?.value,
-          capacity = Number($("#batchCapacity")?.value || 0),
-          start_time = $("#batchStartTime")?.value,
-          end_time = $("#batchEndTime")?.value;
-          
-        const selectedDate = date ? new Date(`${date}T00:00:00`) : null;
-        const isWeekend =
-          selectedDate &&
-          !Number.isNaN(selectedDate.getTime()) &&
-          (selectedDate.getDay() === 0 || selectedDate.getDay() === 6);
-        if (!name || !date || !isWeekend || capacity < 100) {
-          notify(
-            date && !isWeekend
-              ? "Assessment can be scheduled only on Saturday or Sunday."
-              : "Enter a batch name, weekend date and capacity of at least 100.",
-            true,
-          );
-          return;
-        }
-        
-        let payload = { batch_number: name, exam_date: date, capacity };
-        if (start_time) payload.start_time = start_time + ':00';
-        if (end_time) payload.end_time = end_time + ':00';
-        
-        try {
-          await api("batch", {
-            method: "POST",
-            body: payload,
-          });
-          notify("Batch created successfully.");
-          form.reset();
-          $("#batchCapacity").value = 100;
-          if ($("#batchStartTime")) $("#batchStartTime").value = "10:00";
-          if ($("#batchEndTime")) $("#batchEndTime").value = "11:00";
-          await loadBatches();
-        } catch (err) {
-          notify(err.message, true);
-        }
-      });
     }
 
     const createSlot = $("#createSlotButton");
@@ -1463,25 +1368,39 @@
     URL.revokeObjectURL(url);
   }
 
+  const professionalLevelInfo = (level) => {
+    const levels = {
+      1: "Highly Proficient",
+      2: "Proficient",
+      3: "Job Ready",
+      4: "Development Required",
+      5: "Training Required",
+    };
+    return levels[Number(level)] || "-";
+  };
+
+  const mergedPlacementStatus = (placement) => {
+    return professionalLevelInfo(placement.level_assigned);
+  };
+
+  const mergedPlacementStatusHtml = (placement) => {
+    const professionalStatus = professionalLevelInfo(placement.level_assigned);
+    return badge(professionalStatus, "blue");
+  };
+
   function exportPlacementCsv() {
     const search = $("#placementSearch"),
-      level = $("#placementLevelFilter"),
-      status = $("#placementStatusFilter");
+      level = $("#placementLevelFilter");
 
     const q = (search?.value || "").toLowerCase(),
       l = (level?.value || "").toLowerCase(),
-      s = (status?.value || "").toLowerCase();
+      s = "";
 
     const filtered = currentPlacementRows.filter((p) => {
       const levelStr = p.level_assigned ? `level ${p.level_assigned}` : "";
-      const statusStr =
-        p.placement_status === "eligible"
-          ? "placement ready"
-          : p.placement_status === "interviewing"
-            ? "interview"
-            : (p.placement_status || "");
+      const statusStr = professionalLevelInfo(p.level_assigned);
 
-      const searchableText = `${p.full_name || ""} ${p.email || ""} ${p.phone || ""} ${p.company_name || ""} ${p.notes || ""} ${levelStr} ${label(p.placement_status)}`.toLowerCase();
+      const searchableText = `${p.full_name || ""} ${p.email || ""} ${p.phone || ""} ${p.company_name || ""} ${p.notes || ""} ${levelStr} ${statusStr}`.toLowerCase();
 
       return (
         searchableText.includes(q) &&
@@ -1501,7 +1420,6 @@
       "Phone",
       "Level",
       "Percentage",
-      "Placement Status",
       "Company Name",
       "Notes",
       "Updated Date",
@@ -1513,7 +1431,6 @@
       p.phone || "",
       p.level_assigned ? `Level ${p.level_assigned}` : "—",
       p.percentage !== null && p.percentage !== undefined ? `${p.percentage}%` : "—",
-      label(p.placement_status),
       p.company_name || "",
       p.notes || "",
       p.updated_at || "",
@@ -1545,6 +1462,9 @@
       "placementLevel2Count",
       rows.filter((p) => Number(p.level_assigned) === 2).length,
     );
+    [3, 4, 5].forEach((level) => {
+      set(`placementLevel${level}Count`, rows.filter((p) => Number(p.level_assigned) === level).length);
+    });
     set(
       "placedCount",
       rows.filter((p) => p.placement_status === "placed").length,
@@ -1558,19 +1478,18 @@
     if (!tbody) return;
     tbody.innerHTML = rows.length
       ? rows
-          .map(
-            (p) => `
-      <tr data-level="${p.level_assigned ? `level ${p.level_assigned}` : ""}" data-placement-candidate="true" data-status="${escapeHtml(p.placement_status === "eligible" ? "placement ready" : p.placement_status === "interviewing" ? "interview" : p.placement_status)}">
+          .map((p) => {
+            return `
+      <tr data-level="${p.level_assigned ? `level ${p.level_assigned}` : ""}" data-placement-candidate="true" data-status="${escapeHtml(professionalLevelInfo(p.level_assigned))}">
         <td class="px-6 py-5 font-medium">${escapeHtml(p.full_name)}</td>
         <td class="px-6 py-5">${p.level_assigned ? badge(`Level ${p.level_assigned}`, "blue") : "—"}</td>
         <td class="px-6 py-5">${p.percentage !== null ? `${escapeHtml(p.percentage)} / 100` : "—"}</td>
-        <td class="px-6 py-5">${badge(label(p.placement_status), typeForStatus(p.placement_status))}</td>
         <td class="px-6 py-5">${escapeHtml(p.company_name || "—")}</td>
-        <td class="px-6 py-5"><button class="view-placement-btn text-intern-blue" type="button" data-id="${Number(p.id)}" data-name="${escapeHtml(p.full_name)}" data-status="${escapeHtml(p.placement_status)}" data-company="${escapeHtml(p.company_name || "")}" data-notes="${escapeHtml(p.notes || "")}">View</button></td>
-      </tr>`,
-          )
+        <td class="px-6 py-5"><button class="view-placement-btn text-intern-blue" type="button" data-id="${Number(p.id)}" data-name="${escapeHtml(p.full_name)}" data-level="${escapeHtml(p.level_assigned || "")}" data-status="${escapeHtml(p.placement_status)}" data-company="${escapeHtml(p.company_name || "")}" data-notes="${escapeHtml(p.notes || "")}">View</button></td>
+      </tr>`;
+          })
           .join("")
-      : `<tr id="emptyPlacement"><td class="px-6 py-12 text-center text-sm text-slate-600" colspan="6">No candidates found</td></tr>`;
+      : `<tr id="emptyPlacement"><td class="px-6 py-12 text-center text-sm text-slate-600" colspan="5">No candidates found</td></tr>`;
     refreshIcons();
 
     $$(".view-placement-btn").forEach(
@@ -1585,8 +1504,12 @@
       `
       <form id="placementEditForm" class="space-y-4">
         <div><p class="text-sm font-medium text-slate-800">${escapeHtml(btn.dataset.name)}</p></div>
-        <label class="block text-sm text-slate-600">Status
-          <select id="placementStatusEdit" class="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2">
+        <div class="rounded-lg bg-slate-50 p-3">
+          <p class="text-xs font-medium uppercase tracking-wide text-slate-500">Professional Status</p>
+          <div class="mt-2">${badge(professionalLevelInfo(btn.dataset.level), "blue")}</div>
+        </div>
+        <label class="block text-sm text-slate-600">Placement Workflow Status
+          <select id="placementWorkflowStatusEdit" class="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2">
             ${["eligible", "shortlisted", "interviewing", "placed", "not_placed"].map((x) => `<option value="${x}" ${x === btn.dataset.status ? "selected" : ""}>${label(x)}</option>`).join("")}
           </select>
         </label>
@@ -1606,7 +1529,7 @@
           method: "POST",
           body: {
             id: Number(btn.dataset.id),
-            status: $("#placementStatusEdit", root).value,
+            status: $("#placementWorkflowStatusEdit", root).value,
             company_name: $("#placementCompanyEdit", root).value,
             notes: $("#placementNotesEdit", root).value,
           },
@@ -1623,7 +1546,6 @@
   function wirePlacementFilters() {
     const search = $("#placementSearch"),
       level = $("#placementLevelFilter"),
-      status = $("#placementStatusFilter"),
       exportBtn = $("#exportPlacementCsvBtn"),
       tbody = document
         .querySelector("#placementSearch")
@@ -1632,22 +1554,19 @@
     if (!tbody) return;
     const run = () => {
       const q = (search?.value || "").toLowerCase(),
-        l = (level?.value || "").toLowerCase(),
-        s = (status?.value || "").toLowerCase();
+        l = (level?.value || "").toLowerCase();
       tbody
         .querySelectorAll("tr[data-placement-candidate]")
-        .forEach(
-          (row) =>
-            (row.style.display =
-              row.textContent.toLowerCase().includes(q) &&
-              sameFilterValue(row.dataset.level, l) &&
-              sameFilterValue(row.dataset.status, s)
-                ? ""
-                : "none"),
-        );
+        .forEach((row) => {
+          row.style.display =
+            row.textContent.toLowerCase().includes(q) &&
+            sameFilterValue(row.dataset.level, l)
+              ? ""
+              : "none";
+        });
     };
-    [search, level, status].forEach((el) => el?.addEventListener("input", run));
-    [level, status].forEach((el) => el?.addEventListener("change", run));
+    [search, level].forEach((el) => el?.addEventListener("input", run));
+    level?.addEventListener("change", run);
 
     if (exportBtn && !exportBtn.dataset.bound) {
       exportBtn.dataset.bound = "1";
@@ -1872,15 +1791,23 @@
                 <input type="text" id="aif_topic" class="w-full rounded-lg border border-slate-300 p-2.5 text-sm outline-none focus:border-purple-600 focus:ring-1 focus:ring-purple-600" placeholder="e.g. PHP Data Types & Functions" required>
               </div>
 
-              <div class="grid grid-cols-2 gap-4">
-                <div>
-                  <label class="block text-sm font-medium text-slate-700 mb-1">Number of Questions <span class="text-red-500">*</span></label>
-                  <input type="number" id="aif_count" min="1" max="50" value="5" class="w-full rounded-lg border border-slate-300 p-2.5 text-sm outline-none focus:border-purple-600 focus:ring-1 focus:ring-purple-600" required>
-                </div>
+              <div>
+                <label class="block text-sm font-medium text-slate-700 mb-1">Question Type (Optional)</label>
+                <input type="text" id="aif_type" class="w-full rounded-lg border border-slate-300 p-2.5 text-sm outline-none focus:border-purple-600 focus:ring-1 focus:ring-purple-600" placeholder="e.g. Code Snippet, Conceptual, Scenario-based">
+              </div>
 
+              <div class="grid grid-cols-3 gap-4">
                 <div>
-                  <label class="block text-sm font-medium text-slate-700 mb-1">Difficulty Mix</label>
-                  <input type="text" id="aif_diff" class="w-full rounded-lg border border-slate-300 p-2.5 text-sm outline-none focus:border-purple-600 focus:ring-1 focus:ring-purple-600" placeholder="easy:2,medium:2,hard:1">
+                  <label class="block text-sm font-medium text-slate-700 mb-1">Easy</label>
+                  <input type="number" id="aif_easy" min="0" value="2" class="w-full rounded-lg border border-slate-300 p-2.5 text-sm outline-none focus:border-purple-600 focus:ring-1 focus:ring-purple-600" required>
+                </div>
+                <div>
+                  <label class="block text-sm font-medium text-slate-700 mb-1">Medium</label>
+                  <input type="number" id="aif_medium" min="0" value="2" class="w-full rounded-lg border border-slate-300 p-2.5 text-sm outline-none focus:border-purple-600 focus:ring-1 focus:ring-purple-600" required>
+                </div>
+                <div>
+                  <label class="block text-sm font-medium text-slate-700 mb-1">Hard</label>
+                  <input type="number" id="aif_hard" min="0" value="1" class="w-full rounded-lg border border-slate-300 p-2.5 text-sm outline-none focus:border-purple-600 focus:ring-1 focus:ring-purple-600" required>
                 </div>
               </div>
 
@@ -1915,11 +1842,21 @@
 
             const qbankId = $("#aif_bank").value;
             const topic = $("#aif_topic").value.trim();
-            const count = parseInt($("#aif_count").value, 10);
-            const difficultyMix = $("#aif_diff").value.trim();
+            const qType = $("#aif_type").value.trim();
+            const easyCount = parseInt($("#aif_easy").value, 10) || 0;
+            const mediumCount = parseInt($("#aif_medium").value, 10) || 0;
+            const hardCount = parseInt($("#aif_hard").value, 10) || 0;
+            
+            const totalCount = easyCount + mediumCount + hardCount;
 
             if (!qbankId || !topic) {
               errBox.textContent = "Question bank and topic description are required.";
+              errBox.classList.remove("hidden");
+              return;
+            }
+            
+            if (totalCount <= 0) {
+              errBox.textContent = "You must generate at least 1 question.";
               errBox.classList.remove("hidden");
               return;
             }
@@ -1933,12 +1870,14 @@
                 body: {
                   question_bank_id: parseInt(qbankId, 10),
                   topic: topic,
-                  count: count || 5,
-                  difficulty_mix: difficultyMix
+                  question_type: qType,
+                  easy_count: easyCount,
+                  medium_count: mediumCount,
+                  hard_count: hardCount
                 }
               });
 
-              notify(`Generated ${res.inserted || count} question(s), pending admin approval.`);
+              notify(`Generated ${res.inserted || totalCount} question(s), pending admin approval.`);
               $("#m7Modal").remove();
               await loadQuestions();
             } catch (err) {
@@ -1974,19 +1913,23 @@
     if (cBtn && !cBtn.dataset.bound) {
       cBtn.dataset.bound = "1";
       cBtn.onclick = async () => {
-        if (
-          !confirm("Generate a certificate for the oldest result without one?")
-        )
-          return;
+        if (!confirm("Generate missing certificates for all eligible candidates?")) return;
+        
+        cBtn.textContent = "Generating...";
+        cBtn.disabled = true;
+        
         try {
-          const data = await api("certificate-next", {
+          const data = await api("certificate-bulk", {
             method: "POST",
             body: {},
           });
-          notify(`Certificate ${data.certificate_number} generated.`);
+          notify(`Successfully generated ${data.count} certificates.`);
           await loadCertificates();
         } catch (e) {
           notify(e.message, true);
+        } finally {
+          cBtn.textContent = "Generate Certificate";
+          cBtn.disabled = false;
         }
       };
     }
