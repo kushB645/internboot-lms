@@ -1,0 +1,783 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+
+    <title>InternBoot | My Profile</title>
+
+    <!-- Tailwind -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              "intern-blue": "#2563eb",
+              "intern-dark": "#17243a",
+            },
+          },
+        },
+      };
+    </script>
+
+    <!-- Lucide -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <style>
+      html {
+        overflow-x: hidden;
+      }
+
+      body {
+        margin: 0;
+        overflow-x: hidden;
+        background: #eef3ff;
+      }
+
+      aside,
+      nav {
+        scrollbar-width: none;
+        -ms-overflow-style: none;
+      }
+
+      aside::-webkit-scrollbar,
+      nav::-webkit-scrollbar {
+        display: none;
+        width: 0;
+        height: 0;
+      }
+    </style>
+  </head>
+
+  <body class="bg-[#eef3ff] text-slate-900 antialiased">
+    <div class="min-h-screen">
+      <!-- =====================================================
+           SIDEBAR
+      ====================================================== -->
+
+      <aside
+        class="fixed inset-y-0 left-0 z-50 hidden lg:flex w-[293px] bg-gradient-to-b from-[#294fae] to-[#347de9] text-white flex-col overflow-hidden"
+      >
+        <!-- Logo -->
+        <div
+          class="h-16 px-6 flex items-center border-b border-white/10 shrink-0"
+        >
+          <a href="dashboard.html" class="flex items-center gap-3 min-w-0">
+            <div
+              class="w-11 h-11 rounded-xl bg-white flex items-center justify-center shrink-0 overflow-hidden"
+            >
+              <img
+                src="assets/internboot-logo.png"
+                alt="InternBoot logo"
+                class="h-9 w-auto object-contain"
+              />
+            </div>
+
+            <div class="min-w-0">
+              <div class="text-lg font-bold leading-tight">Internboot</div>
+
+              <div class="text-xs text-blue-100">Student Dashboard</div>
+            </div>
+          </a>
+        </div>
+
+        <!-- Main Navigation -->
+        <nav class="flex-1 min-h-0 p-4 space-y-1 overflow-hidden">
+          <!-- Dashboard -->
+          <a
+            href="dashboard.html"
+            data-page="dashboard.html"
+            class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-blue-50 hover:bg-white/10 hover:text-white transition-all duration-200"
+          >
+            <i data-lucide="layout-dashboard" class="w-5 h-5 shrink-0"></i>
+
+            <span>Dashboard</span>
+          </a>
+
+          <!-- My Profile -->
+          <a
+            href="profile.html"
+            data-page="profile.html"
+            class="flex items-center gap-3 px-3 py-2.5 rounded-xl bg-white/20 text-white font-medium shadow-sm"
+          >
+            <i data-lucide="user-round" class="w-5 h-5 shrink-0"></i>
+
+            <span>My Profile</span>
+
+            <span class="ml-auto w-2 h-2 rounded-full bg-blue-200"></span>
+          </a>
+
+          <!-- Payments -->
+          <a
+            href="payment.html"
+            data-page="payment.html"
+            class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-blue-50 hover:bg-white/10 hover:text-white transition-all duration-200"
+          >
+            <i data-lucide="credit-card" class="w-5 h-5 shrink-0"></i>
+
+            <span>Payments</span>
+          </a>
+
+          <!-- Enrollment -->
+          <a
+            href="enrollment.html"
+            data-page="enrollment.html"
+            class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-blue-50 hover:bg-white/10 hover:text-white transition-all duration-200"
+          >
+            <i data-lucide="clipboard-check" class="w-5 h-5 shrink-0"></i>
+
+            <span>Enrollment</span>
+          </a>
+
+          <!-- Batches & Slots -->
+          <a
+            href="batches-slots.html"
+            data-page="batches-slots.html"
+            class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-blue-50 hover:bg-white/10 hover:text-white transition-all duration-200"
+          >
+            <i data-lucide="calendar-days" class="w-5 h-5 shrink-0"></i>
+
+            <span>Batches &amp; Slots</span>
+          </a>
+
+          <!-- Exam -->
+          <a
+            href="exam.html"
+            data-page="exam.html"
+            class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-blue-50 hover:bg-white/10 hover:text-white transition-all duration-200"
+          >
+            <i data-lucide="file-pen-line" class="w-5 h-5 shrink-0"></i>
+
+            <span>Exam</span>
+          </a>
+
+          <!-- Results -->
+          <a
+            href="results.html"
+            data-page="results.html"
+            class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-blue-50 hover:bg-white/10 hover:text-white transition-all duration-200"
+          >
+            <i
+              data-lucide="chart-no-axes-combined"
+              class="w-5 h-5 shrink-0"
+            ></i>
+
+            <span>Results</span>
+          </a>
+
+          <!-- Certificates -->
+          <a
+            href="certificates.html"
+            data-page="certificates.html"
+            class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-blue-50 hover:bg-white/10 hover:text-white transition-all duration-200"
+          >
+            <i data-lucide="award" class="w-5 h-5 shrink-0"></i>
+
+            <span>Certificates</span>
+          </a>
+
+          <!-- Placement -->
+          <a
+            href="placement.html"
+            data-page="placement.html"
+            class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-blue-50 hover:bg-white/10 hover:text-white transition-all duration-200"
+          >
+            <i data-lucide="briefcase-business" class="w-5 h-5 shrink-0"></i>
+
+            <span>Placement</span>
+          </a>
+        </nav>
+
+                <!-- Bottom Section -->
+        <div class="shrink-0 border-t border-white/10 p-4 space-y-2">
+
+          <!-- Live Student Profile -->
+          <a
+            href="profile.html"
+            class="flex items-center gap-3 rounded-xl bg-white/10 border border-white/10 px-3 py-2.5 hover:bg-white/15 transition-all duration-200"
+          >
+            <!-- Avatar -->
+            <div
+              id="sidebar-student-avatar"
+              class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-indigo-300 to-purple-400 text-white font-bold text-base"
+            >
+              <span data-candidate="initials">KB</span>
+            </div>
+
+            <!-- Student Details -->
+            <div class="min-w-0 flex-1">
+              <p
+                id="sidebar-student-name"
+                data-candidate="name"
+                class="truncate text-sm font-bold leading-tight text-white"
+              >
+                Student
+              </p>
+
+              <p class="mt-0.5 text-xs leading-tight text-blue-100/80">
+                Student
+              </p>
+            </div>
+
+            <!-- Online Status -->
+            <span
+              class="h-2.5 w-2.5 shrink-0 rounded-full bg-emerald-400"
+              title="Active"
+            ></span>
+          </a>
+
+          <!-- Logout -->
+          <a
+            href="api/auth/logout.php"
+            class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-blue-50 hover:bg-white/10 hover:text-white transition-all duration-200"
+          >
+            <i data-lucide="log-out" class="w-5 h-5 shrink-0"></i>
+
+            <span>Logout</span>
+          </a>
+        </div>
+      </aside>
+
+      <!-- =====================================================
+           MAIN
+      ====================================================== -->
+
+      <main
+        class="lg:ml-[293px] lg:w-[calc(100%-293px)] w-full min-h-screen min-w-0"
+      >
+        <!-- =================================================
+             FIXED HEADER
+        ================================================== -->
+
+        <header
+          class="fixed top-0 right-0 left-0 lg:left-[293px] z-40 h-16 bg-white border-b border-slate-200 flex items-center justify-between px-4 sm:px-5 lg:px-6"
+        >
+          <!-- Header Left -->
+          <div class="flex items-center gap-3 min-w-0">
+            <div
+              class="w-9 h-9 shrink-0 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center"
+            >
+              <i data-lucide="user-round" class="w-5 h-5"></i>
+            </div>
+
+            <strong
+              class="text-lg font-semibold text-slate-800 whitespace-nowrap"
+            >
+              My Profile
+            </strong>
+
+            <span
+              class="hidden sm:inline-flex items-center px-3 py-1 rounded-full bg-emerald-50 text-emerald-600 text-xs font-semibold"
+            >
+              Account
+            </span>
+          </div>
+
+          <!-- Header Candidate -->
+          <a
+            href="profile.html"
+            title="Open My Profile"
+            class="flex items-center gap-3 rounded-xl px-2 py-1.5 hover:bg-slate-50 transition shrink-0"
+          >
+            <div
+              class="w-9 h-9 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center font-semibold"
+              data-candidate="initials"
+            >
+              --
+            </div>
+
+            <div class="hidden sm:flex flex-col min-w-0">
+              <strong
+                class="text-sm font-semibold text-slate-800 truncate max-w-40"
+              >
+                <span data-candidate="name"></span>
+              </strong>
+
+              <small class="text-xs text-slate-500 truncate max-w-48">
+                <span data-candidate="email"></span>
+              </small>
+            </div>
+          </a>
+        </header>
+
+        <!-- =================================================
+             PAGE CONTENT
+        ================================================== -->
+
+        <section class="w-full p-4 sm:p-5 lg:p-6 pt-[84px] lg:pt-[88px]">
+          <div class="max-w-[1400px] mx-auto w-full">
+            <!-- =================================================
+                 PROFILE HERO
+            ================================================== -->
+
+            <section
+              class="relative overflow-hidden rounded-2xl bg-gradient-to-r from-[#21489f] via-[#2f63c8] to-[#4388f2] p-6 sm:p-7 lg:p-8 mb-6 text-white shadow-sm"
+            >
+              <!-- Background Decoration -->
+              <div
+                class="absolute -right-16 -top-24 w-80 h-80 rounded-full bg-white/10 pointer-events-none"
+              ></div>
+
+              <div
+                class="absolute right-36 -bottom-40 w-80 h-80 rounded-full bg-white/10 pointer-events-none"
+              ></div>
+
+              <!-- Rocket -->
+              <div
+                class="absolute right-8 top-5 opacity-15 pointer-events-none"
+              >
+                <i data-lucide="rocket" class="w-32 h-32 sm:w-40 sm:h-40"></i>
+              </div>
+
+              <div
+                class="relative z-10 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-6"
+              >
+                <!-- Hero Content -->
+                <div class="min-w-0">
+                  <div
+                    class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/15 text-white/90 text-xs font-medium mb-3"
+                  >
+                    <i data-lucide="user-check" class="w-4 h-4"></i>
+
+                    Profile Summary
+                  </div>
+
+                  <h1
+                    class="text-3xl sm:text-4xl lg:text-[42px] leading-tight font-bold tracking-tight break-words"
+                  >
+                    <span data-candidate="name"></span>
+                  </h1>
+
+                  <p class="mt-2 text-base text-blue-50">
+                    Candidate ID:
+
+                    <span
+                      data-candidate="candidateId"
+                      class="font-semibold text-white"
+                    ></span>
+                  </p>
+                </div>
+
+                <!-- Active Account -->
+                <div class="shrink-0">
+                  <span
+                    class="inline-flex items-center gap-2 px-5 py-3 rounded-xl bg-white text-blue-700 font-semibold text-sm shadow-sm"
+                  >
+                    <span
+                      class="w-2.5 h-2.5 rounded-full bg-emerald-500"
+                    ></span>
+
+                    Active Account
+                  </span>
+                </div>
+              </div>
+            </section>
+
+            <!-- =================================================
+                 INFORMATION CARDS
+            ================================================== -->
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-5 mb-5">
+              <!-- =================================================
+                   PERSONAL INFORMATION
+              ================================================== -->
+
+              <section
+                class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden"
+              >
+                <!-- Card Header -->
+                <div
+                  class="px-5 py-4 border-b border-slate-100 flex items-center gap-3"
+                >
+                  <div
+                    class="w-10 h-10 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center shrink-0"
+                  >
+                    <i data-lucide="contact" class="w-5 h-5"></i>
+                  </div>
+
+                  <div class="min-w-0">
+                    <h2 class="text-base font-semibold text-slate-900">
+                      Personal Information
+                    </h2>
+
+                    <p class="text-xs text-slate-500 mt-0.5">
+                      Your registered contact details
+                    </p>
+                  </div>
+                </div>
+
+                <!-- Information Rows -->
+                <div class="divide-y divide-slate-100">
+                  <!-- Full Name -->
+                  <div
+                    class="px-5 py-4 flex items-center justify-between gap-5"
+                  >
+                    <div class="flex items-center gap-3 min-w-0">
+                      <i
+                        data-lucide="user"
+                        class="w-4 h-4 text-slate-400 shrink-0"
+                      ></i>
+
+                      <span class="text-sm text-slate-500 whitespace-nowrap">
+                        Full Name
+                      </span>
+                    </div>
+
+                    <span
+                      class="text-sm font-semibold text-slate-800 text-right break-words"
+                    >
+                      <span data-candidate="name"></span>
+                    </span>
+                  </div>
+
+                  <!-- Email -->
+                  <div
+                    class="px-5 py-4 flex items-center justify-between gap-5"
+                  >
+                    <div class="flex items-center gap-3 min-w-0">
+                      <i
+                        data-lucide="mail"
+                        class="w-4 h-4 text-slate-400 shrink-0"
+                      ></i>
+
+                      <span class="text-sm text-slate-500 whitespace-nowrap">
+                        Email
+                      </span>
+                    </div>
+
+                    <span
+                      class="text-sm font-semibold text-slate-800 text-right break-all"
+                    >
+                      <span data-candidate="email"></span>
+                    </span>
+                  </div>
+
+                  <!-- Phone -->
+                  <div
+                    class="px-5 py-4 flex items-center justify-between gap-5"
+                  >
+                    <div class="flex items-center gap-3 min-w-0">
+                      <i
+                        data-lucide="phone"
+                        class="w-4 h-4 text-slate-400 shrink-0"
+                      ></i>
+
+                      <span class="text-sm text-slate-500 whitespace-nowrap">
+                        Phone
+                      </span>
+                    </div>
+
+                    <span
+                      class="text-sm font-semibold text-slate-800 text-right"
+                    >
+                      <span data-candidate="phone"></span>
+                    </span>
+                  </div>
+                </div>
+              </section>
+
+              <!-- =================================================
+                   CANDIDATE DETAILS
+              ================================================== -->
+
+              <section
+                class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden"
+              >
+                <!-- Card Header -->
+                <div
+                  class="px-5 py-4 border-b border-slate-100 flex items-center gap-3"
+                >
+                  <div
+                    class="w-10 h-10 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center shrink-0"
+                  >
+                    <i data-lucide="badge-check" class="w-5 h-5"></i>
+                  </div>
+
+                  <div class="min-w-0">
+                    <h2 class="text-base font-semibold text-slate-900">
+                      Candidate Details
+                    </h2>
+
+                    <p class="text-xs text-slate-500 mt-0.5">
+                      Registration and account information
+                    </p>
+                  </div>
+                </div>
+
+                <!-- Detail Rows -->
+                <div class="divide-y divide-slate-100">
+                  <!-- Candidate ID -->
+                  <div
+                    class="px-5 py-4 flex items-center justify-between gap-5"
+                  >
+                    <div class="flex items-center gap-3 min-w-0">
+                      <i
+                        data-lucide="hash"
+                        class="w-4 h-4 text-slate-400 shrink-0"
+                      ></i>
+
+                      <span class="text-sm text-slate-500 whitespace-nowrap">
+                        Candidate ID
+                      </span>
+                    </div>
+
+                    <span
+                      class="text-sm font-semibold text-slate-800 text-right"
+                    >
+                      <span data-candidate="candidateId"></span>
+                    </span>
+                  </div>
+
+                  <!-- Registration Date -->
+                  <div
+                    class="px-5 py-4 flex items-center justify-between gap-5"
+                  >
+                    <div class="flex items-center gap-3 min-w-0">
+                      <i
+                        data-lucide="calendar-days"
+                        class="w-4 h-4 text-slate-400 shrink-0"
+                      ></i>
+
+                      <span class="text-sm text-slate-500 whitespace-nowrap">
+                        Registration Date
+                      </span>
+                    </div>
+
+                    <span
+                      class="text-sm font-semibold text-slate-800 text-right"
+                    >
+                      <span data-candidate="registrationDate"></span>
+                    </span>
+                  </div>
+
+                  <!-- Current Level -->
+                  <div
+                    class="px-5 py-4 flex items-center justify-between gap-5"
+                  >
+                    <div class="flex items-center gap-3 min-w-0">
+                      <i
+                        data-lucide="layers-3"
+                        class="w-4 h-4 text-slate-400 shrink-0"
+                      ></i>
+
+                      <span class="text-sm text-slate-500 whitespace-nowrap">
+                        Current Level
+                      </span>
+                    </div>
+
+                    <span class="shrink-0">
+                      <span
+                        id="profile-level-badge"
+                        data-result="level_assigned"
+                        class="inline-flex items-center px-3 py-1.5 rounded-full bg-slate-100 text-slate-600 text-xs font-semibold"
+                      >
+                        Not assigned yet
+                      </span>
+                    </span>
+                  </div>
+
+                  <!-- Registration Status -->
+                  <div
+                    class="px-5 py-4 flex items-center justify-between gap-5"
+                  >
+                    <div class="flex items-center gap-3 min-w-0">
+                      <i
+                        data-lucide="circle-check"
+                        class="w-4 h-4 text-slate-400 shrink-0"
+                      ></i>
+
+                      <span class="text-sm text-slate-500 whitespace-nowrap">
+                        Registration Status
+                      </span>
+                    </div>
+
+                    <span class="shrink-0">
+                      <span
+                        data-candidate="registrationStatus"
+                        class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-emerald-50 text-emerald-700 text-xs font-semibold"
+                      >
+                        Registered
+                      </span>
+                    </span>
+                  </div>
+
+                  <!-- Profile Status -->
+                  <div
+                    class="px-5 py-4 flex items-center justify-between gap-5"
+                  >
+                    <div class="flex items-center gap-3 min-w-0">
+                      <i
+                        data-lucide="shield-check"
+                        class="w-4 h-4 text-slate-400 shrink-0"
+                      ></i>
+
+                      <span class="text-sm text-slate-500 whitespace-nowrap">
+                        Profile Status
+                      </span>
+                    </div>
+
+                    <span class="shrink-0">
+                      <span
+                        id="profile-status-badge"
+                        data-candidate="profileStatus"
+                        class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-emerald-50 text-emerald-700 text-xs font-semibold"
+                      >
+                        Verified
+                      </span>
+                    </span>
+                  </div>
+                </div>
+              </section>
+            </div>
+
+            <!-- =================================================
+                 CERTIFICATE
+            ================================================== -->
+
+            <section
+              id="profile-certificate-card"
+              class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden"
+            >
+              <!-- Certificate Header -->
+              <div class="px-5 py-4 border-b border-slate-100">
+                <div
+                  class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4"
+                >
+                  <div class="flex items-center gap-3">
+                    <div
+                      class="w-10 h-10 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center shrink-0"
+                    >
+                      <i data-lucide="award" class="w-5 h-5"></i>
+                    </div>
+
+                    <div>
+                      <h2 class="text-base font-semibold text-slate-900">
+                        Certificate
+                      </h2>
+
+                      <p class="text-xs text-slate-500 mt-0.5">
+                        Certification status and availability
+                      </p>
+                    </div>
+                  </div>
+
+                  <!-- View Certificate -->
+                  <a
+                    href="certificates.html"
+                    class="inline-flex items-center justify-center gap-2 px-4 py-2 rounded-xl bg-blue-50 text-blue-600 hover:bg-blue-100 text-sm font-semibold transition"
+                  >
+                    View Certificate
+
+                    <i data-lucide="arrow-up-right" class="w-4 h-4"></i>
+                  </a>
+                </div>
+              </div>
+
+              <!-- Certificate Content -->
+              <div id="profile-certificate-content" class="p-5">
+                <div
+                  class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-5"
+                >
+                  <!-- Certificate Info -->
+                  <div class="flex items-center gap-4 min-w-0">
+                    <div
+                      class="w-12 h-12 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center shrink-0"
+                    >
+                      <i data-lucide="file-badge" class="w-6 h-6"></i>
+                    </div>
+
+                    <div class="min-w-0">
+                      <p class="text-sm font-semibold text-slate-800">
+                        InternBoot Certificate
+                      </p>
+
+                      <p class="text-xs text-slate-500 mt-1">
+                        Your certificate will appear here once it is issued.
+                      </p>
+                    </div>
+                  </div>
+
+                  <!-- Certificate Status -->
+                  <div class="shrink-0">
+                    <span
+                      id="profile-cert-status"
+                      class="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-slate-100 text-slate-600 text-xs font-semibold"
+                    >
+                      <span class="w-2 h-2 rounded-full bg-slate-400"></span>
+
+                      Not issued yet
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </section>
+          </div>
+        </section>
+      </main>
+    </div>
+
+    <!-- =====================================================
+         EXISTING APPLICATION LOGIC
+         DO NOT CHANGE
+    ====================================================== -->
+
+    <script src="js/app.js"></script>
+
+    <!-- Lucide Icons -->
+    <script>
+      document.addEventListener("DOMContentLoaded", function () {
+        if (window.lucide) {
+          lucide.createIcons();
+        }
+      });
+    </script>
+    <script>
+  document.addEventListener("DOMContentLoaded", () => {
+    const avatar = document.getElementById("sidebar-student-avatar");
+    const name = document.getElementById("sidebar-student-name");
+
+    function syncSidebarProfile() {
+      const sourceName = document.querySelector(
+        '[data-candidate="name"]'
+      );
+
+      const sourceInitials = document.querySelector(
+        '[data-candidate="initials"]'
+      );
+
+      if (sourceName && name) {
+        const value = sourceName.textContent.trim();
+
+        if (value) {
+          name.textContent = value;
+        }
+      }
+
+      if (sourceInitials && avatar) {
+        const value = sourceInitials.textContent.trim();
+
+        if (value) {
+          avatar.querySelector("span").textContent = value;
+        }
+      }
+    }
+
+    // Initial sync
+    syncSidebarProfile();
+
+    // Watch for real-time changes made by app.js/API rendering
+    const observer = new MutationObserver(() => {
+      syncSidebarProfile();
+    });
+
+    observer.observe(document.body, {
+      subtree: true,
+      childList: true,
+      characterData: true,
+    });
+  });
+</script>
+  </body>
+</html>

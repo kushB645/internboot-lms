@@ -1,0 +1,15 @@
+.env
+.env.*
+!.env.example
+storage/*
+!storage/.gitkeep
+cookies.txt
+scratch/
+vendor/
+composer.phar
+
+
+public/uploads/*
+!public/uploads/.gitkeep
+.phpunit.cache/
+aiven-ca.pem

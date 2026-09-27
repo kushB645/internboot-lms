@@ -1,0 +1,253 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Admin Dashboard - InternBoot</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              "intern-blue": "#2563eb",
+            },
+          },
+        },
+      };
+    </script>
+    <script src="https://unpkg.com/lucide@0.383.0/dist/umd/lucide.min.js"></script>
+  </head>
+  <body class="bg-slate-50 text-slate-900 flex h-screen overflow-hidden">
+    <!-- Sidebar -->
+    <aside
+      id="sidebar"
+      class="w-64 bg-white border-r border-slate-200 h-full flex-shrink-0 transition-transform absolute lg:relative z-40 -translate-x-full lg:translate-x-0"
+    >
+      <div class="h-16 flex items-center px-6 border-b border-slate-200">
+        <img
+          src="../assets/internboot-logo.png"
+          alt="InternBoot Logo"
+          class="h-8"
+        />
+      </div>
+      <nav class="p-4 space-y-1">
+        <a
+          href="index.html"
+          class="flex items-center gap-3 px-3 py-2 rounded-lg text-slate-600 hover:bg-slate-50 transition"
+          ><i data-lucide="layout-dashboard" class="h-5 w-5"></i> Dashboard</a
+        >
+        <a
+          href="candidates.html"
+          class="flex items-center gap-3 px-3 py-2 rounded-lg bg-intern-blue font-medium text-white transition"
+          ><i data-lucide="users" class="h-5 w-5"></i> Candidates</a
+        >
+        <a
+          href="results.html"
+          class="flex items-center gap-3 px-3 py-2 rounded-lg text-slate-600 hover:bg-slate-50 transition"
+          ><i data-lucide="file-check-2" class="h-5 w-5"></i> Results</a
+        >
+        <a
+          href="certificates.html"
+          class="flex items-center gap-3 px-3 py-2 rounded-lg text-slate-600 hover:bg-slate-50 transition"
+          ><i data-lucide="award" class="h-5 w-5"></i> Certificates</a
+        >
+        <a
+          href="questions.html"
+          class="flex items-center gap-3 px-3 py-2 rounded-lg text-slate-600 hover:bg-slate-50 transition"
+          ><i data-lucide="help-circle" class="h-5 w-5"></i> Questions</a
+        >
+        <a
+          href="batches.html"
+          class="flex items-center gap-3 px-3 py-2 rounded-lg text-slate-600 hover:bg-slate-50 transition"
+          ><i data-lucide="calendar-days" class="h-5 w-5"></i> Batches</a
+        >
+        <a
+          href="placement.html"
+          class="flex items-center gap-3 px-3 py-2 rounded-lg text-slate-600 hover:bg-slate-50 transition"
+          ><i data-lucide="building-2" class="h-5 w-5"></i> Placement</a
+        >
+      </nav>
+    </aside>
+
+    <!-- Overlay -->
+    <div
+      id="sidebarOverlay"
+      class="fixed inset-0 bg-slate-900/50 z-30 hidden lg:hidden"
+    ></div>
+
+    <!-- Main Content -->
+    <div class="flex-1 flex flex-col h-screen overflow-hidden">
+      <!-- Header -->
+      <header
+        class="h-16 bg-white border-b border-slate-200 flex items-center justify-between px-6 flex-shrink-0"
+      >
+        <div class="flex items-center gap-4">
+          <button
+            id="menuButton"
+            class="lg:hidden text-slate-500 hover:text-slate-700"
+          >
+            <i data-lucide="menu" class="h-6 w-6"></i>
+          </button>
+          <h1 class="text-xl font-semibold text-slate-800">Admin Dashboard</h1>
+        </div>
+
+        <div class="flex items-center gap-4 relative">
+          <button
+            id="notificationButton"
+            class="text-slate-500 hover:text-slate-700 relative"
+          >
+            <i data-lucide="bell" class="h-5 w-5"></i>
+          </button>
+          <div
+            id="notificationDropdown"
+            class="hidden absolute right-12 top-full mt-2 w-64 bg-white rounded-xl shadow-lg border border-slate-100 p-4 z-50"
+          >
+            <p class="text-sm text-slate-500 text-center">
+              No new notifications
+            </p>
+          </div>
+
+          <button id="userButton" class="flex items-center gap-2">
+            <div
+              id="adminAvatar"
+              class="h-8 w-8 rounded-full bg-intern-blue text-white flex items-center justify-center font-medium overflow-hidden"
+            >
+              <span id="adminAvatarInitial">A</span>
+              <img
+                id="adminAvatarImage"
+                src=""
+                alt="Avatar"
+                class="h-full w-full object-cover hidden"
+              />
+            </div>
+            <span
+              id="adminHeaderName"
+              class="text-sm font-medium text-slate-700 hidden sm:block"
+              >Admin</span
+            >
+            <i data-lucide="chevron-down" class="h-4 w-4 text-slate-400"></i>
+          </button>
+
+          <div
+            id="userDropdown"
+            class="hidden absolute right-0 top-full mt-2 w-48 bg-white rounded-xl shadow-lg border border-slate-100 py-1 z-50"
+          >
+            <a
+              href="setting.html"
+              class="block px-4 py-2 text-sm text-slate-700 hover:bg-slate-50"
+              >Profile</a
+            >
+            <div class="border-t border-slate-100 my-1"></div>
+            <a
+              href="#"
+              class="block px-4 py-2 text-sm text-red-600 hover:bg-slate-50"
+              >Logout</a
+            >
+          </div>
+        </div>
+      </header>
+
+      <!-- Main Scrollable Area -->
+      <main class="flex-1 overflow-auto bg-slate-50">
+        <div class="p-6">
+          <div
+            class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4"
+          >
+            <h2 class="text-2xl font-semibold text-slate-800">
+              Candidates (<span id="candidateCount">0</span>)
+            </h2>
+            <button
+              class="bg-intern-blue hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium text-sm flex items-center gap-2"
+            >
+              <i data-lucide="plus" class="h-4 w-4"></i> Add Candidate
+            </button>
+          </div>
+
+          <div
+            class="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden"
+          >
+            <div
+              class="p-4 border-b border-slate-100 flex flex-wrap gap-4 items-center bg-slate-50/50"
+            >
+              <div class="flex-1 min-w-[200px] relative">
+                <i
+                  data-lucide="search"
+                  class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 h-4 w-4"
+                ></i>
+                <input
+                  type="text"
+                  id="candidateSearch"
+                  placeholder="Search candidates..."
+                  class="w-full pl-9 pr-4 py-2 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-intern-blue/20"
+                />
+              </div>
+              <select
+                id="paymentFilter"
+                class="px-3 py-2 rounded-lg border border-slate-200 text-sm bg-white min-w-[140px]"
+              >
+                <option value="">All Payments</option>
+                <option value="success">Paid</option>
+                <option value="pending">Pending</option>
+              </select>
+              <select
+                id="enrollmentFilter"
+                class="px-3 py-2 rounded-lg border border-slate-200 text-sm bg-white min-w-[140px]"
+              >
+                <option value="">All Enrollments</option>
+                <option value="eligible">Enrolled</option>
+                <option value="pending">Pending</option>
+              </select>
+              <select
+                id="assessmentFilter"
+                class="px-3 py-2 rounded-lg border border-slate-200 text-sm bg-white min-w-[140px]"
+              >
+                <option value="">All Assessments</option>
+                <option value="completed">Completed</option>
+                <option value="pending">Pending</option>
+                <option value="not-started">Not Started</option>
+              </select>
+              <select
+                id="certificateFilter"
+                class="px-3 py-2 rounded-lg border border-slate-200 text-sm bg-white min-w-[140px]"
+              >
+                <option value="">All Certificates</option>
+                <option value="issued">Issued</option>
+                <option value="not-issued">Not Issued</option>
+              </select>
+              <button
+                id="exportCandidatesCsv"
+                class="bg-intern-blue hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium text-sm flex items-center gap-2"
+              >
+                <i data-lucide="download" class="h-4 w-4"></i> Export CSV
+              </button>
+            </div>
+
+            <div class="overflow-x-auto">
+              <table class="w-full text-left text-sm text-slate-600">
+                <thead class="bg-slate-50 text-slate-500 uppercase text-xs">
+                  <tr>
+                    <th class="px-6 py-3 font-medium">Name</th>
+                    <th class="px-6 py-3 font-medium">Email</th>
+                    <th class="px-6 py-3 font-medium">Payment</th>
+                    <th class="px-6 py-3 font-medium">Enrollment</th>
+                    <th class="px-6 py-3 font-medium">Assessment</th>
+                    <th class="px-6 py-3 font-medium">Level</th>
+                    <th class="px-6 py-3 font-medium">Certificate</th>
+                    <th class="px-6 py-3 font-medium w-24">Action</th>
+                  </tr>
+                </thead>
+                <tbody
+                  id="candidatesTableBody"
+                  class="divide-y divide-slate-100"
+                ></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </main>
+    </div>
+
+    <script src="admin.js"></script>
+  </body>
+</html>

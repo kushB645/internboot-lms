@@ -1,0 +1,781 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>InternBoot | Level Assessment &amp; Certification</title>
+  <meta name="description"
+    content="Take the InternBoot level assessment, get your Level 1–5 certification, and become visible to our placement team.">
+
+  <meta http-equiv="X-Content-Type-Options" content="nosniff">
+  <meta name="referrer" content="strict-origin-when-cross-origin">
+  <meta http-equiv="Content-Security-Policy"
+    content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://fonts.googleapis.com; font-src 'self' https://cdn.jsdelivr.net https://fonts.gstatic.com data:; img-src 'self' data: https:; connect-src 'self'; frame-ancestors 'none'; base-uri 'self'; form-action 'self';">
+
+  <!-- Favicon for Browser Tab & URL Bar -->
+  <link rel="icon" type="image/png" href="assets/internboot-logo.png">
+  <link rel="shortcut icon" href="assets/internboot-logo.png">
+  <link rel="apple-touch-icon" href="assets/internboot-logo.png">
+
+  <!-- Bootstrap 5 CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"
+    integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+  <!-- Bootstrap Icons -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet"
+    integrity="sha384-tViUnnbYAV00FLIhhi3v/dWt3Jxw4gZQcNoSCxCIFNJVCx7/D55/wXsrNIRANwdD" crossorigin="anonymous">
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap"
+    rel="stylesheet">
+  <!-- Custom Stylesheet -->
+  <link rel="stylesheet" href="css/style.css">
+</head>
+
+<body>
+
+  <!-- ============ NAVBAR ============ -->
+  <nav class="navbar navbar-expand-lg fixed-top ib-nav" id="ibNav">
+    <div class="container">
+      <a class="navbar-brand" href="#home" aria-label="InternBoot Home">
+        <img src="assets/internboot-logo.png" alt="InternBoot" class="brand-logo-img">
+      </a>
+
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#ibMenu"
+        aria-controls="ibMenu" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+
+      <div class="collapse navbar-collapse" id="ibMenu">
+        <ul class="navbar-nav ms-auto align-items-lg-center">
+          <li class="nav-item"><a class="nav-link" href="#how">How it works</a></li>
+          <li class="nav-item"><a class="nav-link" href="#levels">Levels</a></li>
+          <li class="nav-item"><a class="nav-link" href="#pattern">Pattern</a></li>
+          <li class="nav-item"><a class="nav-link" href="#fee">Fee</a></li>
+          <li class="nav-item"><a class="nav-link" href="#faq">FAQs</a></li>
+          <li class="nav-item"><a class="nav-link" href="contact.html">Support</a></li>
+          <li class="nav-item ms-lg-3 mt-3 mt-lg-0">
+            <a class="btn btn-ib-primary w-100" href="register.php">
+              <span>Register now</span>
+              <i class="bi bi-arrow-right-short fs-5"></i>
+            </a>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+  <!-- ============ HERO ============ -->
+  <header class="ib-hero" id="home">
+    <div class="hero-glow"></div>
+    <div class="hero-glow-secondary"></div>
+    <div class="container position-relative">
+      <div class="row align-items-center g-5">
+
+        <div class="col-lg-6 hero-content">
+          <!-- Live Batch Notification Pill -->
+          <div class="hero-badge-wrap">
+            <i class="bi bi-calendar2-check hero-badge-icon" aria-hidden="true"></i>
+            <p class="hero-kicker">Enrolling • Weekend Exam Slots Open</p>
+          </div>
+
+          <h1 class="hero-title">
+            Your Journey to<br>
+            Success <span class="text-highlight">Starts Here.</span>
+          </h1>
+          <p class="hero-sub">
+            Register, take the verified online assessment, and earn your official Level
+            1–5 certificate. Your level is what our placement partners see first —
+            top levels, earlier interview callbacks.
+          </p>
+
+          <div class="hero-actions d-flex flex-wrap gap-3">
+            <a href="register.php" class="btn btn-ib-primary btn-lg">
+              <span>Register now</span>
+              <i class="bi bi-arrow-right"></i>
+            </a>
+            <a href="#how" class="btn btn-ib-ghost btn-lg">
+              <i class="bi bi-play-circle-fill hero-play-icon"></i>
+              <span>See how it works</span>
+            </a>
+          </div>
+
+          <ul class="hero-points list-unstyled">
+            <li>
+              <span class="hero-point-icon"><i class="bi bi-calendar2-check-fill"></i></span>
+              <span class="hero-point-text">
+                <strong>Weekend exam slots</strong>
+                <small>Choose a time that works for you</small>
+              </span>
+            </li>
+            <li>
+              <span class="hero-point-icon"><i class="bi bi-lightning-charge-fill"></i></span>
+              <span class="hero-point-text">
+                <strong>Result the same day</strong>
+                <small>Get your score instantly after the exam</small>
+              </span>
+            </li>
+            <li>
+              <span class="hero-point-icon"><i class="bi bi-patch-check-fill"></i></span>
+              <span class="hero-point-text">
+                <strong>Verifiable digital certificate</strong>
+                <small>Share your credentials with confidence</small>
+              </span>
+            </li>
+          </ul>
+        </div>
+
+        <!-- Assessment Gauge — right-side hero visual -->
+        <div class="col-lg-6 hero-visual" id="gaugeVisual">
+          <div class="gauge-stage" aria-label="Assessment level gauge">
+
+            <!-- Subtle background decorations -->
+            <div class="gauge-bg-deco" aria-hidden="true">
+              <span class="gauge-bg-orb gauge-bg-orb--a"></span>
+              <span class="gauge-bg-orb gauge-bg-orb--b"></span>
+              <!-- Subtle wave vectors -->
+              <svg class="gauge-bg-waves" viewBox="0 0 600 600" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                <path d="M-50,180 C150,100 350,260 650,160" stroke="#1652d6" stroke-width="2" stroke-dasharray="6 6" opacity=".10"/>
+                <path d="M-80,300 C120,220 380,380 680,270" stroke="#1652d6" stroke-width="2" opacity=".09"/>
+                <path d="M-20,420 C180,360 320,480 620,400" stroke="#1652d6" stroke-width="1.5" stroke-dasharray="4 4" opacity=".07"/>
+              </svg>
+              <!-- Dotted grid -->
+              <svg class="gauge-bg-grid" viewBox="0 0 420 420" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                <defs>
+                  <pattern id="gdot" x="0" y="0" width="22" height="22" patternUnits="userSpaceOnUse">
+                    <circle cx="1" cy="1" r="1" fill="#1652d6" opacity=".10"/>
+                  </pattern>
+                </defs>
+                <rect width="420" height="420" fill="url(#gdot)"/>
+              </svg>
+            </div>
+
+            <!-- Floating assessment visual (no rectangular card) -->
+            <div class="gauge-card">
+              <!-- SVG circular ring -->
+              <div class="gauge-ring-wrap">
+                <div class="gauge-ring-glow" id="gaugeGlow"></div>
+                <svg class="gauge-svg" viewBox="0 0 220 220" aria-hidden="true">
+                  <!-- track -->
+                  <circle class="gauge-track" cx="110" cy="110" r="88" />
+                  <!-- progress ring — dasharray 553 = 2π×88, offset for 90% is 55 -->
+                  <circle class="gauge-progress" id="gaugeRing" cx="110" cy="110" r="88"
+                    stroke-dasharray="553"
+                    stroke-dashoffset="55"
+                    transform="rotate(-90 110 110)" />
+                </svg>
+                <!-- Center content -->
+                <div class="gauge-center">
+                  <span class="gauge-center-your">Your Score</span>
+                  <span class="gauge-center-pct" id="gaugePct">90%</span>
+                  <i class="bi bi-trophy-fill gauge-center-trophy" id="gaugeTrophy"></i>
+                  <span class="gauge-center-label" id="gaugeLabel">Top / Excellent</span>
+                  <span class="gauge-center-lvl" id="gaugeLvl">Level 1</span>
+                </div>
+              </div>
+
+              <!-- Range pill -->
+              <div class="gauge-range-pill" id="gaugeRange">
+                <i class="bi bi-graph-up-arrow"></i> 85 – 100%
+              </div>
+
+              <!-- 5-level selector strip -->
+              <div class="gauge-levels" role="list" aria-label="Assessment levels">
+                <div class="gauge-levels-track" aria-hidden="true"></div>
+
+                <button class="gauge-lvl-btn active" data-lvl="0" role="listitem"
+                  aria-pressed="true" aria-label="Level 1 – Top / Excellent, 85–100%">
+                  <span class="glb-num">1</span>
+                  <span class="glb-name">Level 1</span>
+                  <span class="glb-range">85–100%</span>
+                </button>
+
+                <button class="gauge-lvl-btn" data-lvl="1" role="listitem"
+                  aria-pressed="false" aria-label="Level 2 – Intermediate, 70–84%">
+                  <span class="glb-num">2</span>
+                  <span class="glb-name">Level 2</span>
+                  <span class="glb-range">70–84%</span>
+                </button>
+
+                <button class="gauge-lvl-btn" data-lvl="2" role="listitem"
+                  aria-pressed="false" aria-label="Level 3 – Basic / Employable, 55–69%">
+                  <span class="glb-num">3</span>
+                  <span class="glb-name">Level 3</span>
+                  <span class="glb-range">55–69%</span>
+                </button>
+
+                <button class="gauge-lvl-btn" data-lvl="3" role="listitem"
+                  aria-pressed="false" aria-label="Level 4 – Basic Knowledge, 40–54%">
+                  <span class="glb-num">4</span>
+                  <span class="glb-name">Level 4</span>
+                  <span class="glb-range">40–54%</span>
+                </button>
+
+                <button class="gauge-lvl-btn" data-lvl="4" role="listitem"
+                  aria-pressed="false" aria-label="Level 5 – Needs Training, 0–39%">
+                  <span class="glb-num">5</span>
+                  <span class="glb-name">Level 5</span>
+                  <span class="glb-range">0–39%</span>
+                </button>
+              </div>
+
+              <p class="gauge-card-foot">
+                <i class="bi bi-patch-check-fill"></i>
+                Score once · verified credential · shared with placement partners
+              </p>
+            </div><!-- /gauge-card -->
+
+          </div><!-- /gauge-stage -->
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Hero Stats Strip -->
+    <div class="hero-stats mt-5">
+      <div class="container">
+        <div class="row text-center g-4">
+          <div class="col-6 col-lg-3">
+            <div class="stat-card">
+              <div class="stat-icon"><i class="bi bi-mortarboard-fill"></i></div>
+              <span class="stat-num" data-count="150000">0</span>
+              <span class="stat-lab">Students evaluated</span>
+            </div>
+          </div>
+          <div class="col-6 col-lg-3">
+            <div class="stat-card">
+              <div class="stat-icon"><i class="bi bi-buildings-fill"></i></div>
+              <span class="stat-num" data-count="650">0</span>
+              <span class="stat-lab">Hiring partners</span>
+            </div>
+          </div>
+          <div class="col-6 col-lg-3">
+            <div class="stat-card">
+              <div class="stat-icon"><i class="bi bi-grid-3x3-gap-fill"></i></div>
+              <span class="stat-num" data-count="15">0</span>
+              <span class="stat-lab">Specializations</span>
+            </div>
+          </div>
+          <div class="col-6 col-lg-3">
+            <div class="stat-card">
+              <div class="stat-icon"><i class="bi bi-stars"></i></div>
+              <span class="stat-num" data-count="98" data-suffix="%">0</span>
+              <span class="stat-lab">Candidate satisfaction</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- ============ HOW IT WORKS ============ -->
+  <section class="section hiw-section" id="how">
+    <div class="hiw-shell" aria-hidden="true">
+      <span class="hiw-mesh hiw-mesh--a"></span>
+      <span class="hiw-mesh hiw-mesh--b"></span>
+      <span class="hiw-mesh hiw-mesh--c"></span>
+    </div>
+
+    <div class="container position-relative">
+      <div class="row hiw-layout g-4 g-xl-5 align-items-start">
+
+        <div class="col-lg-4">
+          <div class="hiw-intro">
+            <span class="hiw-intro-badge"><i class="bi bi-lightning-charge-fill"></i> How it works</span>
+            <h2 class="hiw-intro-title">Your path from registration to verified certification</h2>
+            <p class="hiw-intro-text">A clean, fully online journey — no manual follow-ups. Complete all six steps and
+              unlock your Level 1–5 credential for placement partners.</p>
+
+            <ul class="hiw-intro-stats list-unstyled">
+              <li>
+                <span class="hiw-stat-icon"><i class="bi bi-ui-checks-grid"></i></span>
+                <span><strong data-ib="questions">100 questions</strong> · industry-aligned MCQ paper</span>
+              </li>
+              <li>
+                <span class="hiw-stat-icon"><i class="bi bi-clock-history"></i></span>
+                <span><strong data-ib="duration">60 minutes</strong> · secure timed attempt</span>
+              </li>
+              <li>
+                <span class="hiw-stat-icon"><i class="bi bi-patch-check"></i></span>
+                <span><strong>Same-day</strong> level &amp; digital certificate</span>
+              </li>
+            </ul>
+
+            <a href="register.php" class="btn btn-ib-primary hiw-intro-cta">
+              <span>Start registration</span>
+              <i class="bi bi-arrow-right"></i>
+            </a>
+          </div>
+        </div>
+
+        <div class="col-lg-8">
+          <ol class="hiw-flow list-unstyled mb-0">
+            <li class="hiw-flow-step">
+              <div class="hiw-flow-rail"><span class="hiw-flow-dot"></span></div>
+              <article class="hiw-flow-card">
+                <span class="hiw-flow-num" aria-hidden="true">01</span>
+                <div class="hiw-flow-icon"><i class="bi bi-person-plus"></i></div>
+                <div class="hiw-flow-body">
+                  <span class="hiw-flow-tag">Step 1</span>
+                  <h3 class="hiw-flow-title">Register your profile</h3>
+                  <p class="hiw-flow-desc">Add academic details and target specializations in under 2 minutes. One
+                    account
+                    for exam, results, and certificate.</p>
+                </div>
+              </article>
+            </li>
+
+            <li class="hiw-flow-step">
+              <div class="hiw-flow-rail"><span class="hiw-flow-dot"></span></div>
+              <article class="hiw-flow-card">
+                <span class="hiw-flow-num" aria-hidden="true">02</span>
+                <div class="hiw-flow-icon"><i class="bi bi-credit-card"></i></div>
+                <div class="hiw-flow-body">
+                  <span class="hiw-flow-tag">Step 2</span>
+                  <h3 class="hiw-flow-title">Pay the assessment fee</h3>
+                  <p class="hiw-flow-desc">Pay <span data-ib="fee">₹2999</span> via UPI, debit/credit card, or net
+                    banking. Seat confirmation is instant on successful payment.</p>
+                </div>
+              </article>
+            </li>
+
+            <li class="hiw-flow-step">
+              <div class="hiw-flow-rail"><span class="hiw-flow-dot"></span></div>
+              <article class="hiw-flow-card">
+                <span class="hiw-flow-num" aria-hidden="true">03</span>
+                <div class="hiw-flow-icon"><i class="bi bi-calendar2-week"></i></div>
+                <div class="hiw-flow-body">
+                  <span class="hiw-flow-tag">Step 3</span>
+                  <h3 class="hiw-flow-title">Choose batch &amp; weekend slot</h3>
+                  <p class="hiw-flow-desc">When <span data-ib="batchSize">100</span> candidates fill a batch, pick your
+                    preferred Weekend slot from the dashboard.</p>
+                </div>
+              </article>
+            </li>
+
+            <li class="hiw-flow-step">
+              <div class="hiw-flow-rail"><span class="hiw-flow-dot"></span></div>
+              <article class="hiw-flow-card">
+                <span class="hiw-flow-num" aria-hidden="true">04</span>
+                <div class="hiw-flow-icon"><i class="bi bi-laptop"></i></div>
+                <div class="hiw-flow-body">
+                  <span class="hiw-flow-tag">Step 4</span>
+                  <h3 class="hiw-flow-title">Take the online exam</h3>
+                  <p class="hiw-flow-desc"><span data-ib="duration">60 minutes</span> proctored-style MCQ test with
+                    server-side autosave. Reconnect anytime without losing answers.</p>
+                </div>
+              </article>
+            </li>
+
+            <li class="hiw-flow-step">
+              <div class="hiw-flow-rail"><span class="hiw-flow-dot"></span></div>
+              <article class="hiw-flow-card">
+                <span class="hiw-flow-num" aria-hidden="true">05</span>
+                <div class="hiw-flow-icon"><i class="bi bi-bar-chart-line-fill"></i></div>
+                <div class="hiw-flow-body">
+                  <span class="hiw-flow-tag">Step 5</span>
+                  <h3 class="hiw-flow-title">Get your Level 1–5 result</h3>
+                  <p class="hiw-flow-desc">Automated scoring publishes your level <span data-ib="resultTiming">within a
+                      few minutes of submission</span> on your candidate dashboard.</p>
+                </div>
+              </article>
+            </li>
+
+            <li class="hiw-flow-step">
+              <div class="hiw-flow-rail"><span class="hiw-flow-dot"></span></div>
+              <article class="hiw-flow-card">
+                <span class="hiw-flow-num" aria-hidden="true">06</span>
+                <div class="hiw-flow-icon"><i class="bi bi-award-fill"></i></div>
+                <div class="hiw-flow-body">
+                  <span class="hiw-flow-tag">Step 6</span>
+                  <h3 class="hiw-flow-title">Certificate &amp; placement visibility</h3>
+                  <p class="hiw-flow-desc">Download your QR-verifiable certificate. Higher levels are surfaced first to
+                    hiring partners across placement drives.</p>
+                </div>
+              </article>
+            </li>
+          </ol>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ LEVELS ============ -->
+  <section class="section section-alt" id="levels">
+    <div class="container">
+      <div class="section-head">
+        <span class="section-badge">Benchmarked Competency</span>
+        <h2>What each level means</h2>
+        <p>Your performance maps to one of five levels. This credential travels with your profile to recruiters.</p>
+      </div>
+
+      <!-- Cards dynamically built by script.js -->
+      <div class="levels-stack-container" id="levelGrid"></div>
+
+      <div class="levels-note">
+        <i class="bi bi-patch-check-fill"></i>
+        <span>Certificates will be awarded to all candidates who participate in the assessment.
+        </span>
+      </div>
+
+
+    </div>
+  </section>
+
+  <!-- ============ TEST PATTERN & SYLLABUS ============ -->
+  <section class="section" id="pattern">
+    <div class="container">
+      <div class="section-head">
+        <span class="section-badge">Exam Structure</span>
+        <h2>What the assessment covers</h2>
+        <p>100 questions designed by industry mentors to test practical aptitude and core depth.</p>
+      </div>
+
+      <div class="pattern-deck-wrap" id="patternDeckWrap">
+        <span class="pattern-orb pattern-orb--a" aria-hidden="true"></span>
+        <span class="pattern-orb pattern-orb--b" aria-hidden="true"></span>
+
+        <div class="pattern-deck-hint">
+          <i class="bi bi-cursor-fill"></i> Hover to explore all sections
+        </div>
+
+        <div class="pattern-deck" id="patternDeck">
+
+          <div class="pattern-card pc-1">
+            <div class="pattern-icon"><i class="bi bi-calculator"></i></div>
+            <h4>Quantitative &amp; Aptitude</h4>
+            <p>Speed, numerical reasoning, pattern recognition, and data interpretation required in technical roles.</p>
+            <div class="pattern-meta">
+              <span><i class="bi bi-check2-circle"></i> 30 Questions</span>
+              <span><i class="bi bi-clock"></i> ~18 mins</span>
+            </div>
+          </div>
+
+          <div class="pattern-card pc-2">
+            <div class="pattern-icon"><i class="bi bi-code-slash"></i></div>
+            <h4>Core Domain Knowledge</h4>
+            <p>Fundamentals of your selected stream: software engineering, web concepts, logic, and problem structuring.
+            </p>
+            <div class="pattern-meta">
+              <span><i class="bi bi-check2-circle"></i> 40 Questions</span>
+              <span><i class="bi bi-clock"></i> ~24 mins</span>
+            </div>
+          </div>
+
+          <div class="pattern-card pc-3">
+            <div class="pattern-icon"><i class="bi bi-puzzle"></i></div>
+            <h4>Logical Reasoning</h4>
+            <p>Analytical deductions, critical thinking, algorithm tracing, and situational decision making.</p>
+            <div class="pattern-meta">
+              <span><i class="bi bi-check2-circle"></i> 30 Questions</span>
+              <span><i class="bi bi-clock"></i> ~18 mins</span>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+
+  <!-- ============ FEE ============ -->
+  <section class="section section-alt" id="fee">
+    <div class="container">
+      <div class="section-head">
+        <span class="section-badge">All-Inclusive</span>
+        <h2>One fee, nothing after</h2>
+        <p>Pay once at registration. No hidden charges for evaluation, certificate issuance, or placement shortlisting.
+        </p>
+      </div>
+
+      <div class="row justify-content-center">
+        <div class="col-lg-10">
+          <div class="fee-card">
+            <div class="fee-price">
+              <span class="fee-label">Assessment Fee</span>
+              <span class="fee-amount" data-ib="fee">₹2999</span>
+              <span class="fee-gst-note" data-ib="gstNote"></span>
+              <span class="fee-note">Complete package: Exam, automated evaluation, verifiable certificate &amp;
+                placement drive access.</span>
+              <a href="register.php" class="btn btn-ib-accent w-100 mt-2">
+                <span>Register now</span>
+                <i class="bi bi-arrow-right"></i>
+              </a>
+              <div class="fee-secure-badge">
+                <i class="bi bi-shield-fill-check"></i>
+                <span>100% Secure Checkout</span>
+              </div>
+            </div>
+
+            <div class="fee-list">
+              <ul class="list-unstyled mb-0">
+                <li><i class="bi bi-check-circle-fill"></i> <span><strong data-ib="questions">100 questions</strong>
+                    online assessment with server-side timer</span></li>
+                <li><i class="bi bi-check-circle-fill"></i> <span>Automatic instant evaluation &amp; Level 1–5 score
+                    assignment</span></li>
+                <li><i class="bi bi-check-circle-fill"></i> <span>Verifiable digital certificate for LinkedIn &amp;
+                    Resume</span></li>
+                <li><i class="bi bi-check-circle-fill"></i> <span>Profile shared directly with 650+ corporate hiring
+                    partners</span></li>
+                <li><i class="bi bi-check-circle-fill"></i> <span>Full candidate dashboard with weekend slot
+                    selector</span></li>
+                <li><i class="bi bi-check-circle-fill"></i> <span>Dedicated candidate support till your result is
+                    published</span></li>
+              </ul>
+
+              <div class="payment-strip">
+                <span>Accepted Payment Modes:</span>
+                <div class="payment-icons">
+                  <i class="bi bi-wallet2" title="UPI (GPay / PhonePe / Paytm)"></i>
+                  <i class="bi bi-credit-card" title="Debit & Credit Cards"></i>
+                  <i class="bi bi-bank" title="NetBanking"></i>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ FAQ ============ -->
+  <section class="section" id="faq">
+    <div class="container">
+      <div class="section-head">
+        <span class="section-badge">Help &amp; Clarifications</span>
+        <h2>Questions candidates ask</h2>
+        <p>Have questions before you register? Everything you need to know about the exam and placement process.</p>
+      </div>
+
+      <div class="row justify-content-center">
+        <div class="col-lg-9">
+          <div class="accordion ib-accordion" id="faqBox">
+
+            <div class="accordion-item">
+              <h3 class="accordion-header">
+                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#f1"
+                  aria-expanded="false" aria-controls="f1">
+                  Who can take this assessment?
+                </button>
+              </h3>
+              <div id="f1" class="accordion-collapse collapse" data-bs-parent="#faqBox">
+                <div class="accordion-body">
+                  Any college student, fresher, or early-career graduate registered on InternBoot. There are no strict
+                  college tier or percentage cutoffs — everyone is evaluated purely on demonstrated aptitude and skill.
+                </div>
+              </div>
+            </div>
+
+            <div class="accordion-item">
+              <h3 class="accordion-header">
+                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#f2"
+                  aria-expanded="false" aria-controls="f2">
+                  When will my exam be scheduled?
+                </button>
+              </h3>
+              <div id="f2" class="accordion-collapse collapse" data-bs-parent="#faqBox">
+                <div class="accordion-body">
+                  A batch is formed once <span data-ib="batchSize">100</span> candidates enroll. Exams are held every
+                  weekend (Saturday and Sunday). Once your batch is formed, you can pick your preferred timing slot
+                  directly from your candidate dashboard.
+                </div>
+              </div>
+            </div>
+
+            <div class="accordion-item">
+              <h3 class="accordion-header">
+                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#f3"
+                  aria-expanded="false" aria-controls="f3">
+                  What does the exam paper contain?
+                </button>
+              </h3>
+              <div id="f3" class="accordion-collapse collapse" data-bs-parent="#faqBox">
+                <div class="accordion-body">
+                  The test contains <span data-ib="questions">100 multiple-choice questions</span> across Quantitative
+                  Aptitude, Technical Fundamentals, and Logical Reasoning, completed in <span data-ib="duration">60
+                    minutes</span>.
+                </div>
+              </div>
+            </div>
+
+            <div class="accordion-item">
+              <h3 class="accordion-header">
+                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#f4"
+                  aria-expanded="false" aria-controls="f4">
+                  What happens if my internet connection drops?
+                </button>
+              </h3>
+              <div id="f4" class="accordion-collapse collapse" data-bs-parent="#faqBox">
+                <div class="accordion-body">
+                  Your responses are autosaved on every question. If your connection drops, simply refresh or log back
+                  in on the same browser to resume right where you left off. The exam timer is securely maintained on
+                  our server.
+                </div>
+              </div>
+            </div>
+
+            <div class="accordion-item">
+              <h3 class="accordion-header">
+                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#f5"
+                  aria-expanded="false" aria-controls="f5">
+                  When do I get my result and certificate?
+                </button>
+              </h3>
+              <div id="f5" class="accordion-collapse collapse" data-bs-parent="#faqBox">
+                <div class="accordion-body">
+                  Evaluation is automated. Your score, Level assignment, and verifiable certificate are generated <span
+                    data-ib="resultTiming">within a few minutes of submission</span> on your candidate dashboard.
+                </div>
+              </div>
+            </div>
+
+            <div class="accordion-item">
+              <h3 class="accordion-header">
+                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#f6"
+                  aria-expanded="false" aria-controls="f6">
+                  Can I take the exam again if I want a higher level?
+                </button>
+              </h3>
+              <div id="f6" class="accordion-collapse collapse" data-bs-parent="#faqBox">
+                <div class="accordion-body">
+                  <span data-ib="retake">No, you can only take the test once per drive.</span> Retake windows and
+                  upgrade drives are announced periodically on your candidate dashboard.
+                </div>
+              </div>
+            </div>
+
+            <div class="accordion-item">
+              <h3 class="accordion-header">
+                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#f7"
+                  aria-expanded="false" aria-controls="f7">
+                  Is the certificate verifiable by employers?
+                </button>
+              </h3>
+              <div id="f7" class="accordion-collapse collapse" data-bs-parent="#faqBox">
+                <div class="accordion-body">
+                  Yes. Every certificate carries a unique verification identifier that recruiters can instantly check
+                  against our candidate records database.
+                </div>
+              </div>
+            </div>
+
+          </div>
+
+          <div class="faq-support-box">
+            <p class="fw-semibold">Still have a specific question before registering?</p>
+            <a href="contact.html" class="btn btn-ib-ghost btn-sm">
+              <i class="bi bi-chat-dots-fill me-1"></i> Contact Candidate Support
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ CTA ============ -->
+  <section class="ib-cta">
+    <div class="container text-center position-relative">
+      <div class="cta-urgency-pill">
+        <!-- <span class="pulse-dot"></span> -->
+        <span>Seats are allocated on a first-come, first-served basis</span>
+      </div>
+      <h2>Your seat opens when the batch fills.</h2>
+      <p>Register today so you are placed in the immediate upcoming weekend batch instead of the waitlist.</p>
+      <a href="register.php" class="btn btn-ib-accent btn-lg px-5">
+        <span>Register now for <span data-ib="feeShort">₹2999</span></span>
+        <i class="bi bi-arrow-right"></i>
+      </a>
+    </div>
+  </section>
+
+  <!-- ============ FOOTER ============ -->
+  <footer class="ib-footer">
+    <div class="container">
+      <div class="row g-4">
+        <div class="col-lg-4">
+          <a class="navbar-brand d-inline-flex mb-3 align-items-center" href="#home" aria-label="InternBoot Home">
+            <img src="assets/internboot-logo.png" alt="InternBoot" class="footer-logo-img">
+          </a>
+          <p class="footer-note">
+            InternBoot standardizes fresher talent assessment and connects ambitious graduates with verified internships
+            and full-time hiring partners across India.
+          </p>
+        </div>
+
+        <div class="col-6 col-lg-2">
+          <h4>Platform</h4>
+          <ul class="list-unstyled">
+            <li><a href="#how">How it works</a></li>
+            <li><a href="#levels">Level Tiers</a></li>
+            <li><a href="#pattern">Exam Pattern</a></li>
+            <li><a href="#fee">Fee Structure</a></li>
+            <li><a href="#faq">Candidate FAQs</a></li>
+          </ul>
+        </div>
+
+        <div class="col-6 col-lg-2">
+          <h4>Candidate</h4>
+          <ul class="list-unstyled">
+            <li><a href="register.php">Register</a></li>
+            <li><a href="login.php">Login</a></li>
+            <li><a href="dashboard.html">Dashboard</a></li>
+            <li><a href="contact.html">Support</a></li>
+          </ul>
+        </div>
+
+        <div class="col-lg-4">
+          <h4>Reach us</h4>
+          <ul class="list-unstyled footer-contact">
+            <li><i class="bi bi-envelope"></i> <a href="mailto:support@internboot.com">support@internboot.com</a></li>
+            <li><i class="bi bi-chat-dots"></i> <a href="contact.html">Candidate Support Desk</a></li>
+            <li><i class="bi bi-globe"></i> <a href="https://internboot.com">internboot.com</a></li>
+            <li><i class="bi bi-geo-alt"></i> <span>Noida, India</span></li>
+          </ul>
+          <div class="footer-social">
+            <a href="https://www.linkedin.com/showcase/internboot/" aria-label="LinkedIn"><i
+                class="bi bi-linkedin"></i></a>
+            <a href="https://www.instagram.com/employmentexpressllp/" aria-label="Instagram"><i
+                class="bi bi-instagram"></i></a>
+            <a href="https://www.youtube.com/@internboot" aria-label="YouTube"><i class="bi bi-youtube"></i></a>
+            <a href="https://www.facebook.com/internboot" aria-label="Facebook"><i class="bi bi-facebook"></i></a>
+          </div>
+        </div>
+      </div>
+
+      <div class="footer-base">
+        <span>&copy; <span id="year"></span> InternBoot — Employment Express Verband LLP</span>
+        <span><a href="#">Privacy Policy</a> · <a href="#">Terms of Service</a></span>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Back to top button -->
+  <a href="#home" class="to-top" id="toTop" aria-label="Back to top">
+    <i class="bi bi-arrow-up"></i>
+  </a>
+
+  <!-- Mobile Sticky Bottom Bar -->
+  <div class="mobile-sticky-bar" id="mobileStickyBar">
+    <div class="mobile-sticky-info">
+      <span class="mobile-sticky-label">Assessment Fee</span>
+      <span class="mobile-sticky-fee" data-ib="feeShort">₹2999</span>
+      <span class="mobile-sticky-gst" data-ib="gstNote"></span>
+    </div>
+    <a href="register.php" class="btn btn-ib-accent btn-sm px-4">
+      <span>Register now</span>
+      <i class="bi bi-arrow-right"></i>
+    </a>
+  </div>
+
+  <!-- Bootstrap 5 JS Bundle -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
+    integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
+    crossorigin="anonymous"></script>
+  <!-- Application Script -->
+  <script src="js/script.js"></script>
+</body>
+
+</html>

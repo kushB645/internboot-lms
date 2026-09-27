@@ -1,0 +1,462 @@
+// M4 Dashboard - Railway MySQL API Integration
+// Values available from the API are dynamic. Static descriptive UI text remains in dashboard.html.
+
+function initStudentResponsiveShell() {
+    const sidebar = document.querySelector("body > div aside");
+    const main = document.querySelector("body > div main");
+    const header = main?.querySelector("header");
+
+    if (!sidebar || !main || !header || sidebar.dataset.responsiveShellBound) return;
+    sidebar.dataset.responsiveShellBound = "1";
+
+    document.body.classList.add("overflow-x-hidden");
+    sidebar.classList.add("-translate-x-full", "transition-transform", "duration-200", "lg:translate-x-0");
+    main.classList.remove("ml-[293px]", "w-[calc(100%-293px)]");
+    main.classList.add("ml-0", "w-full", "lg:ml-[293px]", "lg:w-[calc(100%-293px)]");
+    header.classList.remove("left-[293px]");
+    header.classList.add("left-0", "lg:left-[293px]", "px-4", "sm:px-6");
+    main.querySelectorAll("table").forEach((table) => {
+        table.classList.add("min-w-[640px]");
+        table.parentElement?.classList.add("max-w-full", "overflow-x-auto");
+    });
+
+    const menuButton = document.createElement("button");
+    menuButton.type = "button";
+    menuButton.className = "inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-slate-200 text-slate-600 hover:bg-slate-50 lg:hidden";
+    menuButton.setAttribute("aria-label", "Open navigation");
+    menuButton.setAttribute("aria-expanded", "false");
+    menuButton.innerHTML = '<i data-lucide="menu" class="h-5 w-5"></i>';
+
+    const headerTitle = header.firstElementChild;
+    if (headerTitle) {
+        headerTitle.classList.add("min-w-0");
+        headerTitle.prepend(menuButton);
+        headerTitle.classList.add("gap-2", "sm:gap-3");
+    }
+
+    const overlay = document.createElement("button");
+    overlay.type = "button";
+    overlay.className = "fixed inset-0 z-40 hidden bg-slate-900/40 lg:hidden";
+    overlay.setAttribute("aria-label", "Close navigation");
+    document.body.appendChild(overlay);
+
+    const close = () => {
+        sidebar.classList.add("-translate-x-full");
+        overlay.classList.add("hidden");
+        menuButton.setAttribute("aria-expanded", "false");
+    };
+    const open = () => {
+        sidebar.classList.remove("-translate-x-full");
+        overlay.classList.remove("hidden");
+        menuButton.setAttribute("aria-expanded", "true");
+    };
+
+    menuButton.addEventListener("click", () => {
+        if (sidebar.classList.contains("-translate-x-full")) open();
+        else close();
+    });
+    overlay.addEventListener("click", close);
+    sidebar.querySelectorAll("a").forEach((link) => link.addEventListener("click", close));
+    window.addEventListener("resize", () => {
+        if (window.innerWidth >= 1024) close();
+    });
+
+    if (window.lucide && typeof window.lucide.createIcons === "function") {
+        window.lucide.createIcons();
+    }
+}
+
+document.addEventListener("DOMContentLoaded", async () => {
+    initStudentResponsiveShell();
+    try {
+        const response = await fetch("api/dashboard.php", {
+            method: "GET",
+            headers: { "Accept": "application/json" }
+        });
+
+        if (response.status === 401) {
+            handleUnauthenticated("Session expired or authentication required. Please <a href='login.php' style='color:#1652d6;text-decoration:underline;font-weight:700;'>log in as candidate</a> to access your dashboard.");
+            return;
+        }
+
+        const payload = await response.json();
+
+        const isSuccess = payload.status === "success";
+        if (!response.ok || !isSuccess || !payload.data) {
+            throw new Error(payload.message || "Unable to load dashboard data.");
+        }
+
+        const source = payload.data;
+
+        fillSection("candidate", source.candidate);
+        fillSection("payment", source.payment);
+        fillSection("enrollment", source.enrollment);
+        fillSection("batch", source.batch);
+        fillSection("exam", source.exam);
+        fillSection("result", source.result);
+        fillSection("certificate", source.certificate);
+        fillSection("placement", source.placement);
+
+        updateAvatar(source.candidate?.name);
+        updateStatusCards(source);
+        updateLearningJourney(source);
+        renderCertificateState(source);
+        renderProfileState(source);
+        renderEnrollmentState(source);
+    } catch (error) {
+        console.error("Dashboard API Error:", error);
+
+        const errorBox = document.querySelector("[data-api-error]");
+        if (errorBox) {
+            errorBox.textContent = "Unable to load dashboard data. Please try again.";
+            errorBox.style.display = "block";
+        }
+    }
+});
+
+document.addEventListener("DOMContentLoaded", () => {
+    if (window.lucide && typeof window.lucide.createIcons === "function") {
+        window.lucide.createIcons();
+    }
+});
+
+function handleUnauthenticated(message) {
+    updateAvatar("—");
+    document.querySelectorAll('[data-candidate="name"]').forEach((el) => {
+        el.textContent = "Unauthenticated";
+    });
+
+    let alertBox = document.getElementById("dashboard-alert");
+    if (!alertBox) {
+        const content = document.querySelector(".content");
+        if (content) {
+            alertBox = document.createElement("div");
+            alertBox.id = "dashboard-alert";
+            alertBox.style.cssText = "margin-bottom: 20px; padding: 14px 18px; border: 1px solid #ef4444; background: #fef2f2; color: #991b1b; border-radius: 8px; font-size: 14px; line-height: 1.5;";
+            content.insertBefore(alertBox, content.firstChild);
+        }
+    }
+    if (alertBox) {
+        alertBox.innerHTML = message || "Session expired or authentication required. Please <a href='login.php' style='color:#1652d6;text-decoration:underline;font-weight:700;'>log in as candidate</a> to access your dashboard.";
+        alertBox.style.display = "block";
+    }
+}
+
+function fillSection(attribute, data) {
+    if (!data) return;
+
+    document.querySelectorAll(`[data-${attribute}]`).forEach((el) => {
+        const key = el.dataset[attribute];
+
+        if (data[key] !== undefined && data[key] !== null) {
+            el.textContent = data[key];
+        }
+    });
+}
+
+function updateAvatar(name) {
+    const avatar = document.querySelector('[data-candidate="initials"]');
+    if (!avatar || !name || name === "—") return;
+
+    const initials = name
+        .trim()
+        .split(/\s+/)
+        .filter(Boolean)
+        .slice(0, 2)
+        .map((part) => part[0].toUpperCase())
+        .join("");
+
+    avatar.textContent = initials || "--";
+}
+
+function updateStatusCards(source) {
+    document.querySelectorAll("[data-status]").forEach((el) => {
+        const parts = el.dataset.status.split(".");
+        if (parts.length === 2 && source[parts[0]] && source[parts[0]][parts[1]] !== undefined) {
+            el.textContent = source[parts[0]][parts[1]];
+        }
+    });
+}
+
+function updateLearningJourney(source) {
+    const statuses = {
+        payment: source.payment?.status,
+        enrollment: source.enrollment?.status,
+        batch: source.batch?.status,
+        exam: source.exam?.status,
+        result: source.result?.status,
+        certificate: source.certificate?.status,
+        placement: source.placement?.applicable
+            ? (source.placement.statusLabel || source.placement.status || 'Eligible')
+            : 'Not Applicable'
+    };
+
+    Object.entries(statuses).forEach(([key, status]) => {
+        const badge = document.querySelector(`[data-journey="${key}"]`);
+        const step = document.querySelector(`[data-step="${key}"]`);
+        if (!badge) return;
+
+        badge.textContent = journeyLabel(key, status);
+        badge.className = `badge ${journeyClass(status)}`;
+
+        if (step) {
+            step.classList.toggle("done", isCompleted(key, status));
+        }
+    });
+}
+
+function journeyLabel(key, status) {
+    if (!status || status === "—") return "—";
+
+    if (key === "payment") return status === "Paid" ? "Completed" : status;
+    if (key === "enrollment") return status === "Enrolled" ? "Completed" : status;
+    if (key === "batch") return status === "Assigned" ? "Completed" : status;
+    if (key === "exam") return status === "Completed" ? "Completed" : status;
+    if (key === "result") return status === "Completed" ? "Completed" : status;
+    if (key === "certificate") return status === "Issued" ? "Completed" : status;
+    if (key === "placement") return status;
+
+    return status;
+}
+
+function journeyClass(status) {
+    if (["Paid", "Enrolled", "Assigned", "Completed", "Issued", "Placed"].includes(status)) return "green";
+    if (["Upcoming", "Scheduled", "In Progress", "Eligible", "Shortlisted", "Interviewing"].includes(status)) return "blue";
+    if (["Not Applicable"].includes(status)) return "gray";
+    return "gray";
+}
+
+function isCompleted(key, status) {
+    return (
+        (key === "payment" && status === "Paid") ||
+        (key === "enrollment" && status === "Enrolled") ||
+        (key === "batch" && status === "Assigned") ||
+        (key === "exam" && status === "Completed") ||
+        (key === "result" && status === "Completed") ||
+        (key === "certificate" && status === "Issued") ||
+        (key === "placement" && status === "Placed")
+    );
+}
+
+function bindCandidateLogout() {
+    document.querySelectorAll("a.logout, a[href*='logout.php']").forEach((link) => {
+        if (link.dataset.logoutBound) return;
+        link.dataset.logoutBound = "1";
+        link.addEventListener("click", async (e) => {
+            e.preventDefault();
+            try {
+                let token = null;
+                try {
+                    const csrfRes = await fetch("api/auth/csrf.php", {
+                        credentials: "same-origin",
+                        headers: { Accept: "application/json" }
+                    });
+                    const csrfData = await csrfRes.json();
+                    token = csrfData.data?.token || null;
+                } catch {}
+                if (!token) {
+                    const m7Res = await fetch("/api/admin/evaluate.php?action=csrf", {
+                        credentials: "same-origin",
+                        headers: { Accept: "application/json" }
+                    });
+                    const m7Data = await m7Res.json();
+                    token = m7Data.data?.token || null;
+                }
+                await fetch("api/auth/logout.php", {
+                    method: "POST",
+                    headers: {
+                        "Accept": "application/json",
+                        "X-CSRF-Token": token || ""
+                    }
+                });
+            } catch (err) {
+                console.error("Logout failed:", err);
+            } finally {
+                window.location.href = "/login.php";
+            }
+        });
+    });
+}
+
+if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", bindCandidateLogout);
+} else {
+    bindCandidateLogout();
+}
+
+function renderCertificateState(source) {
+    const certStateContainer = document.getElementById("certificate-state-container");
+    const certPreviewContainer = document.getElementById("certificate-preview-container");
+    const dashCertDownload = document.getElementById("dashboard-certificate-download");
+
+    if (source.certificate && source.certificate.status === "Issued" && source.result && source.result.id) {
+        const downloadUrl = `api/admin/certificate_pdf.php?result_id=${source.result.id}`;
+        
+        if (certStateContainer) {
+            certStateContainer.innerHTML = `
+                <div class='empty' style='padding: 40px;'>
+                    <div style='font-size:42px'>🎓</div>
+                    <h2 style='color:#17243a; margin-top: 10px;'>Certificate Issued</h2>
+                    <p style='margin-bottom: 20px;'>Congratulations! Your certificate is ready to download.</p>
+                    <a href="${downloadUrl}" class="button" target="_blank" style="background: #1652d6; color: white; padding: 10px 20px; text-decoration: none; border-radius: 4px; font-weight: bold; display: inline-block;">Download Certificate (PDF)</a>
+                </div>
+            `;
+        }
+
+        if (certPreviewContainer) {
+            certPreviewContainer.style.display = "flex";
+            const badge = document.getElementById("certificate-status-badge");
+            if (badge) {
+                badge.textContent = "Issued";
+                badge.className = "badge green";
+            }
+        }
+
+        if (dashCertDownload) {
+            dashCertDownload.innerHTML = `<a href="${downloadUrl}" target="_blank" style="color: #1652d6; font-weight: bold;">(Download)</a>`;
+        }
+    } else {
+        if (certStateContainer) {
+            certStateContainer.innerHTML = `
+                <div class='empty'>
+                    <div style='font-size:42px'>🏅</div>
+                    <h2 style='color:#17243a'>No Certificate Issued</h2>
+                    <p>Your certificate will appear here after successful evaluation and level assignment.</p>
+                </div>
+            `;
+        }
+        if (certPreviewContainer) {
+            certPreviewContainer.style.display = "none";
+        }
+        if (dashCertDownload) {
+            dashCertDownload.innerHTML = "";
+        }
+    }
+}
+
+function renderProfileState(source) {
+    if (!source) return;
+
+    const levelBadge = document.getElementById("profile-level-badge") || document.querySelector("[data-result='level_assigned']");
+    if (levelBadge) {
+        const assignedLevel = source.result?.level_assigned ||
+            (source.result?.level && source.result.level !== "—" ? source.result.level : null) ||
+            source.candidate?.level_assigned ||
+            (source.candidate?.level && source.candidate.level !== "—" ? source.candidate.level : null);
+
+        if (assignedLevel) {
+            levelBadge.textContent = assignedLevel;
+            levelBadge.className = "badge blue";
+        } else {
+            levelBadge.textContent = "Not assigned yet";
+            levelBadge.className = "badge gray";
+        }
+    }
+
+    const profileBadge = document.getElementById("profile-status-badge") || document.querySelector("[data-candidate='profileStatus']");
+    if (profileBadge) {
+        const pStatus = source.candidate?.profileStatus;
+        if (pStatus === "Verified") {
+            profileBadge.textContent = "Verified";
+            profileBadge.className = "badge green";
+        } else if (pStatus) {
+            profileBadge.textContent = pStatus;
+            profileBadge.className = "badge gray";
+        } else {
+            profileBadge.textContent = "Basic Profile";
+            profileBadge.className = "badge gray";
+        }
+    }
+
+    const certContent = document.getElementById("profile-certificate-content");
+    if (certContent) {
+        const cert = source.certificate;
+        const result = source.result;
+        const resultId = result?.id || cert?.result_id;
+        const isIssued = cert && (cert.status === "Issued" || (cert.number && cert.number !== "Not issued" && cert.number !== "—"));
+
+        if (isIssued && resultId) {
+            const downloadUrl = `api/admin/certificate_pdf.php?result_id=${resultId}`;
+            const certNumber = cert.number || cert.certificate_number || "—";
+            const certLevel = cert.level || (result?.level && result.level !== "—" ? result.level : "—");
+            const issueDate = cert.issueDate || cert.issue_date || "—";
+
+            certContent.innerHTML = `
+                <div class="row"><span class="label">Certificate Number</span><span class="value"><strong>${certNumber}</strong></span></div>
+                <div class="row"><span class="label">Level</span><span class="value"><span class="badge blue">${certLevel}</span></span></div>
+                <div class="row"><span class="label">Issue Date</span><span class="value">${issueDate}</span></div>
+                <div class="row" style="align-items: center;"><span class="label">Certificate PDF</span><span class="value"><a href="${downloadUrl}" class="button" target="_blank" style="background: #1652d6; color: white; padding: 6px 14px; text-decoration: none; border-radius: 4px; font-weight: bold; display: inline-block; font-size: 13px;">Download Certificate</a></span></div>
+            `;
+        } else {
+            certContent.innerHTML = `
+                <div class="row"><span class="label">Status</span><span class="value"><span class="badge gray">Not issued yet</span></span></div>
+            `;
+        }
+    }
+}
+
+function renderEnrollmentState(source) {
+    if (!source) return;
+
+    const hero = document.getElementById("enrollment-hero");
+    const statusBadge = document.getElementById("enrollment-status-badge");
+    const nextStep = document.getElementById("enrollment-next-step");
+
+    if (!hero && !statusBadge) return;
+
+    const heroTitle = document.getElementById("enrollment-hero-title") || hero?.querySelector("h2");
+    const heroDesc = document.getElementById("enrollment-hero-desc") || hero?.querySelector("p");
+
+    const enrStatus = source.enrollment?.status;
+    const payStatus = source.payment?.status;
+    const hasEnrollmentId = source.enrollment?.id && source.enrollment.id !== "—";
+
+    // 1. Confirmed (payment verified + enrollment created/active)
+    if (enrStatus === "Enrolled" || enrStatus === "Confirmed" || enrStatus === "Active" || (hasEnrollmentId && enrStatus !== "Pending" && enrStatus !== "Not Enrolled")) {
+        if (heroTitle) heroTitle.textContent = "Enrollment Confirmed";
+        if (heroDesc) heroDesc.textContent = "Your payment has been verified and your enrollment has been created successfully.";
+        if (statusBadge) {
+            statusBadge.textContent = enrStatus && enrStatus !== "—" ? enrStatus : "Enrolled";
+            statusBadge.className = "badge green";
+        }
+        if (nextStep) {
+            nextStep.innerHTML = "Your next step is batch and slot assignment. You will see the details here once they are assigned.";
+        }
+    }
+    // 2. Pending (payment done, enrollment processing)
+    else if (enrStatus === "Pending" || (payStatus === "Paid" && !hasEnrollmentId)) {
+        if (heroTitle) heroTitle.textContent = "Enrollment Pending";
+        if (heroDesc) heroDesc.textContent = "Your payment has been received and your enrollment is currently being processed.";
+        if (statusBadge) {
+            statusBadge.textContent = "Pending";
+            statusBadge.className = "badge yellow";
+        }
+        if (nextStep) {
+            nextStep.innerHTML = "Your enrollment is pending verification. Please check back shortly once your batch is allocated.";
+        }
+    }
+    // 3. Failed (payment not verified / failed)
+    else if (payStatus === "Failed" || enrStatus === "Failed") {
+        if (heroTitle) heroTitle.textContent = "Payment Failed";
+        if (heroDesc) heroDesc.textContent = "Your payment could not be verified. Please complete your payment to proceed with enrollment.";
+        if (statusBadge) {
+            statusBadge.textContent = "Failed";
+            statusBadge.className = "badge gray";
+        }
+        if (nextStep) {
+            nextStep.innerHTML = 'Please visit <a href="payment.html" style="color:#1652d6;font-weight:700;">Payments</a> to retry your payment and complete your enrollment.';
+        }
+    }
+    // 4. Not Started / Not Enrolled
+    else {
+        if (heroTitle) heroTitle.textContent = "Enrollment Not Started";
+        if (heroDesc) heroDesc.textContent = "Please complete your payment to verify and confirm your enrollment.";
+        if (statusBadge) {
+            statusBadge.textContent = enrStatus && enrStatus !== "—" ? enrStatus : "Not Enrolled";
+            statusBadge.className = "badge gray";
+        }
+        if (nextStep) {
+            nextStep.innerHTML = 'Please visit <a href="payment.html" style="color:#1652d6;font-weight:700;">Payments</a> to pay the registration fee and start your enrollment.';
+        }
+    }
+}

@@ -1,0 +1,367 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Admin Dashboard - InternBoot</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              "intern-blue": "#2563eb",
+            },
+          },
+        },
+      };
+    </script>
+    <script src="https://unpkg.com/lucide@0.383.0/dist/umd/lucide.min.js"></script>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/flatpickr/4.6.13/flatpickr.min.css"
+    />
+    <style>
+      .flatpickr-day.flatpickr-disabled {
+        opacity: 0.35;
+        text-decoration: line-through;
+      }
+    </style>
+  </head>
+  <body class="bg-slate-50 text-slate-900 flex h-screen overflow-hidden">
+    <!-- Sidebar -->
+    <aside
+      id="sidebar"
+      class="w-64 bg-white border-r border-slate-200 h-full flex-shrink-0 transition-transform absolute lg:relative z-40 -translate-x-full lg:translate-x-0"
+    >
+      <div class="h-16 flex items-center px-6 border-b border-slate-200">
+        <img
+          src="../assets/internboot-logo.png"
+          alt="InternBoot Logo"
+          class="h-8"
+        />
+      </div>
+      <nav class="p-4 space-y-1">
+        <a
+          href="index.html"
+          class="flex items-center gap-3 px-3 py-2 rounded-lg text-slate-600 hover:bg-slate-50 transition"
+          ><i data-lucide="layout-dashboard" class="h-5 w-5"></i> Dashboard</a
+        >
+        <a
+          href="candidates.html"
+          class="flex items-center gap-3 px-3 py-2 rounded-lg text-slate-600 hover:bg-slate-50 transition"
+          ><i data-lucide="users" class="h-5 w-5"></i> Candidates</a
+        >
+        <a
+          href="results.html"
+          class="flex items-center gap-3 px-3 py-2 rounded-lg text-slate-600 hover:bg-slate-50 transition"
+          ><i data-lucide="file-check-2" class="h-5 w-5"></i> Results</a
+        >
+        <a
+          href="certificates.html"
+          class="flex items-center gap-3 px-3 py-2 rounded-lg text-slate-600 hover:bg-slate-50 transition"
+          ><i data-lucide="award" class="h-5 w-5"></i> Certificates</a
+        >
+        <a
+          href="questions.html"
+          class="flex items-center gap-3 px-3 py-2 rounded-lg text-slate-600 hover:bg-slate-50 transition"
+          ><i data-lucide="help-circle" class="h-5 w-5"></i> Questions</a
+        >
+        <a
+          href="batches.html"
+          class="flex items-center gap-3 px-3 py-2 rounded-lg bg-intern-blue font-medium text-white transition"
+          ><i data-lucide="calendar-days" class="h-5 w-5"></i> Batches</a
+        >
+        <a
+          href="placement.html"
+          class="flex items-center gap-3 px-3 py-2 rounded-lg text-slate-600 hover:bg-slate-50 transition"
+          ><i data-lucide="building-2" class="h-5 w-5"></i> Placement</a
+        >
+      </nav>
+    </aside>
+
+    <!-- Overlay -->
+    <div
+      id="sidebarOverlay"
+      class="fixed inset-0 bg-slate-900/50 z-30 hidden lg:hidden"
+    ></div>
+
+    <!-- Main Content -->
+    <div class="flex-1 flex flex-col h-screen overflow-hidden">
+      <!-- Header -->
+      <header
+        class="h-16 bg-white border-b border-slate-200 flex items-center justify-between px-6 flex-shrink-0"
+      >
+        <div class="flex items-center gap-4">
+          <button
+            id="menuButton"
+            class="lg:hidden text-slate-500 hover:text-slate-700"
+          >
+            <i data-lucide="menu" class="h-6 w-6"></i>
+          </button>
+          <h1 class="text-xl font-semibold text-slate-800">Admin Dashboard</h1>
+        </div>
+
+        <div class="flex items-center gap-4 relative">
+          <button
+            id="notificationButton"
+            class="text-slate-500 hover:text-slate-700 relative"
+          >
+            <i data-lucide="bell" class="h-5 w-5"></i>
+          </button>
+          <div
+            id="notificationDropdown"
+            class="hidden absolute right-12 top-full mt-2 w-64 bg-white rounded-xl shadow-lg border border-slate-100 p-4 z-50"
+          >
+            <p class="text-sm text-slate-500 text-center">
+              No new notifications
+            </p>
+          </div>
+
+          <button id="userButton" class="flex items-center gap-2">
+            <div
+              id="adminAvatar"
+              class="h-8 w-8 rounded-full bg-intern-blue text-white flex items-center justify-center font-medium overflow-hidden"
+            >
+              <span id="adminAvatarInitial">A</span>
+              <img
+                id="adminAvatarImage"
+                src=""
+                alt="Avatar"
+                class="h-full w-full object-cover hidden"
+              />
+            </div>
+            <span
+              id="adminHeaderName"
+              class="text-sm font-medium text-slate-700 hidden sm:block"
+              >Admin</span
+            >
+            <i data-lucide="chevron-down" class="h-4 w-4 text-slate-400"></i>
+          </button>
+
+          <div
+            id="userDropdown"
+            class="hidden absolute right-0 top-full mt-2 w-48 bg-white rounded-xl shadow-lg border border-slate-100 py-1 z-50"
+          >
+            <a
+              href="setting.html"
+              class="block px-4 py-2 text-sm text-slate-700 hover:bg-slate-50"
+              >Profile</a
+            >
+            <div class="border-t border-slate-100 my-1"></div>
+            <a
+              href="#"
+              class="block px-4 py-2 text-sm text-red-600 hover:bg-slate-50"
+              >Logout</a
+            >
+          </div>
+        </div>
+      </header>
+
+      <!-- Main Scrollable Area -->
+      <main class="flex-1 overflow-auto bg-slate-50">
+        <div class="p-6">
+          <h2 class="text-2xl font-semibold text-slate-800 mb-6">
+            Batches & Scheduling
+          </h2>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+            <div
+              class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100"
+            >
+              <p class="text-sm text-slate-500 mb-1">
+                Eligible Candidates Awaiting Batch
+              </p>
+              <h3
+                class="text-3xl font-bold text-amber-500"
+                id="eligibleCandidateCount"
+              >
+                0
+              </h3>
+            </div>
+            <div
+              class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100"
+            >
+              <p class="text-sm text-slate-500 mb-1">
+                Available Slots (Capacity)
+              </p>
+              <h3
+                class="text-3xl font-bold text-green-600"
+                id="availableSlotCount"
+              >
+                0
+              </h3>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+            <div class="lg:col-span-1 flex flex-col gap-6">
+              <div
+                class="bg-white rounded-2xl shadow-sm border border-slate-100 p-6 flex flex-col"
+              >
+                <h3 class="font-semibold text-slate-800 mb-4">
+                  Create Provisional Slot
+                </h3>
+                <form id="createProvisionalSlotForm" class="space-y-4">
+                  <div>
+                    <label class="block text-xs font-medium text-slate-700 mb-1"
+                      >Assessment</label
+                    >
+                    <select
+                      id="assessmentSelect"
+                      name="assessment_id"
+                      class="w-full text-sm border-slate-200 rounded-lg focus:ring-primary focus:border-primary px-3 py-2 border"
+                    ></select>
+                  </div>
+                  <div>
+                    <label class="block text-xs font-medium text-slate-700 mb-1"
+                      >Exam Date (Sat/Sun)</label
+                    >
+                    <input
+                      type="date"
+                      name="exam_date"
+                      required
+                      class="w-full text-sm border-slate-200 rounded-lg focus:ring-primary focus:border-primary px-3 py-2 border"
+                    />
+                  </div>
+                  <div class="grid grid-cols-2 gap-4">
+                    <div>
+                      <label
+                        class="block text-xs font-medium text-slate-700 mb-1"
+                        >Start Time</label
+                      >
+                      <input
+                        type="time"
+                        name="start_time"
+                        value="10:00"
+                        class="w-full text-sm border-slate-200 rounded-lg focus:ring-primary focus:border-primary px-3 py-2 border"
+                      />
+                    </div>
+                    <div>
+                      <label
+                        class="block text-xs font-medium text-slate-700 mb-1"
+                        >Capacity</label
+                      >
+                      <input
+                        type="number"
+                        name="capacity"
+                        value="100"
+                        min="10"
+                        required
+                        class="w-full text-sm border-slate-200 rounded-lg focus:ring-primary focus:border-primary px-3 py-2 border"
+                      />
+                    </div>
+                  </div>
+                  <button
+                    type="submit"
+                    class="w-full bg-primary hover:bg-primary/90 text-white font-medium py-2 px-4 rounded-lg text-sm transition-colors flex items-center justify-center gap-2"
+                  >
+                    <i class="ri-calendar-check-line"></i> Create Provisional
+                    Slot
+                  </button>
+                </form>
+              </div>
+              <div
+                class="bg-white rounded-2xl shadow-sm border border-slate-100 p-6 flex flex-col flex-1"
+              >
+                <h3 class="font-semibold text-slate-800 mb-4">
+                  Pending Batch Requests
+                </h3>
+                <p class="text-xs text-slate-500 mb-4">
+                  Batches can only be created once a threshold (e.g., 100) of
+                  candidates request the same date.
+                </p>
+                <div class="overflow-y-auto flex-1">
+                  <table class="w-full text-left text-sm text-slate-600">
+                    <thead class="bg-slate-50 text-slate-500 uppercase text-xs">
+                      <tr>
+                        <th class="px-4 py-2 font-medium">Req. Date</th>
+                        <th class="px-4 py-2 font-medium">Count</th>
+                        <th class="px-4 py-2 font-medium">Action</th>
+                      </tr>
+                    </thead>
+                    <tbody
+                      id="pendingRequestsTableBody"
+                      class="divide-y divide-slate-100"
+                    >
+                      <tr>
+                        <td
+                          colspan="3"
+                          class="px-4 py-4 text-center text-slate-500"
+                        >
+                          Loading pending requests...
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+            <div class="lg:col-span-2">
+              <div
+                class="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden h-full flex flex-col"
+              >
+                <div
+                  class="px-6 py-4 border-b border-slate-100 flex justify-between items-center"
+                >
+                  <h3 class="font-semibold text-slate-800">Exam Slots</h3>
+                </div>
+                <div class="overflow-x-auto flex-1">
+                  <table class="w-full text-left text-sm text-slate-600">
+                    <thead class="bg-slate-50 text-slate-500 uppercase text-xs">
+                      <tr>
+                        <th class="px-6 py-3 font-medium">Batch</th>
+                        <th class="px-6 py-3 font-medium">Time</th>
+                        <th class="px-6 py-3 font-medium">Cap</th>
+                        <th class="px-6 py-3 font-medium">Alloc</th>
+                        <th class="px-6 py-3 font-medium">Left</th>
+                        <th class="px-6 py-3 font-medium">Status</th>
+                      </tr>
+                    </thead>
+                    <tbody
+                      id="slotsTableBody"
+                      class="divide-y divide-slate-100"
+                    ></tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div
+            class="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden"
+          >
+            <div class="px-6 py-4 border-b border-slate-100">
+              <h3 class="font-semibold text-slate-800">Allocate Candidates</h3>
+              <p class="text-xs text-slate-500 mt-1">
+                Assign eligible candidates to available exam slots.
+              </p>
+            </div>
+            <div class="overflow-x-auto">
+              <table class="w-full text-left text-sm text-slate-600">
+                <thead class="bg-slate-50 text-slate-500 uppercase text-xs">
+                  <tr>
+                    <th class="px-6 py-3 font-medium">Candidate</th>
+                    <th class="px-6 py-3 font-medium">Level</th>
+                    <th class="px-6 py-3 font-medium">Status</th>
+                    <th class="px-6 py-3 font-medium min-w-[200px]">
+                      Slot Selection
+                    </th>
+                    <th class="px-6 py-3 font-medium w-24">Action</th>
+                  </tr>
+                </thead>
+                <tbody
+                  id="allocationTableBody"
+                  class="divide-y divide-slate-100"
+                ></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </main>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/flatpickr/4.6.13/flatpickr.min.js"></script>
+    <script src="admin.js"></script>
+  </body>
+</html>

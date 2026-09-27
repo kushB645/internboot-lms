@@ -1,0 +1,755 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+
+    <title>InternBoot | Payments</title>
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              "intern-blue": "#2563eb",
+              "intern-dark": "#17243a",
+            },
+          },
+        },
+      };
+    </script>
+
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <style>
+      html {
+        overflow-x: hidden;
+      }
+
+      body {
+        margin: 0;
+        overflow-x: hidden;
+      }
+
+      /* Remove sidebar scrollbar completely */
+      aside,
+      nav {
+        scrollbar-width: none;
+        -ms-overflow-style: none;
+      }
+
+      aside::-webkit-scrollbar,
+      nav::-webkit-scrollbar {
+        display: none;
+        width: 0;
+        height: 0;
+      }
+    </style>
+  </head>
+
+  <body class="bg-[#eef3ff] text-slate-900 antialiased">
+    <div class="min-h-screen">
+      <!-- =====================================================
+           SIDEBAR
+      ====================================================== -->
+
+      <aside
+        class="fixed inset-y-0 left-0 z-50 hidden lg:flex w-[293px] bg-gradient-to-b from-[#294fae] to-[#347de9] text-white flex-col overflow-hidden"
+      >
+        <!-- Logo -->
+        <div
+          class="h-16 px-6 flex items-center border-b border-white/10 shrink-0"
+        >
+          <a href="dashboard.html" class="flex items-center gap-3">
+            <div
+              class="w-11 h-11 rounded-xl bg-white flex items-center justify-center shrink-0 overflow-hidden"
+            >
+              <img
+                src="assets/internboot-logo.png"
+                alt="InternBoot logo"
+                class="h-9 w-auto object-contain"
+              />
+            </div>
+
+            <div>
+              <div class="text-lg font-bold leading-tight">Internboot</div>
+
+              <div class="text-xs text-blue-100">Student Dashboard</div>
+            </div>
+          </a>
+        </div>
+
+        <!-- Main Navigation -->
+        <nav class="flex-1 min-h-0 p-4 space-y-1 overflow-hidden">
+          <!-- Dashboard -->
+          <a
+            class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-blue-50 hover:bg-white/10 hover:text-white transition-all duration-200"
+            href="dashboard.html"
+            data-page="dashboard.html"
+          >
+            <i data-lucide="layout-dashboard" class="w-5 h-5 shrink-0"></i>
+
+            <span>Dashboard</span>
+          </a>
+
+          <!-- My Profile -->
+          <a
+            class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-blue-50 hover:bg-white/10 hover:text-white transition-all duration-200"
+            href="profile.html"
+            data-page="profile.html"
+          >
+            <i data-lucide="user-round" class="w-5 h-5 shrink-0"></i>
+
+            <span>My Profile</span>
+          </a>
+
+          <!-- Payments -->
+          <a
+            class="flex items-center gap-3 px-3 py-2.5 rounded-xl bg-white/20 text-white font-medium shadow-sm"
+            href="payment.html"
+            data-page="payment.html"
+          >
+            <i data-lucide="credit-card" class="w-5 h-5 shrink-0"></i>
+
+            <span>Payments</span>
+
+            <span class="ml-auto w-2 h-2 rounded-full bg-blue-200"></span>
+          </a>
+
+          <!-- Enrollment -->
+          <a
+            class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-blue-50 hover:bg-white/10 hover:text-white transition-all duration-200"
+            href="enrollment.html"
+            data-page="enrollment.html"
+          >
+            <i data-lucide="clipboard-check" class="w-5 h-5 shrink-0"></i>
+
+            <span>Enrollment</span>
+          </a>
+
+          <!-- Batches & Slots -->
+          <a
+            class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-blue-50 hover:bg-white/10 hover:text-white transition-all duration-200"
+            href="batches-slots.html"
+            data-page="batches-slots.html"
+          >
+            <i data-lucide="calendar-days" class="w-5 h-5 shrink-0"></i>
+
+            <span>Batches &amp; Slots</span>
+          </a>
+
+          <!-- Exam -->
+          <a
+            class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-blue-50 hover:bg-white/10 hover:text-white transition-all duration-200"
+            href="exam.html"
+            data-page="exam.html"
+          >
+            <i data-lucide="file-pen-line" class="w-5 h-5 shrink-0"></i>
+
+            <span>Exam</span>
+          </a>
+
+          <!-- Results -->
+          <a
+            class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-blue-50 hover:bg-white/10 hover:text-white transition-all duration-200"
+            href="results.html"
+            data-page="results.html"
+          >
+            <i
+              data-lucide="chart-no-axes-combined"
+              class="w-5 h-5 shrink-0"
+            ></i>
+
+            <span>Results</span>
+          </a>
+
+          <!-- Certificates -->
+          <a
+            class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-blue-50 hover:bg-white/10 hover:text-white transition-all duration-200"
+            href="certificates.html"
+            data-page="certificates.html"
+          >
+            <i data-lucide="award" class="w-5 h-5 shrink-0"></i>
+
+            <span>Certificates</span>
+          </a>
+
+          <!-- Placement -->
+          <a
+            class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-blue-50 hover:bg-white/10 hover:text-white transition-all duration-200"
+            href="placement.html"
+            data-page="placement.html"
+          >
+            <i data-lucide="briefcase-business" class="w-5 h-5 shrink-0"></i>
+
+            <span>Placement</span>
+          </a>
+        </nav>
+
+        <!-- Bottom Section -->
+        <div class="shrink-0 border-t border-white/10 p-4 space-y-2">
+          <!-- Live Student Profile -->
+          <a
+            href="profile.html"
+            class="flex items-center gap-3 rounded-xl bg-white/10 border border-white/10 px-3 py-2.5 hover:bg-white/15 transition-all duration-200"
+          >
+            <!-- Avatar -->
+            <div
+              id="sidebar-student-avatar"
+              class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-indigo-300 to-purple-400 text-white font-bold text-base"
+            >
+              <span data-candidate="initials">KB</span>
+            </div>
+
+            <!-- Student Details -->
+            <div class="min-w-0 flex-1">
+              <p
+                id="sidebar-student-name"
+                data-candidate="name"
+                class="truncate text-sm font-bold leading-tight text-white"
+              >
+                Student
+              </p>
+
+              <p class="mt-0.5 text-xs leading-tight text-blue-100/80">
+                Student
+              </p>
+            </div>
+
+            <!-- Online Status -->
+            <span
+              class="h-2.5 w-2.5 shrink-0 rounded-full bg-emerald-400"
+              title="Active"
+            ></span>
+          </a>
+
+          <!-- Logout -->
+          <a
+            href="api/auth/logout.php"
+            class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-blue-50 hover:bg-white/10 hover:text-white transition-all duration-200"
+          >
+            <i data-lucide="log-out" class="w-5 h-5 shrink-0"></i>
+
+            <span>Logout</span>
+          </a>
+        </div>
+      </aside>
+
+      <!-- =====================================================
+           MAIN
+      ====================================================== -->
+
+      <main
+        class="lg:ml-[293px] lg:w-[calc(100%-293px)] w-full min-h-screen min-w-0"
+      >
+        <!-- =================================================
+             FIXED HEADER
+        ================================================== -->
+
+        <header
+          class="fixed top-0 right-0 left-0 lg:left-[293px] z-40 h-16 bg-white border-b border-slate-200 px-4 sm:px-5 lg:px-6 flex items-center justify-between"
+        >
+          <!-- Header Left -->
+          <div class="flex items-center gap-3 min-w-0">
+            <div
+              class="w-9 h-9 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center shrink-0"
+            >
+              <i data-lucide="credit-card" class="w-5 h-5"></i>
+            </div>
+
+            <div class="min-w-0">
+              <div class="flex items-center gap-2">
+                <h1
+                  class="text-base font-semibold text-slate-900 whitespace-nowrap"
+                >
+                  Payments
+                </h1>
+
+                <span
+                  class="hidden sm:inline-flex items-center px-2.5 py-1 rounded-full bg-slate-100 text-slate-600 text-xs font-medium"
+                >
+                  Registration
+                </span>
+              </div>
+
+              <p class="hidden md:block text-xs text-slate-500">
+                Registration fee and transaction history
+              </p>
+            </div>
+          </div>
+
+          <!-- Candidate Profile -->
+          <a
+            class="flex items-center gap-3 rounded-xl px-2 py-1.5 hover:bg-slate-50 transition shrink-0"
+            href="profile.html"
+            title="Open My Profile"
+          >
+            <div
+              class="w-9 h-9 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center font-semibold"
+              data-candidate="initials"
+            >
+              --
+            </div>
+
+            <div class="hidden sm:flex flex-col min-w-0">
+              <strong
+                class="text-sm font-semibold text-slate-800 truncate max-w-40"
+              >
+                <span data-candidate="name"></span>
+              </strong>
+
+              <small class="text-xs text-slate-500 truncate max-w-48">
+                <span data-candidate="email"></span>
+              </small>
+            </div>
+          </a>
+        </header>
+
+        <!-- =================================================
+             PAGE CONTENT
+        ================================================== -->
+
+        <section class="w-full p-4 sm:p-5 lg:p-6 pt-[84px] lg:pt-[88px]">
+          <div class="max-w-[1400px] mx-auto w-full">
+            <!-- =================================================
+                 PAYMENT ALERT
+            ================================================== -->
+
+            <div
+              id="payment-alert"
+              class="hidden mb-6 bg-white border border-slate-200 border-l-4 border-l-blue-600 rounded-2xl shadow-sm"
+            >
+              <div id="payment-alert-body" class="p-5"></div>
+            </div>
+
+            <!-- =================================================
+                 PAYMENT HERO
+            ================================================== -->
+
+            <section
+              id="payment-action-card"
+              class="relative overflow-hidden rounded-2xl bg-gradient-to-r from-[#21489f] via-[#2f63c8] to-[#4388f2] p-6 sm:p-7 lg:p-8 mb-6 text-white shadow-sm"
+            >
+              <!-- Decorative circles -->
+              <div
+                class="absolute -right-20 -top-28 w-80 h-80 rounded-full bg-white/10 pointer-events-none"
+              ></div>
+
+              <div
+                class="absolute right-32 -bottom-44 w-80 h-80 rounded-full bg-white/10 pointer-events-none"
+              ></div>
+
+              <div
+                class="relative z-10 flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6"
+              >
+                <!-- Assessment -->
+                <div class="min-w-0">
+                  <span
+                    id="assessment-badge"
+                    class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/15 text-white/90 text-xs font-semibold mb-4"
+                  >
+                    <i data-lucide="clipboard-check" class="w-4 h-4"></i>
+
+                    Assessment Registration
+                  </span>
+
+                  <h2
+                    id="assessment-title"
+                    class="text-2xl sm:text-3xl font-bold tracking-tight"
+                  >
+                    InternBoot Level Assessment
+                  </h2>
+
+                  <p id="assessment-desc" class="mt-3 text-sm text-blue-100">
+                    Registration Fee:
+
+                    <strong
+                      id="assessment-fee-display"
+                      class="text-white font-bold"
+                    >
+                      —
+                    </strong>
+
+                    <span class="mx-2 text-blue-200"> • </span>
+
+                    <span id="assessment-meta">
+                      Duration: — | Questions: —
+                    </span>
+                  </p>
+                </div>
+
+                <!-- Payment Action -->
+                <div
+                  id="payment-action-box"
+                  class="flex items-center gap-3 flex-wrap shrink-0"
+                >
+                  <button
+                    id="btn-pay"
+                    class="inline-flex items-center justify-center gap-2 px-5 py-3 rounded-xl bg-white text-blue-700 hover:bg-blue-50 font-semibold text-sm shadow-sm transition disabled:opacity-50 disabled:cursor-not-allowed"
+                    type="button"
+                  >
+                    <i data-lucide="wallet-cards" class="w-4 h-4"></i>
+
+                    Pay Registration Fee (Demo)
+                  </button>
+                </div>
+              </div>
+            </section>
+
+            <!-- =================================================
+                 PAYMENT STATS
+            ================================================== -->
+
+            <div
+              class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 mb-6"
+            >
+              <!-- Total Fee -->
+              <div
+                class="bg-white border border-slate-200 rounded-2xl shadow-sm p-5"
+              >
+                <div class="flex items-start justify-between gap-4">
+                  <div class="min-w-0">
+                    <p class="text-sm font-medium text-slate-500">Total Fee</p>
+
+                    <strong class="block mt-2 text-xl font-bold text-slate-900">
+                      <span data-payment="totalFee"> — </span>
+                    </strong>
+                  </div>
+
+                  <div
+                    class="w-10 h-10 shrink-0 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center"
+                  >
+                    <i data-lucide="receipt" class="w-5 h-5"></i>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Paid Amount -->
+              <div
+                class="bg-white border border-slate-200 rounded-2xl shadow-sm p-5"
+              >
+                <div class="flex items-start justify-between gap-4">
+                  <div class="min-w-0">
+                    <p class="text-sm font-medium text-slate-500">
+                      Paid Amount
+                    </p>
+
+                    <strong
+                      id="stat-paid-amount"
+                      class="block mt-2 text-xl font-bold text-emerald-600"
+                    >
+                      <span data-payment="paidAmount"> — </span>
+                    </strong>
+                  </div>
+
+                  <div
+                    class="w-10 h-10 shrink-0 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center"
+                  >
+                    <i data-lucide="circle-check" class="w-5 h-5"></i>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Payment Status -->
+              <div
+                class="bg-white border border-slate-200 rounded-2xl shadow-sm p-5"
+              >
+                <div class="flex items-start justify-between gap-4">
+                  <div class="min-w-0">
+                    <p class="text-sm font-medium text-slate-500">
+                      Payment Status
+                    </p>
+
+                    <strong
+                      id="stat-payment-status"
+                      class="block mt-2 text-xl font-bold text-emerald-600"
+                    >
+                      <span data-payment="status"> — </span>
+                    </strong>
+                  </div>
+
+                  <div
+                    class="w-10 h-10 shrink-0 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center"
+                  >
+                    <i data-lucide="badge-check" class="w-5 h-5"></i>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Transaction -->
+              <div
+                class="bg-white border border-slate-200 rounded-2xl shadow-sm p-5"
+              >
+                <div class="flex items-start justify-between gap-4">
+                  <div class="min-w-0">
+                    <p class="text-sm font-medium text-slate-500">
+                      Transaction
+                    </p>
+
+                    <strong
+                      class="block mt-2 text-lg font-bold text-slate-900 truncate"
+                    >
+                      <span data-payment="transactionId"> — </span>
+                    </strong>
+                  </div>
+
+                  <div
+                    class="w-10 h-10 shrink-0 rounded-xl bg-violet-50 text-violet-600 flex items-center justify-center"
+                  >
+                    <i data-lucide="hash" class="w-5 h-5"></i>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- =================================================
+                 PAYMENT DETAILS
+            ================================================== -->
+
+            <section
+              class="bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden"
+            >
+              <!-- Header -->
+              <div class="px-5 sm:px-6 py-5 border-b border-slate-200">
+                <div class="flex items-center gap-3">
+                  <div
+                    class="w-10 h-10 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center shrink-0"
+                  >
+                    <i data-lucide="file-text" class="w-5 h-5"></i>
+                  </div>
+
+                  <div>
+                    <h2 class="text-base font-semibold text-slate-900">
+                      Payment Details
+                    </h2>
+
+                    <p class="text-xs text-slate-500 mt-0.5">
+                      Complete details of your registration payment
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Details -->
+              <div class="p-5 sm:p-6">
+                <div class="divide-y divide-slate-100">
+                  <!-- Assessment -->
+                  <div class="py-4 first:pt-0">
+                    <div
+                      class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2"
+                    >
+                      <span class="text-sm text-slate-500"> Assessment </span>
+
+                      <span
+                        class="text-sm font-semibold text-slate-800 sm:text-right"
+                      >
+                        <span data-assessment="title"> — </span>
+                      </span>
+                    </div>
+                  </div>
+
+                  <!-- Payment ID -->
+                  <div class="py-4">
+                    <div
+                      class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2"
+                    >
+                      <span class="text-sm text-slate-500"> Payment ID </span>
+
+                      <span
+                        class="text-sm font-semibold text-slate-800 sm:text-right break-all"
+                      >
+                        <span data-payment="paymentId"> — </span>
+                      </span>
+                    </div>
+                  </div>
+
+                  <!-- Transaction ID -->
+                  <div class="py-4">
+                    <div
+                      class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2"
+                    >
+                      <span class="text-sm text-slate-500">
+                        Transaction ID
+                      </span>
+
+                      <span
+                        class="text-sm font-semibold text-slate-800 sm:text-right break-all"
+                      >
+                        <span data-payment="transactionId"> — </span>
+                      </span>
+                    </div>
+                  </div>
+
+                  <!-- Amount -->
+                  <div class="py-4">
+                    <div
+                      class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2"
+                    >
+                      <span class="text-sm text-slate-500"> Amount </span>
+
+                      <span
+                        class="text-sm font-bold text-slate-900 sm:text-right"
+                      >
+                        <span data-payment="totalFee"> — </span>
+                      </span>
+                    </div>
+                  </div>
+
+                  <!-- Payment Date -->
+                  <div class="py-4">
+                    <div
+                      class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2"
+                    >
+                      <span class="text-sm text-slate-500"> Payment Date </span>
+
+                      <span
+                        class="text-sm font-semibold text-slate-800 sm:text-right"
+                      >
+                        <span data-payment="paymentDate"> — </span>
+                      </span>
+                    </div>
+                  </div>
+
+                  <!-- Payment Method -->
+                  <div class="py-4">
+                    <div
+                      class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2"
+                    >
+                      <span class="text-sm text-slate-500">
+                        Payment Method
+                      </span>
+
+                      <span
+                        class="text-sm font-semibold text-slate-800 sm:text-right"
+                      >
+                        <span data-payment="method"> — </span>
+                      </span>
+                    </div>
+                  </div>
+
+                  <!-- Status -->
+                  <div class="py-4">
+                    <div
+                      class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3"
+                    >
+                      <span class="text-sm text-slate-500"> Status </span>
+
+                      <span class="sm:text-right">
+                        <span
+                          id="payment-status-badge"
+                          class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-emerald-50 text-emerald-700 text-xs font-semibold"
+                        >
+                          <span
+                            class="w-1.5 h-1.5 rounded-full bg-emerald-500"
+                          ></span>
+
+                          <span data-payment="status"> — </span>
+                        </span>
+                      </span>
+                    </div>
+                  </div>
+
+                  <!-- Enrollment Eligibility -->
+                  <div class="pt-4">
+                    <div
+                      class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3"
+                    >
+                      <div>
+                        <span class="text-sm text-slate-500">
+                          Enrollment Eligibility
+                        </span>
+
+                        <p class="text-xs text-slate-400 mt-1">
+                          Eligibility based on your payment status
+                        </p>
+                      </div>
+
+                      <span class="sm:text-right">
+                        <span
+                          id="enrollment-badge"
+                          class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-slate-100 text-slate-600 text-xs font-semibold"
+                        >
+                          <span data-enrollment="status"> — </span>
+                        </span>
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </section>
+          </div>
+        </section>
+      </main>
+    </div>
+
+    <!-- =====================================================
+         EXISTING APPLICATION LOGIC
+         DO NOT CHANGE
+    ====================================================== -->
+
+    <script src="js/app.js"></script>
+    <script src="js/payment.js"></script>
+
+    <!-- =====================================================
+         LUCIDE
+    ====================================================== -->
+
+    <script>
+      document.addEventListener("DOMContentLoaded", function () {
+        if (window.lucide) {
+          lucide.createIcons();
+        }
+      });
+    </script>
+    <script>
+  document.addEventListener("DOMContentLoaded", () => {
+    const avatar = document.getElementById("sidebar-student-avatar");
+    const name = document.getElementById("sidebar-student-name");
+
+    function syncSidebarProfile() {
+      const sourceName = document.querySelector(
+        '[data-candidate="name"]'
+      );
+
+      const sourceInitials = document.querySelector(
+        '[data-candidate="initials"]'
+      );
+
+      if (sourceName && name) {
+        const value = sourceName.textContent.trim();
+
+        if (value) {
+          name.textContent = value;
+        }
+      }
+
+      if (sourceInitials && avatar) {
+        const value = sourceInitials.textContent.trim();
+
+        if (value) {
+          avatar.querySelector("span").textContent = value;
+        }
+      }
+    }
+
+    // Initial sync
+    syncSidebarProfile();
+
+    // Watch for real-time changes made by app.js/API rendering
+    const observer = new MutationObserver(() => {
+      syncSidebarProfile();
+    });
+
+    observer.observe(document.body, {
+      subtree: true,
+      childList: true,
+      characterData: true,
+    });
+  });
+</script>
+  </body>
+</html>
