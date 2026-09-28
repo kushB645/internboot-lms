@@ -140,8 +140,8 @@ function generate_questions_via_ai(
         throw new RuntimeException("AI provider '{$provider}' is configured but its API key is missing from environment.");
     }
 
-    // 3. Determine Batching Plan (chunk up to 25 questions per prompt to prevent LLM token cutoffs)
-    $batchSize = 25;
+    // 3. Determine Batching Plan (chunk up to 20 questions per prompt for speed and zero throttling)
+    $batchSize = 20;
     $remaining = $count;
     $allItems = [];
 
@@ -178,7 +178,7 @@ function generate_questions_via_ai(
         $rawText = '';
         try {
             if ($provider === 'gemini') {
-                $candidates = array_unique(array_filter([$model, 'gemini-flash-latest', 'gemini-3.7-flash', 'gemini-3.8-flash']));
+                $candidates = array_unique(array_filter([$model, 'gemini-flash-lite-latest', 'gemini-3.1-flash-lite', 'gemini-3.5-flash-lite', 'gemini-flash-latest']));
                 $lastErr = '';
                 $gotSuccess = false;
 
@@ -302,6 +302,10 @@ function generate_questions_via_ai(
             foreach ($batchItems as $bi) {
                 $allItems[] = $bi;
             }
+        }
+
+        if ($remaining > 0) {
+            usleep(150000);
         }
     }
 
