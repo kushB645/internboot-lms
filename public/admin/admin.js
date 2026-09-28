@@ -935,7 +935,6 @@
         <td class="px-4 py-5 align-middle"><div class="flex items-center gap-1.5 whitespace-nowrap">
           <button class="view-certificate-btn inline-flex h-9 w-9 items-center justify-center rounded-lg border border-slate-200 text-slate-600 hover:border-intern-blue hover:text-intern-blue" title="View certificate" type="button" data-id="${c.result_id}"><i data-lucide="eye" class="h-4 w-4"></i></button>
           <button class="download-certificate-btn inline-flex h-9 w-9 items-center justify-center rounded-lg border border-slate-200 text-slate-600 hover:border-intern-blue hover:text-intern-blue" title="Download certificate" type="button" data-id="${c.result_id}"><i data-lucide="download" class="h-4 w-4"></i></button>
-          <button class="verify-certificate-btn inline-flex h-9 w-9 items-center justify-center rounded-lg bg-green-50 text-green-600 hover:bg-green-100" type="button" data-number="${escapeHtml(c.certificate_number)}"><i data-lucide="badge-check" class="h-4 w-4"></i></button>
         </div></td>
       </tr>`,
           )
@@ -954,7 +953,7 @@
     $$(".view-certificate-btn").forEach((btn) =>
       btn.addEventListener("click", () =>
         window.open(
-          `/api/admin/certificate_pdf.php?result_id=${encodeURIComponent(btn.dataset.id)}`,
+          `/api/admin/certificate_pdf.php?result_id=${encodeURIComponent(btn.dataset.id)}&view=1`,
           "_blank",
         ),
       ),

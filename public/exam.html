@@ -1,503 +1,412 @@
 <!doctype html>
 <html lang="en">
-  <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>InternBoot | Exam</title>
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <!-- Tailwind CSS -->
-    <script src="https://cdn.tailwindcss.com"></script>
+  <title>InternBoot | Exam</title>
 
-    <!-- Lucide Icons -->
-    <script src="https://unpkg.com/lucide@latest"></script>
-  </head>
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
 
-  <body class="min-h-screen bg-[#eef3ff] text-slate-900 overflow-x-hidden">
-    <div class="min-h-screen">
-      <!-- =====================================================
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+
+<body class="min-h-screen bg-[#eef3ff] text-slate-900 overflow-x-hidden">
+  <div class="min-h-screen">
+    <!-- =====================================================
            SIDEBAR
       ====================================================== -->
 
-      <aside
-        class="fixed inset-y-0 left-0 z-50 w-[293px] bg-gradient-to-b from-[#294fae] to-[#347de9] text-white flex flex-col overflow-hidden"
-      >
-        <!-- Logo -->
-        <div
-          class="h-16 px-6 flex items-center border-b border-white/10 shrink-0"
-        >
-          <a href="dashboard.html" class="flex items-center gap-3 min-w-0">
-            <div
-              class="w-11 h-11 rounded-xl bg-white flex items-center justify-center shrink-0 overflow-hidden"
-            >
-              <img
-                src="assets/internboot-logo.png"
-                alt="InternBoot logo"
-                class="h-9 w-auto object-contain"
-              />
-            </div>
+    <aside
+      class="fixed inset-y-0 left-0 z-50 w-[293px] bg-gradient-to-b from-[#294fae] to-[#347de9] text-white flex flex-col overflow-hidden">
+      <!-- Logo -->
+      <div class="h-16 px-6 flex items-center border-b border-white/10 shrink-0">
+        <a href="dashboard.html" class="flex items-center gap-3 min-w-0">
+          <div class="w-11 h-11 rounded-xl bg-white flex items-center justify-center shrink-0 overflow-hidden">
+            <img src="assets/internboot-logo.png" alt="InternBoot logo" class="h-9 w-auto object-contain" />
+          </div>
 
-            <div class="min-w-0">
-              <div class="text-lg font-bold leading-tight">Internboot</div>
+          <div class="min-w-0">
+            <div class="text-lg font-bold leading-tight">Internboot</div>
 
-              <div class="text-xs text-blue-100">Student Dashboard</div>
-            </div>
-          </a>
-        </div>
+            <div class="text-xs text-blue-100">Student Dashboard</div>
+          </div>
+        </a>
+      </div>
 
-        <!-- Navigation -->
-        <nav class="flex-1 min-h-0 overflow-hidden p-4 space-y-1">
-          <!-- Dashboard -->
-          <a
-            href="dashboard.html"
-            data-page="dashboard.html"
-            class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-blue-100 hover:bg-white/10 hover:text-white transition"
-          >
-            <i data-lucide="layout-dashboard" class="w-5 h-5 shrink-0"></i>
+      <!-- Navigation -->
+      <nav class="flex-1 min-h-0 overflow-hidden p-4 space-y-1">
+        <!-- Dashboard -->
+        <a href="dashboard.html" data-page="dashboard.html"
+          class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-blue-100 hover:bg-white/10 hover:text-white transition">
+          <i data-lucide="layout-dashboard" class="w-5 h-5 shrink-0"></i>
 
-            <span>Dashboard</span>
-          </a>
+          <span>Dashboard</span>
+        </a>
 
-          <!-- My Profile -->
-          <a
-            href="profile.html"
-            data-page="profile.html"
-            class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-blue-100 hover:bg-white/10 hover:text-white transition"
-          >
-            <i data-lucide="user-round" class="w-5 h-5 shrink-0"></i>
+        <!-- My Profile -->
+        <a href="profile.html" data-page="profile.html"
+          class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-blue-100 hover:bg-white/10 hover:text-white transition">
+          <i data-lucide="user-round" class="w-5 h-5 shrink-0"></i>
 
-            <span>My Profile</span>
-          </a>
+          <span>My Profile</span>
+        </a>
 
-          <!-- Payments -->
-          <a
-            href="payment.html"
-            data-page="payment.html"
-            class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-blue-100 hover:bg-white/10 hover:text-white transition"
-          >
-            <i data-lucide="credit-card" class="w-5 h-5 shrink-0"></i>
+        <!-- Payments -->
+        <a href="payment.html" data-page="payment.html"
+          class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-blue-100 hover:bg-white/10 hover:text-white transition">
+          <i data-lucide="credit-card" class="w-5 h-5 shrink-0"></i>
 
-            <span>Payments</span>
-          </a>
+          <span>Payments</span>
+        </a>
 
-          <!-- Enrollment -->
-          <a
-            href="enrollment.html"
-            data-page="enrollment.html"
-            class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-blue-100 hover:bg-white/10 hover:text-white transition"
-          >
-            <i data-lucide="clipboard-check" class="w-5 h-5 shrink-0"></i>
+        <!-- Enrollment -->
+        <a href="enrollment.html" data-page="enrollment.html"
+          class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-blue-100 hover:bg-white/10 hover:text-white transition">
+          <i data-lucide="clipboard-check" class="w-5 h-5 shrink-0"></i>
 
-            <span>Enrollment</span>
-          </a>
+          <span>Enrollment</span>
+        </a>
 
-          <!-- Batches -->
-          <a
-            href="batches-slots.html"
-            data-page="batches-slots.html"
-            class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-blue-100 hover:bg-white/10 hover:text-white transition"
-          >
-            <i data-lucide="calendar-days" class="w-5 h-5 shrink-0"></i>
+        <!-- Batches -->
+        <a href="batches-slots.html" data-page="batches-slots.html"
+          class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-blue-100 hover:bg-white/10 hover:text-white transition">
+          <i data-lucide="calendar-days" class="w-5 h-5 shrink-0"></i>
 
-            <span>Batches &amp; Slots</span>
-          </a>
+          <span>Batches &amp; Slots</span>
+        </a>
 
-          <!-- ACTIVE: Exam -->
-          <a
-            href="exam.html"
-            data-page="exam.html"
-            class="flex items-center gap-3 px-3 py-2.5 rounded-xl bg-white/20 text-white font-semibold transition"
-          >
-            <i data-lucide="file-pen-line" class="w-5 h-5 shrink-0"></i>
+        <!-- ACTIVE: Exam -->
+        <a href="exam.html" data-page="exam.html"
+          class="flex items-center gap-3 px-3 py-2.5 rounded-xl bg-white/20 text-white font-semibold transition">
+          <i data-lucide="file-pen-line" class="w-5 h-5 shrink-0"></i>
 
-            <span>Exam</span>
+          <span>Exam</span>
 
-            <span
-              class="ml-auto w-2 h-2 rounded-full bg-blue-300 shrink-0"
-            ></span>
-          </a>
+          <span class="ml-auto w-2 h-2 rounded-full bg-blue-300 shrink-0"></span>
+        </a>
 
-          <!-- Results -->
-          <a
-            href="results.html"
-            data-page="results.html"
-            class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-blue-100 hover:bg-white/10 hover:text-white transition"
-          >
-            <i
-              data-lucide="chart-no-axes-combined"
-              class="w-5 h-5 shrink-0"
-            ></i>
+        <!-- Results -->
+        <a href="results.html" data-page="results.html"
+          class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-blue-100 hover:bg-white/10 hover:text-white transition">
+          <i data-lucide="chart-no-axes-combined" class="w-5 h-5 shrink-0"></i>
 
-            <span>Results</span>
-          </a>
+          <span>Results</span>
+        </a>
 
-          <!-- Certificates -->
-          <a
-            href="certificates.html"
-            data-page="certificates.html"
-            class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-blue-100 hover:bg-white/10 hover:text-white transition"
-          >
-            <i data-lucide="award" class="w-5 h-5 shrink-0"></i>
+        <!-- Certificates -->
+        <a href="certificates.html" data-page="certificates.html"
+          class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-blue-100 hover:bg-white/10 hover:text-white transition">
+          <i data-lucide="award" class="w-5 h-5 shrink-0"></i>
 
-            <span>Certificates</span>
-          </a>
+          <span>Certificates</span>
+        </a>
 
-          <!-- Placement -->
-          <a
-            href="placement.html"
-            data-page="placement.html"
-            class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-blue-100 hover:bg-white/10 hover:text-white transition"
-          >
-            <i data-lucide="briefcase-business" class="w-5 h-5 shrink-0"></i>
+        <!-- Placement -->
+        <a href="placement.html" data-page="placement.html"
+          class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-blue-100 hover:bg-white/10 hover:text-white transition">
+          <i data-lucide="briefcase-business" class="w-5 h-5 shrink-0"></i>
 
-            <span>Placement</span>
-          </a>
-        </nav>
+          <span>Placement</span>
+        </a>
+      </nav>
 
-        <!-- Bottom Navigation -->
-        <div class="shrink-0 p-4 border-t border-white/10 space-y-1">
-          
+      <!-- Bottom Section -->
+      <div class="shrink-0 border-t border-white/10 p-4 space-y-2">
 
-                  <!-- Bottom Section -->
-        <div class="shrink-0 border-t border-white/10 p-4 space-y-2">
+        <!-- Live Student Profile -->
+        <a href="profile.html"
+          class="flex items-center gap-3 rounded-xl bg-white/10 border border-white/10 px-3 py-2.5 hover:bg-white/15 transition-all duration-200">
+          <!-- Avatar -->
+          <div id="sidebar-student-avatar"
+            class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-indigo-300 to-purple-400 text-white font-bold text-base">
+            <span data-candidate="initials">KB</span>
+          </div>
 
-          <!-- Live Student Profile -->
-          <a
-            href="profile.html"
-            class="flex items-center gap-3 rounded-xl bg-white/10 border border-white/10 px-3 py-2.5 hover:bg-white/15 transition-all duration-200"
-          >
-            <!-- Avatar -->
-            <div
-              id="sidebar-student-avatar"
-              class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-indigo-300 to-purple-400 text-white font-bold text-base"
-            >
-              <span data-candidate="initials">KB</span>
-            </div>
+          <!-- Student Details -->
+          <div class="min-w-0 flex-1">
+            <p id="sidebar-student-name" data-candidate="name"
+              class="truncate text-sm font-bold leading-tight text-white">
+              Student
+            </p>
 
-            <!-- Student Details -->
-            <div class="min-w-0 flex-1">
-              <p
-                id="sidebar-student-name"
-                data-candidate="name"
-                class="truncate text-sm font-bold leading-tight text-white"
-              >
-                Student
-              </p>
+            <p class="mt-0.5 text-xs leading-tight text-blue-100/80">
+              Student
+            </p>
+          </div>
 
-              <p class="mt-0.5 text-xs leading-tight text-blue-100/80">
-                Student
-              </p>
-            </div>
+          <!-- Online Status -->
+          <span class="h-2.5 w-2.5 shrink-0 rounded-full bg-emerald-400" title="Active"></span>
+        </a>
 
-            <!-- Online Status -->
-            <span
-              class="h-2.5 w-2.5 shrink-0 rounded-full bg-emerald-400"
-              title="Active"
-            ></span>
-          </a>
+        <!-- Logout -->
+        <a href="api/auth/logout.php"
+          class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-blue-50 hover:bg-white/10 hover:text-white transition-all duration-200">
+          <i data-lucide="log-out" class="w-5 h-5 shrink-0"></i>
 
-          <!-- Logout -->
-          <a
-            href="api/auth/logout.php"
-            class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-blue-50 hover:bg-white/10 hover:text-white transition-all duration-200"
-          >
-            <i data-lucide="log-out" class="w-5 h-5 shrink-0"></i>
+          <span>Logout</span>
+        </a>
+      </div>
+    </aside>
 
-            <span>Logout</span>
-          </a>
-        </div>
-      </aside>
-
-      <!-- =====================================================
+    <!-- =====================================================
            MAIN
       ====================================================== -->
 
-      <main class="ml-[293px] w-[calc(100%-293px)] min-h-screen min-w-0 flex flex-col bg-[#eef3ff]">
-        <!-- =====================================================
+    <main class="ml-[293px] w-[calc(100%-293px)] min-h-screen min-w-0 flex flex-col bg-[#eef3ff]">
+      <!-- =====================================================
              FIXED HEADER
         ====================================================== -->
 
-        <header
-          class="fixed top-0 right-0 left-[293px] z-40 h-16 bg-white border-b border-slate-200 flex items-center justify-between px-6"
-        >
-          <!-- Left -->
-          <div class="flex items-center gap-3 min-w-0">
-            <div
-              class="w-9 h-9 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center shrink-0"
-            >
-              <i data-lucide="file-pen-line" class="w-5 h-5"></i>
+      <header
+        class="fixed top-0 right-0 left-[293px] z-40 h-16 bg-white border-b border-slate-200 flex items-center justify-between px-6">
+        <!-- Left -->
+        <div class="flex items-center gap-3 min-w-0">
+          <div class="w-9 h-9 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center shrink-0">
+            <i data-lucide="file-pen-line" class="w-5 h-5"></i>
+          </div>
+
+          <div class="min-w-0">
+            <div class="flex items-center gap-2">
+              <h1 class="text-xl font-bold tracking-tight text-slate-800">
+                Exam Status
+              </h1>
+
+              <span
+                class="hidden sm:inline-flex items-center px-2.5 py-1 rounded-full bg-blue-50 text-blue-600 text-xs font-medium">
+                Assessment
+              </span>
             </div>
 
-            <div class="min-w-0">
-              <div class="flex items-center gap-2">
-                <h1 class="text-xl font-bold tracking-tight text-slate-800">
-                  Exam Status
-                </h1>
+            <p class="hidden md:block text-xs text-slate-500 mt-0.5">
+              View your current examination status and assessment information
+            </p>
+          </div>
+        </div>
+
+        <!-- Profile -->
+        <a href="profile.html" title="Open My Profile"
+          class="flex items-center gap-3 px-3 py-1.5 rounded-full border border-slate-200 bg-white hover:bg-slate-50 transition shrink-0">
+          <div class="w-9 h-9 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center font-semibold"
+            data-candidate="initials">
+            --
+          </div>
+
+          <div class="hidden sm:block min-w-0">
+            <div class="text-sm font-medium text-slate-700 max-w-40 truncate">
+              <span data-candidate="name"></span>
+            </div>
+
+            <div class="text-xs text-slate-500 max-w-48 truncate">
+              <span data-candidate="email"></span>
+            </div>
+          </div>
+        </a>
+      </header>
+
+      <!-- =====================================================
+             CONTENT
+        ====================================================== -->
+
+      <section class="min-h-screen bg-[#eef3ff] px-4 sm:px-5 lg:px-6 pt-[88px] pb-8">
+        <div class="max-w-[1600px] mx-auto w-full">
+          <!-- =================================================
+                 HERO
+            ================================================== -->
+
+          <section
+            class="relative overflow-hidden rounded-2xl bg-gradient-to-r from-[#24479d] via-[#2f61c7] to-[#4388f3] px-5 sm:px-6 lg:px-8 py-6 md:py-7 mb-6 text-white">
+            <!-- Background decoration -->
+            <div class="absolute -right-14 -top-20 w-56 h-56 rounded-full bg-white/10"></div>
+
+            <div class="absolute right-24 -bottom-24 w-48 h-48 rounded-full bg-white/10"></div>
+
+            <div
+              class="absolute right-8 top-6 w-32 h-32 rounded-2xl border border-white/20 bg-white/5 flex items-center justify-center">
+              <i data-lucide="file-pen-line" class="w-20 h-20 text-white/90"></i>
+            </div>
+
+            <div class="relative z-10 max-w-4xl">
+              <div
+                class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/15 border border-white/20 text-xs font-semibold mb-4">
+                <i data-lucide="clipboard-check" class="w-4 h-4"></i>
+
+                Assessment
+              </div>
+
+              <h2 class="text-2xl md:text-3xl font-bold tracking-tight">
+                Exam Status
+              </h2>
+
+              <p class="mt-2 text-sm md:text-base text-blue-50 leading-6 max-w-3xl">
+                View your current examination status, schedule, and assessment
+                information.
+              </p>
+            </div>
+          </section>
+
+          <!-- =================================================
+                 EXAM DETAILS
+            ================================================== -->
+
+          <section class="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden mb-6">
+            <div class="p-5 md:p-6">
+              <!-- Card Header -->
+              <div class="flex items-center justify-between gap-4 mb-5">
+                <div class="flex items-center gap-3 min-w-0">
+                  <div class="w-10 h-10 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center shrink-0">
+                    <i data-lucide="clipboard-check" class="w-5 h-5"></i>
+                  </div>
+
+                  <div class="min-w-0">
+                    <h2 class="text-lg font-semibold text-slate-900">
+                      Examination Details
+                    </h2>
+
+                    <p class="text-sm text-slate-500 mt-0.5">
+                      Your latest assessment information
+                    </p>
+                  </div>
+                </div>
 
                 <span
-                  class="hidden sm:inline-flex items-center px-2.5 py-1 rounded-full bg-blue-50 text-blue-600 text-xs font-medium"
-                >
+                  class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-blue-50 text-blue-700 text-xs font-semibold shrink-0">
+                  <span class="w-1.5 h-1.5 rounded-full bg-blue-600"></span>
+
                   Assessment
                 </span>
               </div>
 
-              <p class="hidden md:block text-xs text-slate-500 mt-0.5">
-                View your current examination status and assessment information
-              </p>
-            </div>
-          </div>
-
-          <!-- Profile -->
-          <a
-            href="profile.html"
-            title="Open My Profile"
-            class="flex items-center gap-3 px-3 py-1.5 rounded-full border border-slate-200 bg-white hover:bg-slate-50 transition shrink-0"
-          >
-            <div
-              class="w-9 h-9 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center font-semibold"
-              data-candidate="initials"
-            >
-              --
-            </div>
-
-            <div class="hidden sm:block min-w-0">
-              <div class="text-sm font-medium text-slate-700 max-w-40 truncate">
-                <span data-candidate="name"></span>
-              </div>
-
-              <div class="text-xs text-slate-500 max-w-48 truncate">
-                <span data-candidate="email"></span>
-              </div>
-            </div>
-          </a>
-        </header>
-
-        <!-- =====================================================
-             CONTENT
-        ====================================================== -->
-
-        <section class="min-h-screen bg-[#eef3ff] px-4 sm:px-5 lg:px-6 pt-[88px] pb-8">
-          <div class="max-w-[1600px] mx-auto w-full">
-            <!-- =================================================
-                 HERO
-            ================================================== -->
-
-            <section
-              class="relative overflow-hidden rounded-2xl bg-gradient-to-r from-[#24479d] via-[#2f61c7] to-[#4388f3] px-5 sm:px-6 lg:px-8 py-6 md:py-7 mb-6 text-white"
-            >
-              <!-- Background decoration -->
-              <div
-                class="absolute -right-14 -top-20 w-56 h-56 rounded-full bg-white/10"
-              ></div>
-
-              <div
-                class="absolute right-24 -bottom-24 w-48 h-48 rounded-full bg-white/10"
-              ></div>
-
-              <div
-                class="absolute right-8 top-6 w-32 h-32 rounded-2xl border border-white/20 bg-white/5 flex items-center justify-center"
-              >
-                <i
-                  data-lucide="file-pen-line"
-                  class="w-20 h-20 text-white/90"
-                ></i>
-              </div>
-
-              <div class="relative z-10 max-w-4xl">
-                <div
-                  class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/15 border border-white/20 text-xs font-semibold mb-4"
-                >
-                  <i data-lucide="clipboard-check" class="w-4 h-4"></i>
-
-                  Assessment
-                </div>
-
-                <h2 class="text-2xl md:text-3xl font-bold tracking-tight">
-                  Exam Status
-                </h2>
-
-                <p
-                  class="mt-2 text-sm md:text-base text-blue-50 leading-6 max-w-3xl"
-                >
-                  View your current examination status, schedule, and assessment
-                  information.
-                </p>
-              </div>
-            </section>
-
-            <!-- =================================================
-                 EXAM DETAILS
-            ================================================== -->
-
-            <section
-              class="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden mb-6"
-            >
-              <div class="p-5 md:p-6">
-                <!-- Card Header -->
-                <div class="flex items-center justify-between gap-4 mb-5">
-                  <div class="flex items-center gap-3 min-w-0">
-                    <div
-                      class="w-10 h-10 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center shrink-0"
-                    >
-                      <i data-lucide="clipboard-check" class="w-5 h-5"></i>
-                    </div>
-
-                    <div class="min-w-0">
-                      <h2 class="text-lg font-semibold text-slate-900">
-                        Examination Details
-                      </h2>
-
-                      <p class="text-sm text-slate-500 mt-0.5">
-                        Your latest assessment information
-                      </p>
-                    </div>
-                  </div>
-
-                  <span
-                    class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-blue-50 text-blue-700 text-xs font-semibold shrink-0"
-                  >
-                    <span class="w-1.5 h-1.5 rounded-full bg-blue-600"></span>
-
-                    Assessment
-                  </span>
-                </div>
-
-                <!-- Dynamic Exam Content -->
-                <div id="exam-details-body" class="min-h-[180px]">
+              <!-- Dynamic Exam Content -->
+              <div id="exam-details-body" class="min-h-[180px]">
+                <div class="flex items-center gap-3 rounded-xl border border-slate-200 bg-slate-50 px-4 py-4">
                   <div
-                    class="flex items-center gap-3 rounded-xl border border-slate-200 bg-slate-50 px-4 py-4"
-                  >
-                    <div
-                      class="w-8 h-8 rounded-lg bg-white border border-slate-200 flex items-center justify-center shrink-0"
-                    >
-                      <i
-                        data-lucide="loader-circle"
-                        class="w-4 h-4 text-blue-600 animate-spin"
-                      ></i>
-                    </div>
-
-                    <p class="text-sm text-slate-500">Loading exam status...</p>
+                    class="w-8 h-8 rounded-lg bg-white border border-slate-200 flex items-center justify-center shrink-0">
+                    <i data-lucide="loader-circle" class="w-4 h-4 text-blue-600 animate-spin"></i>
                   </div>
+
+                  <p class="text-sm text-slate-500">Loading exam status...</p>
                 </div>
               </div>
-            </section>
+            </div>
+          </section>
 
-            <!-- =================================================
+          <!-- =================================================
                  SUPPORTING INFORMATION
             ================================================== -->
 
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
-              <!-- Exam Schedule -->
-              <div
-                class="bg-white rounded-2xl shadow-sm border border-slate-100 p-5"
-              >
-                <div
-                  class="w-10 h-10 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center mb-4"
-                >
-                  <i data-lucide="calendar-check" class="w-5 h-5"></i>
-                </div>
-
-                <h3 class="text-sm font-semibold text-slate-900">
-                  Exam Schedule
-                </h3>
-
-                <p class="text-sm text-slate-500 mt-2 leading-6">
-                  Your assigned exam date and slot will appear in the
-                  examination details above.
-                </p>
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
+            <!-- Exam Schedule -->
+            <div class="bg-white rounded-2xl shadow-sm border border-slate-100 p-5">
+              <div class="w-10 h-10 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center mb-4">
+                <i data-lucide="calendar-check" class="w-5 h-5"></i>
               </div>
 
-              <!-- Assessment Status -->
-              <div
-                class="bg-white rounded-2xl shadow-sm border border-slate-100 p-5"
-              >
-                <div
-                  class="w-10 h-10 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center mb-4"
-                >
-                  <i data-lucide="shield-check" class="w-5 h-5"></i>
-                </div>
+              <h3 class="text-sm font-semibold text-slate-900">
+                Exam Schedule
+              </h3>
 
-                <h3 class="text-sm font-semibold text-slate-900">
-                  Assessment Status
-                </h3>
+              <p class="text-sm text-slate-500 mt-2 leading-6">
+                Your assigned exam date and slot will appear in the
+                examination details above.
+              </p>
+            </div>
 
-                <p class="text-sm text-slate-500 mt-2 leading-6">
-                  Your current assessment eligibility and status are managed by
-                  the InternBoot system.
-                </p>
+            <!-- Assessment Status -->
+            <div class="bg-white rounded-2xl shadow-sm border border-slate-100 p-5">
+              <div class="w-10 h-10 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center mb-4">
+                <i data-lucide="shield-check" class="w-5 h-5"></i>
               </div>
 
-              <!-- Help -->
-              <div
-                class="bg-white rounded-2xl shadow-sm border border-slate-100 p-5"
-              >
-                <div
-                  class="w-10 h-10 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center mb-4"
-                >
-                  <i data-lucide="circle-help" class="w-5 h-5"></i>
-                </div>
+              <h3 class="text-sm font-semibold text-slate-900">
+                Assessment Status
+              </h3>
 
-                <h3 class="text-sm font-semibold text-slate-900">Need Help?</h3>
+              <p class="text-sm text-slate-500 mt-2 leading-6">
+                Your current assessment eligibility and status are managed by
+                the InternBoot system.
+              </p>
+            </div>
 
-                <p class="text-sm text-slate-500 mt-2 leading-6">
-                  Contact support if your examination information is missing or
-                  appears incorrect.
-                </p>
+            <!-- Help -->
+            <div class="bg-white rounded-2xl shadow-sm border border-slate-100 p-5">
+              <div class="w-10 h-10 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center mb-4">
+                <i data-lucide="circle-help" class="w-5 h-5"></i>
               </div>
+
+              <h3 class="text-sm font-semibold text-slate-900">Need Help?</h3>
+
+              <p class="text-sm text-slate-500 mt-2 leading-6">
+                Contact support if your examination information is missing or
+                appears incorrect.
+              </p>
             </div>
           </div>
-        </section>
-      </main>
-    </div>
+        </div>
+      </section>
+    </main>
+  </div>
 
-    <!-- Existing functionality — unchanged -->
-    <script src="js/app.js?v=4"></script>
-    <script src="js/exam-status.js?v=2"></script>
+  <!-- Existing functionality — unchanged -->
+  <script src="js/app.js?v=4"></script>
+  <script src="js/exam-status.js?v=2"></script>
+  <!-- Lucide -->
+  <script>
+    document.addEventListener("DOMContentLoaded", function () {
+      if (window.lucide) {
+        lucide.createIcons();
+      }
+    });
+  </script>
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      const avatar = document.getElementById("sidebar-student-avatar");
+      const name = document.getElementById("sidebar-student-name");
 
-    <!-- Lucide -->
-    <script>
-      document.addEventListener("DOMContentLoaded", function () {
-        if (window.lucide) {
-          lucide.createIcons();
+      function syncSidebarProfile() {
+        const sourceName = document.querySelector(
+          '[data-candidate="name"]'
+        );
+
+        const sourceInitials = document.querySelector(
+          '[data-candidate="initials"]'
+        );
+
+        if (sourceName && name) {
+          const value = sourceName.textContent.trim();
+
+          if (value && name.textContent !== value) {
+            name.textContent = value;
+          }
         }
+
+        if (sourceInitials && avatar) {
+          const value = sourceInitials.textContent.trim();
+
+          if (value && avatar.querySelector("span").textContent !== value) {
+            avatar.querySelector("span").textContent = value;
+          }
+        }
+      }
+
+      // Initial sync
+      syncSidebarProfile();
+
+      // Watch for real-time changes made by app.js/API rendering
+      const observer = new MutationObserver(() => {
+        syncSidebarProfile();
       });
-    </script>
-    <script>
-  document.addEventListener("DOMContentLoaded", () => {
-    const avatar = document.getElementById("sidebar-student-avatar");
-    const name = document.getElementById("sidebar-student-name");
 
-    function syncSidebarProfile() {
-      const sourceName = document.querySelector(
-        '[data-candidate="name"]'
-      );
+      observer.observe(document.body, {
+        subtree: true,
+        childList: true,
+        characterData: true,
+      });
+    });
+  </script>
+</body>
 
-      const sourceInitials = document.querySelector(
-        '[data-candidate="initials"]'
-      );
-
-      if (sourceName && name) {
-        const value = sourceName.textContent.trim();
-
-        if (value) {
-          name.textContent = value;
-        }
-      }
-
-      if (sourceInitials && avatar) {
-        const value = sourceInitials.textContent.trim();
-
-        if (value) {
-          avatar.querySelector("span").textContent = value;
-        }
-      }
-    }
-
-    // Initial sync
-    syncSidebarProfile();
-
-    
-  });
-</script>
-  </body>
 </html>

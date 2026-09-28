@@ -750,7 +750,7 @@
       if (sourceName && name) {
         const value = sourceName.textContent.trim();
 
-        if (value) {
+        if (value && name.textContent !== value) {
           name.textContent = value;
         }
       }
@@ -758,7 +758,7 @@
       if (sourceInitials && avatar) {
         const value = sourceInitials.textContent.trim();
 
-        if (value) {
+        if (value && avatar.querySelector("span").textContent !== value) {
           avatar.querySelector("span").textContent = value;
         }
       }

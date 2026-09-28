@@ -16,7 +16,7 @@ function pdf_escape(string $text): string
     return trim($text);
 }
 
-function output_certificate_pdf(array $data): void
+function output_certificate_pdf(array $data, bool $inline = false): void
 {
     global $conn;
 
@@ -116,8 +116,9 @@ function output_certificate_pdf(array $data): void
     $filename = preg_replace('/[^A-Za-z0-9_-]/', '_', (string)($data['certificate_number'] ?? 'certificate')) . '.pdf';
 
     if (!headers_sent()) {
+        $disposition = $inline ? 'inline' : 'attachment';
         header('Content-Type: application/pdf');
-        header('Content-Disposition: attachment; filename="' . $filename . '"');
+        header('Content-Disposition: ' . $disposition . '; filename="' . $filename . '"');
         header('Content-Length: ' . strlen($pdfContent));
         header('Cache-Control: private, max-age=0, must-revalidate');
         header('Pragma: public');

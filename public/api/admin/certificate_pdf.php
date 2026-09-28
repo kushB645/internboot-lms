@@ -79,7 +79,8 @@ try {
         }
     }
 
-    output_certificate_pdf($data);
+    $inline = !empty($_GET['view']);
+    output_certificate_pdf($data, $inline);
 } catch (AdminAccessDeniedException $e) {
     render_certificate_error_page($e->getMessage(), 403);
 
