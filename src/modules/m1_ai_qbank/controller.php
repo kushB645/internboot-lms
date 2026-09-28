@@ -84,8 +84,19 @@ function handle_generate_questions_request(array $input, mysqli $conn): void {
     require_csrf();
     $qbankId = (int)($input['question_bank_id'] ?? 0);
     $topic = trim((string)($input['topic'] ?? ''));
-    $count = (int)($input['count'] ?? 5);
-    $difficultyMix = trim((string)($input['difficulty_mix'] ?? ''));
+    $count = (int)($input['count'] ?? 0);
+
+    $easy = max(0, (int)($input['easy_count'] ?? 0));
+    $med = max(0, (int)($input['medium_count'] ?? 0));
+    $hard = max(0, (int)($input['hard_count'] ?? 0));
+    $diffSum = $easy + $med + $hard;
+
+    if ($count <= 0 && $diffSum > 0) {
+        $count = $diffSum;
+    }
+    if ($count <= 0) {
+        $count = 5;
+    }
 
     if ($qbankId <= 0) {
         send_json_response('error', 'Valid question_bank_id is required', null, 400);
@@ -101,6 +112,11 @@ function handle_generate_questions_request(array $input, mysqli $conn): void {
 
     if ($count > 50) {
         $count = 50;
+    }
+
+    $difficultyMix = trim((string)($input['difficulty_mix'] ?? ''));
+    if ($difficultyMix === '' && $diffSum > 0) {
+        $difficultyMix = "easy:{$easy},medium:{$med},hard:{$hard}";
     }
 
     try {
