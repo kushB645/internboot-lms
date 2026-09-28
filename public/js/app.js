@@ -235,7 +235,7 @@ function isCompleted(key, status) {
         (key === "enrollment" && status === "Enrolled") ||
         (key === "batch" && status === "Assigned") ||
         (key === "exam" && status === "Completed") ||
-        (key === "result" && status === "Completed") ||
+        (key === "result" && (status === "Completed" || status === "Available")) ||
         (key === "certificate" && status === "Issued") ||
         (key === "placement" && status === "Placed")
     );
