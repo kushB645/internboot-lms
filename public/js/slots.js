@@ -71,6 +71,27 @@ async function initSlotsModule() {
         // Render Booked Slot status if already booked
         updateBookedSlotSection(data);
 
+        // === If candidate already has a booked slot — hide booking UI entirely ===
+        if (data.exam && data.exam.booked === true) {
+            const slotsCard = document.getElementById("available-slots-card");
+            if (slotsCard) {
+                slotsCard.innerHTML = `
+                    <div style="display:flex; align-items:center; gap:16px; padding:24px 28px;">
+                        <div style="width:48px; height:48px; border-radius:14px; background:#ecfdf5; display:flex; align-items:center; justify-content:center; flex-shrink:0;">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+                        </div>
+                        <div>
+                            <div style="font-size:15px; font-weight:700; color:#166534; margin-bottom:3px;">Exam Slot Already Confirmed</div>
+                            <div style="font-size:13px; color:#4b7a5e; line-height:1.5;">
+                                Your slot is booked for <strong>${escapeHtml(data.exam.date || data.exam.exam_date || 'today')}</strong> at <strong>${escapeHtml(data.exam.slot_time || data.exam.time || '—')}</strong>.
+                                No action needed — you will be notified before your exam.
+                            </div>
+                        </div>
+                    </div>`;
+            }
+            return;
+        }
+
         // Check enrollment eligibility
         const isEligible = data.enrollment && (data.enrollment.eligibility_status === "eligible" || data.enrollment.status === "Enrolled");
         if (!isEligible) {
@@ -96,7 +117,6 @@ async function initSlotsModule() {
         }
 
         // Fetch available slots
-
         const assessmentId = data.assessment ? data.assessment.id : 1;
         await loadAvailableSlots(assessmentId);
 
@@ -171,32 +191,42 @@ async function loadAvailableSlots(assessmentId) {
         }
 
         slotsListEl.innerHTML = `
-            <div style="display:grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap:16px;">
+            <div style="display:grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap:16px;">
                 ${slots.map(s => {
                     const dayLabel = getWeekdayLabel(s.exam_date);
                     const dateHeader = dayLabel ? `${dayLabel} (${s.exam_date || ''})` : (s.exam_date || '');
                     const startTimeFormatted = formatHHMM(s.start_time);
                     const endTimeFormatted = formatHHMM(s.end_time);
+                    const isFull = s.seats_remaining <= 0;
                     return `
-                    <div style="border:1px solid #e5ebf2; border-radius:10px; padding:18px; background:#ffffff; box-shadow:0 2px 8px rgba(0,0,0,0.03);">
-                        <div style="font-weight:700; font-size:16px; color:#17243a; margin-bottom:6px;">
-                            ${escapeHtml(dateHeader)}
+                    <div style="border:1px solid ${isFull ? '#f1f5f9' : '#dbeafe'}; border-radius:14px; padding:20px 22px; background:${isFull ? '#f8fafc' : '#fff'}; box-shadow:0 2px 12px rgba(37,99,235,0.06); transition:box-shadow 0.2s;">
+                        <div style="display:flex; align-items:center; gap:10px; margin-bottom:12px;">
+                            <div style="width:40px; height:40px; border-radius:10px; background:#eff6ff; display:flex; align-items:center; justify-content:center; flex-shrink:0;">
+                                <svg xmlns='http://www.w3.org/2000/svg' width='18' height='18' viewBox='0 0 24 24' fill='none' stroke='#2563eb' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><rect x='3' y='4' width='18' height='18' rx='2' ry='2'/><line x1='16' y1='2' x2='16' y2='6'/><line x1='8' y1='2' x2='8' y2='6'/><line x1='3' y1='10' x2='21' y2='10'/></svg>
+                            </div>
+                            <div>
+                                <div style="font-weight:700; font-size:15px; color:#1e293b; line-height:1.3;">${escapeHtml(dateHeader)}</div>
+                                <div style="font-size:13px; color:#64748b; margin-top:2px;">Exam Date</div>
+                            </div>
                         </div>
-                        <div style="display:flex; align-items:center; gap:6px; font-size:14px; color:#4b5563; margin-bottom:10px;">
-                            <i data-lucide="clock-3" style="width:15px; height:15px;"></i>${escapeHtml(startTimeFormatted)} – ${escapeHtml(endTimeFormatted)}
+                        <div style="display:flex; align-items:center; gap:8px; font-size:14px; color:#374151; background:#f8fafc; border-radius:8px; padding:10px 12px; margin-bottom:14px;">
+                            <svg xmlns='http://www.w3.org/2000/svg' width='15' height='15' viewBox='0 0 24 24' fill='none' stroke='#6366f1' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><circle cx='12' cy='12' r='10'/><polyline points='12 6 12 12 16 14'/></svg>
+                            <span style="font-weight:600;">${escapeHtml(startTimeFormatted)} – ${escapeHtml(endTimeFormatted)}</span>
                         </div>
-                        <div style="display:flex; justify-content:space-between; align-items:center; margin-top:12px;">
-                            <span class="badge ${s.seats_remaining > 0 ? 'blue' : 'gray'}">
-                                ${s.seats_remaining} seats remaining
+                        <div style="display:flex; justify-content:space-between; align-items:center;">
+                            <span style="display:inline-flex; align-items:center; gap:5px; font-size:12px; font-weight:600; padding:4px 10px; border-radius:20px; background:${isFull ? '#f1f5f9' : '#eff6ff'}; color:${isFull ? '#94a3b8' : '#1d4ed8'};">
+                                <span style="width:6px; height:6px; border-radius:50%; background:${isFull ? '#94a3b8' : '#2563eb'}; display:inline-block;"></span>
+                                ${isFull ? 'Fully Booked' : s.seats_remaining + ' seats left'}
                             </span>
                             <button 
                                 class="btn-book-slot" 
                                 data-slot-id="${s.exam_slot_id}" 
                                 data-assessment-id="${assessmentId}"
-                                ${s.seats_remaining <= 0 ? 'disabled' : ''}
-                                style="background:#2563eb; color:#fff; border:none; padding:8px 16px; border-radius:6px; font-weight:700; cursor:pointer;"
+                                ${isFull ? 'disabled' : ''}
+                                style="display:inline-flex; align-items:center; gap:7px; background:${isFull ? '#e2e8f0' : '#2563eb'}; color:${isFull ? '#94a3b8' : '#fff'}; border:none; padding:9px 18px; border-radius:9px; font-weight:700; font-size:13px; cursor:${isFull ? 'not-allowed' : 'pointer'}; transition:background 0.2s;"
                             >
-                                <i data-lucide="calendar-plus"></i>Book This Slot
+                                <svg xmlns='http://www.w3.org/2000/svg' width='15' height='15' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'><rect x='3' y='4' width='18' height='18' rx='2' ry='2'/><line x1='16' y1='2' x2='16' y2='6'/><line x1='8' y1='2' x2='8' y2='6'/><line x1='3' y1='10' x2='21' y2='10'/><line x1='12' y1='14' x2='12' y2='18'/><line x1='10' y1='16' x2='14' y2='16'/></svg>
+                                ${isFull ? 'Unavailable' : 'Book This Slot'}
                             </button>
                         </div>
                     </div>`;
