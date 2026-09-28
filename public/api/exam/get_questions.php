@@ -166,10 +166,10 @@ try {
 
     $totalQuestions = ($assessment && !empty($assessment['total_questions']))
         ? (int) $assessment['total_questions']
-        : 50;
+        : 100;
 
     if ($totalQuestions <= 0) {
-        $totalQuestions = 50;
+        $totalQuestions = 100;
     }
 
     /*
