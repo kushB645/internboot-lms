@@ -9,8 +9,8 @@
 
 const IB_CONFIG = {
   /* --- money & batch --- */
-  fee: "₹2999",
-  feeShort: "₹2999",
+  fee: "₹2999 + 18% GST",
+  feeShort: "₹2999 + 18% GST",
   gstNote: "+ 18% GST applicable",
   batchSize: "100",
   batchNumber: "",

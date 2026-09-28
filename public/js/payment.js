@@ -14,7 +14,7 @@ document.addEventListener("DOMContentLoaded", () => {
 // In-memory state (scoped to page lifecycle, never persisted to localStorage)
 let currentAssessmentId = null;
 let currentCandidateId = null;
-let currentFeeAmount = 2999;
+let currentFeeAmount = 3538.82;
 let isPaymentCompleted = false;
 let isProcessing = false;
 let devCandidateParam = null;
@@ -100,16 +100,16 @@ function renderDetails(data) {
         setText('[data-assessment="title"]', assessment.title || "Assessment");
 
         const durationText = assessment.duration ? `${assessment.duration} mins` : "60 mins";
-        const questionsText = assessment.questions ? `${assessment.questions} Questions` : "50 Questions";
-        setText("#assessment-meta", `Duration: ${durationText} | Questions: ${questionsText}`);
+        setText("#assessment-meta", `Duration: ${durationText}`);
     }
 
     // 3. Fee
-    currentFeeAmount = (fee !== undefined && fee !== null) ? Number(fee) : 2999;
+    currentFeeAmount = 3538.82;
     const formattedFee = formatCurrency(currentFeeAmount);
+    const baseWithGstStr = "₹2,999 + 18% GST";
 
     setText('[data-payment="totalFee"]', formattedFee);
-    setText("#assessment-fee-display", formattedFee);
+    setText("#assessment-fee-display", baseWithGstStr);
 
     // 4. Payment & Enrollment Status
     if (payment && payment.status === "success") {
@@ -128,7 +128,7 @@ function renderDetails(data) {
  * Update UI when payment is successfully verified
  */
 function applyPaymentSuccessState(payment, enrollment) {
-    const paidAmount = payment.amount ? formatCurrency(payment.amount) : formatCurrency(currentFeeAmount);
+    const paidAmount = formatCurrency(currentFeeAmount);
 
     setText('[data-payment="paidAmount"]', paidAmount);
     setText('[data-payment="status"]', "Paid");
@@ -456,7 +456,13 @@ function setStatusBadge(text, colorClass) {
 function setStatCardStatus(text, colorClass) {
     const strong = document.getElementById("stat-payment-status");
     if (strong) {
-        strong.className = colorClass;
+        let textClass = "text-slate-900";
+        if (colorClass === "green") textClass = "text-emerald-600";
+        else if (colorClass === "blue") textClass = "text-blue-600";
+        else if (colorClass === "yellow") textClass = "text-amber-600";
+        else if (colorClass === "gray") textClass = "text-slate-500";
+        
+        strong.className = `block mt-2 text-xl font-bold ${textClass}`;
         const span = strong.querySelector('[data-payment="status"]') || strong;
         span.textContent = text;
     }
@@ -473,7 +479,7 @@ function setEnrollmentBadge(text, colorClass) {
 
 function formatCurrency(amount) {
     const num = Number(amount) || 0;
-    return "₹" + num.toLocaleString("en-IN");
+    return "₹" + num.toLocaleString("en-IN", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 }
 
 function formatDate(dateStr) {

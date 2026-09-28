@@ -16,11 +16,8 @@ function request_body(): array {
 require_once __DIR__ . '/../../../src/core/candidate_resolver.php';
 
 function get_fee(mysqli $conn): float {
-    $s = $conn->prepare("SELECT setting_value FROM settings WHERE setting_key='exam_fee' LIMIT 1");
-    $s->execute();
-    $r = $s->get_result()->fetch_assoc();
-    $s->close();
-    return $r ? (float)$r['setting_value'] : 2999.00;
+    // Always return fixed total: ₹2,999 base + 18% GST = ₹3,538.82
+    return 3538.82;
 }
 
 $action = $_GET['action'] ?? '';
@@ -92,10 +89,13 @@ try {
         $e = $s->get_result()->fetch_assoc();
         $s->close();
 
+        if ($p) {
+            $p['amount'] = get_fee($conn);
+        }
         send_json_response('success', 'Payment details retrieved', [
             'candidate' => ['id' => (int)$c['id'], 'name' => $c['full_name'], 'phone' => $c['phone']],
             'assessment' => ['id' => $aid, 'title' => $a['title'], 'description' => $a['description'], 'duration' => (int)$a['duration_minutes'], 'questions' => (int)$a['total_questions']],
-            'fee' => $p ? (float)$p['amount'] : get_fee($conn),
+            'fee' => get_fee($conn),
             'payment' => $p,
             'enrollment' => $e
         ]);
