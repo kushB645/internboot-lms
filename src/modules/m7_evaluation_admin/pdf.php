@@ -102,8 +102,8 @@ function output_certificate_pdf(array $data, bool $inline = false): void
 
     // 3. Level Achieved
     $pdf->SetFont('freesans', 'B', 16);
-    // Y approx 310
-    $pdf->SetXY(285, 310);
+    // Y approx 306
+    $pdf->SetXY(285, 306);
     $pdf->Cell(450, 20, $levelDisplay, 0, 1, 'L');
 
     // 4. Certificate ID
