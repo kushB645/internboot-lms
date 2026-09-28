@@ -524,7 +524,7 @@
 
             <div class="flex flex-wrap gap-2">
               <span
-                class="rounded-full bg-white px-3 py-1.5 text-xs font-medium text-blue-700 shadow-sm"
+                class="rounded-full bg-white px-3 py-1.5 text-xs font-medium text-blue-700 shadow-sm whitespace-nowrap"
               >
                 All Levels (1-5) Eligible
               </span>
@@ -765,6 +765,14 @@
                 statusStat.textContent = status;
               }
             }
+
+            /* Individual Eligibility Level */
+            const eligibilityStat = document.getElementById("pl-stat-eligibility");
+            if (eligibilityStat) {
+              const candLevel = payload.data.candidate?.level;
+              eligibilityStat.textContent = candLevel && candLevel !== "—" ? candLevel : "Pending";
+            }
+
 
             /* Candidate name */
             const name = payload.data.candidate?.name;
