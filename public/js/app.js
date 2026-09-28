@@ -393,16 +393,12 @@ function renderProfileState(source) {
 
     const profileBadge = document.getElementById("profile-status-badge") || document.querySelector("[data-candidate='profileStatus']");
     if (profileBadge) {
-        const pStatus = source.candidate?.profileStatus;
-        if (pStatus === "Verified") {
-            profileBadge.textContent = "Verified";
-            profileBadge.className = "badge green";
-        } else if (pStatus) {
-            profileBadge.textContent = pStatus;
-            profileBadge.className = "badge gray";
+        if (source.enrollment && source.enrollment.status === "Enrolled") {
+            profileBadge.textContent = "Enrolled";
+            profileBadge.className = "inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-emerald-50 text-emerald-700 text-xs font-semibold";
         } else {
-            profileBadge.textContent = "Basic Profile";
-            profileBadge.className = "badge gray";
+            profileBadge.textContent = "";
+            profileBadge.className = "hidden"; // Tailwind class to hide if not enrolled
         }
     }
 
@@ -420,14 +416,51 @@ function renderProfileState(source) {
             const issueDate = cert.issueDate || cert.issue_date || "—";
 
             certContent.innerHTML = `
-                <div class="row"><span class="label">Certificate Number</span><span class="value"><strong>${certNumber}</strong></span></div>
-                <div class="row"><span class="label">Level</span><span class="value"><span class="badge blue">${certLevel}</span></span></div>
-                <div class="row"><span class="label">Issue Date</span><span class="value">${issueDate}</span></div>
-                <div class="row" style="align-items: center;"><span class="label">Certificate PDF</span><span class="value"><a href="${downloadUrl}" class="button" target="_blank" style="background: #1652d6; color: white; padding: 6px 14px; text-decoration: none; border-radius: 4px; font-weight: bold; display: inline-block; font-size: 13px;">Download Certificate</a></span></div>
+                <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-5">
+                    <div class="flex items-center gap-4 min-w-0">
+                        <div class="w-12 h-12 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center shrink-0">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z"/><path d="M19.5 10.5c-1 0-1.5-.5-2-1.5A3 3 0 0 0 12 6a3 3 0 0 0-5.5 3c-.5 1-1 1.5-2 1.5A3 3 0 0 0 3 13.5c1 0 1.5.5 2 1.5A3 3 0 0 0 10.5 18a3 3 0 0 0 5.5-3c.5-1 1-1.5 2-1.5A3 3 0 0 0 19.5 10.5Z"/></svg>
+                        </div>
+                        <div class="min-w-0">
+                            <p class="text-sm font-semibold text-slate-800">InternBoot Certificate</p>
+                            <p class="text-xs text-slate-500 mt-1 flex flex-wrap items-center gap-2">
+                                <span>No: <strong class="text-slate-800">${certNumber}</strong></span>
+                                <span class="w-1 h-1 bg-slate-300 rounded-full"></span>
+                                <span>Level: <strong class="text-slate-800">${certLevel}</strong></span>
+                                <span class="w-1 h-1 bg-slate-300 rounded-full"></span>
+                                <span>Issued: <strong class="text-slate-800">${issueDate}</strong></span>
+                            </p>
+                        </div>
+                    </div>
+                    <div class="shrink-0 flex flex-wrap items-center gap-3">
+                        <span class="inline-flex items-center gap-2 px-3 py-1.5 rounded-xl bg-emerald-50 text-emerald-700 text-xs font-semibold">
+                            <span class="w-2 h-2 rounded-full bg-emerald-500"></span> Issued
+                        </span>
+                        <a href="${downloadUrl}" target="_blank" class="inline-flex items-center justify-center gap-2 px-4 py-2 rounded-xl bg-blue-600 text-white hover:bg-blue-700 text-sm font-semibold shadow-sm transition">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" x2="12" y1="15" y2="3"/></svg>
+                            Download
+                        </a>
+                    </div>
+                </div>
             `;
         } else {
             certContent.innerHTML = `
-                <div class="row"><span class="label">Status</span><span class="value"><span class="badge gray">Not issued yet</span></span></div>
+                <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-5">
+                    <div class="flex items-center gap-4 min-w-0">
+                        <div class="w-12 h-12 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center shrink-0">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z"/><path d="M19.5 10.5c-1 0-1.5-.5-2-1.5A3 3 0 0 0 12 6a3 3 0 0 0-5.5 3c-.5 1-1 1.5-2 1.5A3 3 0 0 0 3 13.5c1 0 1.5.5 2 1.5A3 3 0 0 0 10.5 18a3 3 0 0 0 5.5-3c.5-1 1-1.5 2-1.5A3 3 0 0 0 19.5 10.5Z"/></svg>
+                        </div>
+                        <div class="min-w-0">
+                            <p class="text-sm font-semibold text-slate-800">InternBoot Certificate</p>
+                            <p class="text-xs text-slate-500 mt-1">Your certificate will appear here once it is issued.</p>
+                        </div>
+                    </div>
+                    <div class="shrink-0">
+                        <span class="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-slate-100 text-slate-600 text-xs font-semibold">
+                            <span class="w-2 h-2 rounded-full bg-slate-400"></span> Not issued yet
+                        </span>
+                    </div>
+                </div>
             `;
         }
     }
