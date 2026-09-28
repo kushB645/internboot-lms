@@ -110,9 +110,10 @@ function handle_generate_questions_request(array $input, mysqli $conn): void {
         send_json_response('error', 'Count must be a positive integer', null, 400);
     }
 
-    if ($count > 50) {
-        $count = 50;
+    if ($count > 100) {
+        $count = 100;
     }
+    @set_time_limit(300);
 
     $difficultyMix = trim((string)($input['difficulty_mix'] ?? ''));
     if ($difficultyMix === '' && $diffSum > 0) {
