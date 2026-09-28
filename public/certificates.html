@@ -1,591 +1,406 @@
 <!doctype html>
 <html lang="en">
-  <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width,initial-scale=1" />
 
-    <title>InternBoot | Certificates</title>
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
 
-    <!-- Tailwind CSS -->
-    <script src="https://cdn.tailwindcss.com"></script>
+  <title>InternBoot | Certificates</title>
 
-    <script>
-      tailwind.config = {
-        theme: {
-          extend: {
-            colors: {
-              "intern-blue": "#2563eb",
-              "intern-dark": "#17243a",
-            },
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            "intern-blue": "#2563eb",
+            "intern-dark": "#17243a",
           },
         },
-      };
-    </script>
+      },
+    };
+  </script>
 
-    <!-- Lucide Icons -->
-    <script src="https://unpkg.com/lucide@latest"></script>
-  </head>
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+</head>
 
-  <body class="min-h-screen bg-[#eef4ff] text-slate-900">
-    <div class="min-h-screen flex">
-      <!-- =====================================================
+<body class="min-h-screen bg-[#eef4ff] text-slate-900">
+  <div class="min-h-screen flex">
+    <!-- =====================================================
            SIDEBAR
       ====================================================== -->
 
-      <aside
-        class="fixed inset-y-0 left-0 z-50 hidden md:flex w-[293px] flex-col overflow-hidden bg-gradient-to-b from-[#294fae] to-[#347de9] text-white"
-      >
-        <!-- Logo -->
-        <div
-          class="h-16 px-6 flex items-center border-b border-white/15 shrink-0"
-        >
-          <a href="dashboard.html" class="flex items-center gap-3 min-w-0">
-            <div
-              class="w-10 h-10 rounded-xl bg-white flex items-center justify-center shrink-0 overflow-hidden"
-            >
-              <img
-                src="assets/internboot-logo.png"
-                alt="InternBoot logo"
-                class="w-full h-full object-contain"
-              />
-            </div>
+    <aside
+      class="fixed inset-y-0 left-0 z-50 hidden md:flex w-[293px] flex-col overflow-hidden bg-gradient-to-b from-[#294fae] to-[#347de9] text-white">
+      <!-- Logo -->
+      <div class="h-16 px-6 flex items-center border-b border-white/15 shrink-0">
+        <a href="dashboard.html" class="flex items-center gap-3 min-w-0">
+          <div class="w-10 h-10 rounded-xl bg-white flex items-center justify-center shrink-0 overflow-hidden">
+            <img src="assets/internboot-logo.png" alt="InternBoot logo" class="w-full h-full object-contain" />
+          </div>
 
-            <div class="min-w-0">
-              <div class="text-xl font-bold leading-none">InternBoot</div>
+          <div class="min-w-0">
+            <div class="text-xl font-bold leading-none">InternBoot</div>
 
-              <div class="text-sm text-white/85 mt-1">Student Dashboard</div>
-            </div>
-          </a>
-        </div>
+            <div class="text-sm text-white/85 mt-1">Student Dashboard</div>
+          </div>
+        </a>
+      </div>
 
-        <!-- Main Navigation -->
-        <nav class="flex-1 min-h-0 overflow-y-auto p-4 space-y-1">
-          <a
-            href="dashboard.html"
-            data-page="dashboard.html"
-            class="nav-item flex items-center gap-3 px-3 py-2.5 rounded-xl text-white/90 hover:bg-white/10 transition"
-          >
-            <i data-lucide="layout-dashboard" class="w-5 h-5 shrink-0"></i>
-            <span>Dashboard</span>
-          </a>
+      <!-- Main Navigation -->
+      <nav class="flex-1 min-h-0 overflow-y-auto p-4 space-y-1">
+        <a href="dashboard.html" data-page="dashboard.html"
+          class="nav-item flex items-center gap-3 px-3 py-2.5 rounded-xl text-white/90 hover:bg-white/10 transition">
+          <i data-lucide="layout-dashboard" class="w-5 h-5 shrink-0"></i>
+          <span>Dashboard</span>
+        </a>
 
-          <a
-            href="profile.html"
-            data-page="profile.html"
-            class="nav-item flex items-center gap-3 px-3 py-2.5 rounded-xl text-white/90 hover:bg-white/10 transition"
-          >
-            <i data-lucide="user-round" class="w-5 h-5 shrink-0"></i>
-            <span>My Profile</span>
-          </a>
+        <a href="profile.html" data-page="profile.html"
+          class="nav-item flex items-center gap-3 px-3 py-2.5 rounded-xl text-white/90 hover:bg-white/10 transition">
+          <i data-lucide="user-round" class="w-5 h-5 shrink-0"></i>
+          <span>My Profile</span>
+        </a>
 
-          <a
-            href="payment.html"
-            data-page="payment.html"
-            class="nav-item flex items-center gap-3 px-3 py-2.5 rounded-xl text-white/90 hover:bg-white/10 transition"
-          >
-            <i data-lucide="credit-card" class="w-5 h-5 shrink-0"></i>
-            <span>Payments</span>
-          </a>
+        <a href="payment.html" data-page="payment.html"
+          class="nav-item flex items-center gap-3 px-3 py-2.5 rounded-xl text-white/90 hover:bg-white/10 transition">
+          <i data-lucide="credit-card" class="w-5 h-5 shrink-0"></i>
+          <span>Payments</span>
+        </a>
 
-          <a
-            href="enrollment.html"
-            data-page="enrollment.html"
-            class="nav-item flex items-center gap-3 px-3 py-2.5 rounded-xl text-white/90 hover:bg-white/10 transition"
-          >
-            <i data-lucide="clipboard-check" class="w-5 h-5 shrink-0"></i>
-            <span>Enrollment</span>
-          </a>
+        <a href="enrollment.html" data-page="enrollment.html"
+          class="nav-item flex items-center gap-3 px-3 py-2.5 rounded-xl text-white/90 hover:bg-white/10 transition">
+          <i data-lucide="clipboard-check" class="w-5 h-5 shrink-0"></i>
+          <span>Enrollment</span>
+        </a>
 
-          <a
-            href="batches-slots.html"
-            data-page="batches-slots.html"
-            class="nav-item flex items-center gap-3 px-3 py-2.5 rounded-xl text-white/90 hover:bg-white/10 transition"
-          >
-            <i data-lucide="calendar-days" class="w-5 h-5 shrink-0"></i>
-            <span>Batches &amp; Slots</span>
-          </a>
+        <a href="batches-slots.html" data-page="batches-slots.html"
+          class="nav-item flex items-center gap-3 px-3 py-2.5 rounded-xl text-white/90 hover:bg-white/10 transition">
+          <i data-lucide="calendar-days" class="w-5 h-5 shrink-0"></i>
+          <span>Batches &amp; Slots</span>
+        </a>
 
-          <a
-            href="exam.html"
-            data-page="exam.html"
-            class="nav-item flex items-center gap-3 px-3 py-2.5 rounded-xl text-white/90 hover:bg-white/10 transition"
-          >
-            <i data-lucide="file-pen-line" class="w-5 h-5 shrink-0"></i>
-            <span>Exam</span>
-          </a>
+        <a href="exam.html" data-page="exam.html"
+          class="nav-item flex items-center gap-3 px-3 py-2.5 rounded-xl text-white/90 hover:bg-white/10 transition">
+          <i data-lucide="file-pen-line" class="w-5 h-5 shrink-0"></i>
+          <span>Exam</span>
+        </a>
 
-          <a
-            href="results.html"
-            data-page="results.html"
-            class="nav-item flex items-center gap-3 px-3 py-2.5 rounded-xl text-white/90 hover:bg-white/10 transition"
-          >
-            <i
-              data-lucide="chart-no-axes-combined"
-              class="w-5 h-5 shrink-0"
-            ></i>
-            <span>Results</span>
-          </a>
+        <a href="results.html" data-page="results.html"
+          class="nav-item flex items-center gap-3 px-3 py-2.5 rounded-xl text-white/90 hover:bg-white/10 transition">
+          <i data-lucide="chart-no-axes-combined" class="w-5 h-5 shrink-0"></i>
+          <span>Results</span>
+        </a>
 
-          <!-- ACTIVE -->
-          <a
-            href="certificates.html"
-            data-page="certificates.html"
-            class="nav-item active flex items-center gap-3 px-3 py-2.5 rounded-xl bg-white/20 text-white font-semibold"
-          >
-            <i data-lucide="award" class="w-5 h-5 shrink-0"></i>
+        <!-- ACTIVE -->
+        <a href="certificates.html" data-page="certificates.html"
+          class="nav-item active flex items-center gap-3 px-3 py-2.5 rounded-xl bg-white/20 text-white font-semibold">
+          <i data-lucide="award" class="w-5 h-5 shrink-0"></i>
 
-            <span>Certificates</span>
+          <span>Certificates</span>
 
-            <span class="ml-auto w-2.5 h-2.5 rounded-full bg-blue-100"></span>
-          </a>
+          <span class="ml-auto w-2.5 h-2.5 rounded-full bg-blue-100"></span>
+        </a>
 
-          <a
-            href="placement.html"
-            data-page="placement.html"
-            class="nav-item flex items-center gap-3 px-3 py-2.5 rounded-xl text-white/90 hover:bg-white/10 transition"
-          >
-            <i data-lucide="briefcase-business" class="w-5 h-5 shrink-0"></i>
-            <span>Placement</span>
-          </a>
-        </nav>
+        <a href="placement.html" data-page="placement.html"
+          class="nav-item flex items-center gap-3 px-3 py-2.5 rounded-xl text-white/90 hover:bg-white/10 transition">
+          <i data-lucide="briefcase-business" class="w-5 h-5 shrink-0"></i>
+          <span>Placement</span>
+        </a>
+      </nav>
 
-                <!-- Bottom Section -->
-        <div class="shrink-0 border-t border-white/10 p-4 space-y-2">
+      <!-- Bottom Section -->
+      <div class="shrink-0 border-t border-white/10 p-4 space-y-2">
 
-          <!-- Live Student Profile -->
-          <a
-            href="profile.html"
-            class="flex items-center gap-3 rounded-xl bg-white/10 border border-white/10 px-3 py-2.5 hover:bg-white/15 transition-all duration-200"
-          >
-            <!-- Avatar -->
-            <div
-              id="sidebar-student-avatar"
-              class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-indigo-300 to-purple-400 text-white font-bold text-base"
-            >
-              <span data-candidate="initials">KB</span>
-            </div>
+        <!-- Live Student Profile -->
+        <a href="profile.html"
+          class="flex items-center gap-3 rounded-xl bg-white/10 border border-white/10 px-3 py-2.5 hover:bg-white/15 transition-all duration-200">
+          <!-- Avatar -->
+          <div id="sidebar-student-avatar"
+            class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-indigo-300 to-purple-400 text-white font-bold text-base">
+            <span data-candidate="initials">KB</span>
+          </div>
 
-            <!-- Student Details -->
-            <div class="min-w-0 flex-1">
-              <p
-                id="sidebar-student-name"
-                data-candidate="name"
-                class="truncate text-sm font-bold leading-tight text-white"
-              >
-                Student
-              </p>
+          <!-- Student Details -->
+          <div class="min-w-0 flex-1">
+            <p id="sidebar-student-name" data-candidate="name"
+              class="truncate text-sm font-bold leading-tight text-white">
+              Student
+            </p>
 
-              <p class="mt-0.5 text-xs leading-tight text-blue-100/80">
-                Student
-              </p>
-            </div>
+            <p class="mt-0.5 text-xs leading-tight text-blue-100/80">
+              Student
+            </p>
+          </div>
 
-            <!-- Online Status -->
-            <span
-              class="h-2.5 w-2.5 shrink-0 rounded-full bg-emerald-400"
-              title="Active"
-            ></span>
-          </a>
+          <!-- Online Status -->
+          <span class="h-2.5 w-2.5 shrink-0 rounded-full bg-emerald-400" title="Active"></span>
+        </a>
 
-          <!-- Logout -->
-          <a
-            href="api/auth/logout.php"
-            class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-blue-50 hover:bg-white/10 hover:text-white transition-all duration-200"
-          >
-            <i data-lucide="log-out" class="w-5 h-5 shrink-0"></i>
+        <!-- Logout -->
+        <a href="api/auth/logout.php"
+          class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-blue-50 hover:bg-white/10 hover:text-white transition-all duration-200">
+          <i data-lucide="log-out" class="w-5 h-5 shrink-0"></i>
 
-            <span>Logout</span>
-          </a>
-        </div>
-      </aside>
+          <span>Logout</span>
+        </a>
+      </div>
+    </aside>
 
-      <!-- =====================================================
+    <!-- =====================================================
            MAIN
       ====================================================== -->
 
-      <main class="ml-[293px] w-[calc(100%-293px)] min-h-screen">
-        <!-- =====================================================
+    <main class="ml-[293px] w-[calc(100%-293px)] min-h-screen">
+      <!-- =====================================================
              FIXED HEADER
         ====================================================== -->
 
-        <header
-          class="fixed top-0 right-0 left-[293px] z-40 h-16 bg-white border-b border-slate-200 px-6 flex items-center justify-between"
-        >
-          <!-- Page Title -->
-          <div class="flex items-center gap-3 min-w-0">
-            <div
-              class="w-9 h-9 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center shrink-0"
-            >
-              <i data-lucide="award" class="w-5 h-5"></i>
-            </div>
-
-            <div class="min-w-0">
-              <div class="flex items-center gap-2">
-                <h1 class="text-base font-semibold text-slate-900">
-                  Certificates
-                </h1>
-
-                <span
-                  class="hidden sm:inline-flex items-center px-2.5 py-1 rounded-full bg-blue-50 text-blue-600 text-xs font-medium"
-                >
-                  Downloads
-                </span>
-              </div>
-
-              <p class="hidden md:block text-xs text-slate-500">
-                View and access your internship certificate
-              </p>
-            </div>
+      <header
+        class="fixed top-0 right-0 left-[293px] z-40 h-16 bg-white border-b border-slate-200 px-6 flex items-center justify-between">
+        <!-- Page Title -->
+        <div class="flex items-center gap-3 min-w-0">
+          <div class="w-9 h-9 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center shrink-0">
+            <i data-lucide="award" class="w-5 h-5"></i>
           </div>
 
-          <!-- Profile -->
-          <a
-            class="profile-trigger flex items-center gap-3 rounded-xl px-2 py-1.5 hover:bg-slate-50 transition shrink-0"
-            href="profile.html"
-            title="Open My Profile"
-          >
-            <div
-              class="avatar w-9 h-9 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center font-semibold"
-              data-candidate="initials"
-            >
-              --
+          <div class="min-w-0">
+            <div class="flex items-center gap-2">
+              <h1 class="text-base font-semibold text-slate-900">
+                Certificates
+              </h1>
+
+              <span
+                class="hidden sm:inline-flex items-center px-2.5 py-1 rounded-full bg-blue-50 text-blue-600 text-xs font-medium">
+                Downloads
+              </span>
             </div>
 
-            <div class="user hidden sm:flex flex-col min-w-0">
-              <strong
-                class="text-sm font-semibold text-slate-800 truncate max-w-40"
-              >
-                <span data-candidate="name"></span>
-              </strong>
+            <p class="hidden md:block text-xs text-slate-500">
+              View and access your internship certificate
+            </p>
+          </div>
+        </div>
 
-              <small class="text-xs text-slate-500 truncate max-w-48">
-                <span data-candidate="email"></span>
-              </small>
-            </div>
-          </a>
-        </header>
+        <!-- Profile -->
+        <a class="profile-trigger flex items-center gap-3 rounded-xl px-2 py-1.5 hover:bg-slate-50 transition shrink-0"
+          href="profile.html" title="Open My Profile">
+          <div
+            class="avatar w-9 h-9 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center font-semibold"
+            data-candidate="initials">
+            --
+          </div>
 
-        <!-- =====================================================
+          <div class="user hidden sm:flex flex-col min-w-0">
+            <strong class="text-sm font-semibold text-slate-800 truncate max-w-40">
+              <span data-candidate="name"></span>
+            </strong>
+
+            <small class="text-xs text-slate-500 truncate max-w-48">
+              <span data-candidate="email"></span>
+            </small>
+          </div>
+        </a>
+      </header>
+
+      <!-- =====================================================
              CONTENT
         ====================================================== -->
 
-        <section class="p-6 pt-[88px]">
-          <div class="max-w-[1400px] mx-auto w-full">
-            <!-- =================================================
+      <section class="p-6 pt-[88px]">
+        <div class="max-w-[1400px] mx-auto w-full">
+          <!-- =================================================
                  HERO
             ================================================== -->
 
-            <section
-              class="relative overflow-hidden rounded-2xl bg-gradient-to-r from-[#24479d] via-[#2f61c7] to-[#4388f3] px-5 sm:px-6 lg:px-8 py-6 md:py-7 mb-6 text-white"
-            >
-              <!-- Background decoration -->
-              <div
-                class="absolute -right-14 -top-20 w-56 h-56 rounded-full bg-white/10"
-              ></div>
+          <section
+            class="relative overflow-hidden rounded-2xl bg-gradient-to-r from-[#24479d] via-[#2f61c7] to-[#4388f3] px-5 sm:px-6 lg:px-8 py-6 md:py-7 mb-6 text-white">
+            <!-- Background decoration -->
+            <div class="absolute -right-14 -top-20 w-56 h-56 rounded-full bg-white/10"></div>
 
-              <div
-                class="absolute right-24 -bottom-24 w-48 h-48 rounded-full bg-white/10"
-              ></div>
-
-              <div
-                class="absolute right-8 top-6 w-32 h-32 rounded-2xl border border-white/20 bg-white/5 flex items-center justify-center"
-              >
-                <i data-lucide="award" class="w-20 h-20 text-white/90"></i>
-              </div>
-
-              <div class="relative z-10 max-w-4xl">
-                <div
-                  class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/15 border border-white/20 text-xs font-semibold mb-4"
-                >
-                  <i data-lucide="award" class="w-4 h-4"></i>
-                  Certification
-                </div>
-
-                <h2 class="text-2xl md:text-3xl font-bold tracking-tight">
-                  Certificates
-                </h2>
-
-                <p
-                  class="mt-2 text-sm md:text-base text-blue-50 leading-6 max-w-3xl"
-                >
-                  View your certificate status, certificate details, and
-                  availability.
-                </p>
-              </div>
-            </section>
-
-            <!-- =================================================
-                 CERTIFICATE STATUS
-            ================================================== -->
-
-            <section
-              class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden mb-6"
-            >
-              <div class="p-6">
-                <!-- Card Header -->
-                <div
-                  class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-5"
-                >
-                  <div class="flex items-center gap-3">
-                    <div
-                      class="w-10 h-10 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center shrink-0"
-                    >
-                      <i data-lucide="award" class="w-5 h-5"></i>
-                    </div>
-
-                    <div>
-                      <h2 class="text-lg font-semibold text-slate-900">
-                        Certificate Status
-                      </h2>
-
-                      <p class="text-sm text-slate-500 mt-0.5">
-                        Your certificate availability
-                      </p>
-                    </div>
-                  </div>
-
-                  <span
-                    class="inline-flex items-center gap-2 self-start sm:self-auto px-3 py-1.5 rounded-full bg-blue-50 text-blue-600 text-xs font-semibold"
-                  >
-                    <span class="w-1.5 h-1.5 rounded-full bg-blue-500"></span>
-
-                    Certificate
-                  </span>
-                </div>
-
-                <!-- IMPORTANT:
-                     Existing certificate logic updates this container.
-                     ID MUST NOT CHANGE.
-                -->
-
-                <div id="certificate-state-container">
-                  <div
-                    class="rounded-xl border border-blue-100 bg-blue-50/70 px-6 py-8 text-center"
-                  >
-                    <div
-                      class="mx-auto w-12 h-12 rounded-xl bg-white border border-blue-100 flex items-center justify-center text-blue-600 mb-4"
-                    >
-                      <i data-lucide="badge-check" class="w-6 h-6"></i>
-                    </div>
-
-                    <h2 class="text-lg font-semibold text-slate-900">
-                      Loading Certificate Status...
-                    </h2>
-
-                    <p class="mt-2 text-sm text-slate-500">
-                      Please wait while we check your certificate information.
-                    </p>
-                  </div>
-                </div>
-              </div>
-            </section>
-
-            <!-- =================================================
-                 CERTIFICATE PREVIEW
-            ================================================== -->
+            <div class="absolute right-24 -bottom-24 w-48 h-48 rounded-full bg-white/10"></div>
 
             <div
-              id="certificate-preview-container"
-              class="grid grid-cols-1 xl:grid-cols-[minmax(0,1.5fr)_minmax(280px,.7fr)] gap-5 mb-6"
-              style="display: none"
-            >
-              <!-- Certificate Details -->
-              <section
-                class="bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden"
-              >
-                <div class="p-6">
-                  <div class="flex items-center gap-3 mb-5">
-                    <div
-                      class="w-10 h-10 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center"
-                    >
-                      <i data-lucide="file-badge" class="w-5 h-5"></i>
-                    </div>
-
-                    <div>
-                      <h2 class="text-lg font-semibold text-slate-900">
-                        Certificate Preview
-                      </h2>
-
-                      <p class="text-sm text-slate-500 mt-0.5">
-                        Certificate information
-                      </p>
-                    </div>
-                  </div>
-
-                  <!-- Certificate Information -->
-                  <div class="divide-y divide-slate-100">
-                    <!-- Certificate Number -->
-                    <div
-                      class="py-4 first:pt-0 flex items-center justify-between gap-6"
-                    >
-                      <span class="text-sm text-slate-500">
-                        Certificate Number
-                      </span>
-
-                      <span
-                        class="text-sm font-semibold text-slate-900 text-right break-all"
-                      >
-                        <span data-certificate="number"></span>
-                      </span>
-                    </div>
-
-                    <!-- Level -->
-                    <div class="py-4 flex items-center justify-between gap-6">
-                      <span class="text-sm text-slate-500"> Level </span>
-
-                      <span
-                        class="text-sm font-semibold text-slate-900 text-right"
-                      >
-                        <span data-certificate="level"></span>
-                      </span>
-                    </div>
-
-                    <!-- Issue Date -->
-                    <div
-                      class="py-4 last:pb-0 flex items-center justify-between gap-6"
-                    >
-                      <span class="text-sm text-slate-500"> Issue Date </span>
-
-                      <span
-                        class="text-sm font-semibold text-slate-900 text-right"
-                      >
-                        <span data-certificate="issue_date"></span>
-                      </span>
-                    </div>
-                  </div>
-                </div>
-              </section>
-
-              <!-- Status -->
-              <section
-                class="bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden"
-              >
-                <div class="p-6">
-                  <div class="flex items-center gap-3 mb-5">
-                    <div
-                      class="w-10 h-10 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center"
-                    >
-                      <i data-lucide="shield-check" class="w-5 h-5"></i>
-                    </div>
-
-                    <div>
-                      <h2 class="text-lg font-semibold text-slate-900">
-                        Status
-                      </h2>
-
-                      <p class="text-sm text-slate-500 mt-0.5">
-                        Current certificate status
-                      </p>
-                    </div>
-                  </div>
-
-                  <div
-                    class="rounded-xl bg-slate-50 border border-slate-200 p-5"
-                  >
-                    <div class="flex items-center justify-between gap-4">
-                      <div>
-                        <p
-                          class="text-xs font-medium text-slate-500 uppercase tracking-wide"
-                        >
-                          Certificate
-                        </p>
-
-                        <p class="mt-1 text-sm font-semibold text-slate-900">
-                          Current Status
-                        </p>
-                      </div>
-
-                      <span
-                        class="inline-flex items-center px-3 py-1.5 rounded-full bg-slate-100 text-slate-600 text-xs font-semibold"
-                        id="certificate-status-badge"
-                      >
-                        Pending
-                      </span>
-                    </div>
-                  </div>
-                </div>
-              </section>
+              class="absolute right-8 top-6 w-32 h-32 rounded-2xl border border-white/20 bg-white/5 flex items-center justify-center">
+              <i data-lucide="award" class="w-20 h-20 text-white/90"></i>
             </div>
 
-            <!-- =================================================
+            <div class="relative z-10 max-w-4xl">
+              <div
+                class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/15 border border-white/20 text-xs font-semibold mb-4">
+                <i data-lucide="award" class="w-4 h-4"></i>
+                Certification
+              </div>
+
+              <h2 class="text-2xl md:text-3xl font-bold tracking-tight">
+                Certificates
+              </h2>
+
+              <p class="mt-2 text-sm md:text-base text-blue-50 leading-6 max-w-3xl">
+                View your certificate status, certificate details, and
+                availability.
+              </p>
+            </div>
+          </section>
+
+          <!-- =================================================
+                 CERTIFICATE CONTENT
+            ================================================== -->
+
+          <div id="certificate-main-container" class="grid grid-cols-1 md:grid-cols-2 gap-5 mb-6">
+            <!-- Status / Actions -->
+            <section class="bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden flex flex-col">
+              <div class="p-6 border-b border-slate-100 flex items-center justify-between gap-4">
+                <div class="flex items-center gap-3">
+                  <div class="w-10 h-10 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center shrink-0">
+                    <i data-lucide="award" class="w-5 h-5"></i>
+                  </div>
+                  <div>
+                    <h2 class="text-lg font-semibold text-slate-900">Certificate Status</h2>
+                    <p class="text-sm text-slate-500 mt-0.5">Your certificate availability</p>
+                  </div>
+                </div>
+                <span id="certificate-status-badge"
+                  class="inline-flex items-center px-3 py-1.5 rounded-full bg-slate-100 text-slate-600 text-xs font-semibold">
+                  Pending
+                </span>
+              </div>
+
+              <!-- JS updates this container with Download/View OR Loading -->
+              <div id="certificate-state-container"
+                class="flex-1 p-6 flex flex-col items-center justify-center text-center">
+                <div
+                  class="mx-auto w-12 h-12 rounded-xl bg-white border border-blue-100 flex items-center justify-center text-blue-600 mb-4">
+                  <i data-lucide="badge-check" class="w-6 h-6"></i>
+                </div>
+                <h2 class="text-lg font-semibold text-slate-900">Loading Certificate Status...</h2>
+                <p class="mt-2 text-sm text-slate-500">Please wait while we check your certificate information.</p>
+              </div>
+            </section>
+
+            <!-- Certificate Details -->
+            <section id="certificate-preview-card"
+              class="bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden" style="display: none">
+              <div class="p-6">
+                <div class="flex items-center gap-3 mb-5">
+                  <div class="w-10 h-10 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center">
+                    <i data-lucide="file-badge" class="w-5 h-5"></i>
+                  </div>
+                  <div>
+                    <h2 class="text-lg font-semibold text-slate-900">Certificate Information</h2>
+                  </div>
+                </div>
+
+                <!-- Certificate Information -->
+                <div class="divide-y divide-slate-100">
+                  <!-- Certificate Number -->
+                  <div class="py-4 first:pt-0 flex items-center justify-between gap-6">
+                    <span class="text-sm text-slate-500">
+                      Certificate Number
+                    </span>
+                    <span class="text-sm font-semibold text-slate-900 text-right">
+                      <span data-certificate="number"></span>
+                    </span>
+                  </div>
+
+                  <!-- Level -->
+                  <div class="py-4 flex items-center justify-between gap-6">
+                    <span class="text-sm text-slate-500"> Level </span>
+                    <span class="text-sm font-semibold text-slate-900 text-right">
+                      <span data-certificate="level"></span>
+                    </span>
+                  </div>
+
+                  <!-- Issue Date -->
+                  <div class="py-4 last:pb-0 flex items-center justify-between gap-6">
+                    <span class="text-sm text-slate-500"> Issue Date </span>
+                    <span class="text-sm font-semibold text-slate-900 text-right">
+                      <span data-certificate="issue_date"></span>
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </section>
+          </div>
+
+          <!-- =================================================
                  INFORMATION
             ================================================== -->
 
-            <div
-              class="bg-white border border-slate-200 rounded-2xl shadow-sm p-6"
-            >
-              <div class="flex items-start gap-4">
-                <div
-                  class="w-10 h-10 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center shrink-0"
-                >
-                  <i data-lucide="info" class="w-5 h-5"></i>
-                </div>
+          <div class="bg-white border border-slate-200 rounded-2xl shadow-sm p-6">
+            <div class="flex items-start gap-4">
+              <div class="w-10 h-10 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center shrink-0">
+                <i data-lucide="info" class="w-5 h-5"></i>
+              </div>
 
-                <div>
-                  <h3 class="text-sm font-semibold text-slate-900">
-                    About Your Certificate
-                  </h3>
+              <div>
+                <h3 class="text-sm font-semibold text-slate-900">
+                  About Your Certificate
+                </h3>
 
-                  <p class="mt-1.5 text-sm text-slate-500 leading-6">
-                    Your certificate information will be displayed here once the
-                    certificate has been generated and made available for
-                    download.
-                  </p>
-                </div>
+                <p class="mt-1.5 text-sm text-slate-500 leading-6">
+                  Your certificate information will be displayed here once the
+                  certificate has been generated and made available for
+                  download.
+                </p>
               </div>
             </div>
           </div>
-        </section>
-      </main>
-    </div>
+        </div>
+      </section>
+    </main>
+  </div>
 
-    <!-- Existing JavaScript — UNCHANGED -->
-    <script src="js/app.js"></script>
+  <!-- Existing JavaScript — UNCHANGED -->
+  <script src="js/app.js"></script>
 
-    <!-- Lucide -->
-    <script>
-      document.addEventListener("DOMContentLoaded", function () {
-        if (window.lucide) {
-          lucide.createIcons();
+  <!-- Lucide -->
+  <script>
+    document.addEventListener("DOMContentLoaded", function () {
+      if (window.lucide) {
+        lucide.createIcons();
+      }
+    });
+  </script>
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      const avatar = document.getElementById("sidebar-student-avatar");
+      const name = document.getElementById("sidebar-student-name");
+
+      function syncSidebarProfile() {
+        const sourceName = document.querySelector(
+          '[data-candidate="name"]'
+        );
+
+        const sourceInitials = document.querySelector(
+          '[data-candidate="initials"]'
+        );
+
+        if (sourceName && name) {
+          const value = sourceName.textContent.trim();
+
+          if (value && name.textContent !== value) {
+            name.textContent = value;
+          }
         }
-      });
-    </script>
-    <script>
-  document.addEventListener("DOMContentLoaded", () => {
-    const avatar = document.getElementById("sidebar-student-avatar");
-    const name = document.getElementById("sidebar-student-name");
 
-    function syncSidebarProfile() {
-      const sourceName = document.querySelector(
-        '[data-candidate="name"]'
-      );
+        if (sourceInitials && avatar) {
+          const value = sourceInitials.textContent.trim();
 
-      const sourceInitials = document.querySelector(
-        '[data-candidate="initials"]'
-      );
-
-      if (sourceName && name) {
-        const value = sourceName.textContent.trim();
-
-        if (value && name.textContent !== value) {
-          name.textContent = value;
+          if (value && avatar.querySelector("span").textContent !== value) {
+            avatar.querySelector("span").textContent = value;
+          }
         }
       }
 
-      if (sourceInitials && avatar) {
-        const value = sourceInitials.textContent.trim();
+      // Initial sync
+      syncSidebarProfile();
 
-        if (value && avatar.querySelector("span").textContent !== value) {
-          avatar.querySelector("span").textContent = value;
-        }
-      }
-    }
 
-    // Initial sync
-    syncSidebarProfile();
+    });
+  </script>
+</body>
 
-    
-  });
-</script>
-  </body>
 </html>

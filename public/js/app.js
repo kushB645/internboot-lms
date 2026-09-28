@@ -236,7 +236,7 @@ function isCompleted(key, status) {
         (key === "enrollment" && status === "Enrolled") ||
         (key === "batch" && status === "Assigned") ||
         (key === "exam" && status === "Completed") ||
-        (key === "result" && status === "Completed") ||
+        (key === "result" && (status === "Completed" || status === "Available")) ||
         (key === "certificate" && status === "Issued") ||
         (key === "placement" && status === "Placed")
     );
@@ -290,7 +290,9 @@ if (document.readyState === "loading") {
 
 function renderCertificateState(source) {
     const certStateContainer = document.getElementById("certificate-state-container");
-    const certPreviewContainer = document.getElementById("certificate-preview-container");
+    const certPreviewCard = document.getElementById("certificate-preview-card");
+    const certMainContainer = document.getElementById("certificate-main-container");
+    const certBadge = document.getElementById("certificate-status-badge");
     const dashCertDownload = document.getElementById("dashboard-certificate-download");
 
     if (source.certificate && source.certificate.status === "Issued" && source.result && source.result.id) {
@@ -298,22 +300,40 @@ function renderCertificateState(source) {
 
         if (certStateContainer) {
             certStateContainer.innerHTML = `
-                <div class='empty' style='padding: 40px;'>
-                    <div style='font-size:42px'>🎓</div>
-                    <h2 style='color:#17243a; margin-top: 10px;'>Certificate Issued</h2>
-                    <p style='margin-bottom: 20px;'>Congratulations! Your certificate is ready to download.</p>
-                    <a href="${downloadUrl}" class="button" target="_blank" style="background: #1652d6; color: white; padding: 10px 20px; text-decoration: none; border-radius: 4px; font-weight: bold; display: inline-block;">Download Certificate (PDF)</a>
+                <div class="mx-auto w-16 h-16 rounded-2xl bg-green-50 border border-green-100 flex items-center justify-center text-green-600 mb-5">
+                    <i data-lucide="award" class="w-8 h-8"></i>
+                </div>
+                <h3 class="text-xl font-bold text-slate-900 mb-2">Certificate Issued</h3>
+                <p class="text-slate-500 mb-6 max-w-sm">Congratulations! Your certificate has been generated successfully and is ready.</p>
+                <div class="flex flex-col sm:flex-row justify-center gap-3 w-full sm:w-auto">
+                    <a href="${downloadUrl}" target="_blank" class="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-medium transition-colors shadow-sm focus:ring-2 focus:ring-blue-500/20">
+                        <i data-lucide="download" class="w-4 h-4"></i> Download PDF
+                    </a>
+                    <a href="${downloadUrl}&view=1" target="_blank" class="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 font-medium transition-colors shadow-sm">
+                        <i data-lucide="eye" class="w-4 h-4"></i> View Online
+                    </a>
                 </div>
             `;
+            if (typeof lucide !== 'undefined' && lucide.createIcons) {
+                lucide.createIcons();
+            }
         }
 
-        if (certPreviewContainer) {
-            certPreviewContainer.style.display = "flex";
-            const badge = document.getElementById("certificate-status-badge");
-            if (badge) {
-                badge.textContent = "Issued";
-                badge.className = "badge green";
-            }
+        if (certBadge) {
+            certBadge.textContent = "Issued";
+            certBadge.className = "inline-flex items-center px-3 py-1.5 rounded-full bg-green-100 text-green-700 text-xs font-semibold";
+        }
+
+        if (certMainContainer) {
+            certMainContainer.className = "grid grid-cols-1 md:grid-cols-2 gap-5 mb-6";
+        }
+
+        if (certPreviewCard) {
+            certPreviewCard.style.display = "block";
+            
+            document.querySelectorAll('[data-certificate="number"]').forEach(el => el.textContent = source.certificate.number || '—');
+            document.querySelectorAll('[data-certificate="level"]').forEach(el => el.textContent = source.certificate.level || '—');
+            document.querySelectorAll('[data-certificate="issue_date"]').forEach(el => el.textContent = source.certificate.issueDate || '—');
         }
 
         if (dashCertDownload) {
@@ -322,16 +342,30 @@ function renderCertificateState(source) {
     } else {
         if (certStateContainer) {
             certStateContainer.innerHTML = `
-                <div class='empty'>
-                    <div style='font-size:42px'>🏅</div>
-                    <h2 style='color:#17243a'>No Certificate Issued</h2>
-                    <p>Your certificate will appear here after successful evaluation and level assignment.</p>
+                <div class="mx-auto w-16 h-16 rounded-2xl bg-slate-50 border border-slate-100 flex items-center justify-center text-slate-400 mb-5">
+                    <i data-lucide="clock" class="w-8 h-8"></i>
                 </div>
+                <h3 class="text-xl font-bold text-slate-900 mb-2">No Certificate Issued</h3>
+                <p class="text-slate-500 max-w-sm">Your certificate will appear here after successful evaluation and level assignment.</p>
             `;
+            if (typeof lucide !== 'undefined' && lucide.createIcons) {
+                lucide.createIcons();
+            }
         }
-        if (certPreviewContainer) {
-            certPreviewContainer.style.display = "none";
+
+        if (certBadge) {
+            certBadge.textContent = "Pending";
+            certBadge.className = "inline-flex items-center px-3 py-1.5 rounded-full bg-slate-100 text-slate-600 text-xs font-semibold";
         }
+
+        if (certMainContainer) {
+            certMainContainer.className = "grid grid-cols-1 gap-5 mb-6";
+        }
+
+        if (certPreviewCard) {
+            certPreviewCard.style.display = "none";
+        }
+        
         if (dashCertDownload) {
             dashCertDownload.innerHTML = "";
         }
@@ -404,7 +438,7 @@ function renderEnrollmentState(source) {
 
     const hero = document.getElementById("enrollment-hero");
     const statusBadge = document.getElementById("enrollment-status-badge");
-    const nextStep = document.getElementById("enrollment-next-step");
+    const nextStepContainer = document.getElementById("enrollment-next-step-container");
 
     if (!hero && !statusBadge) return;
 
@@ -415,6 +449,8 @@ function renderEnrollmentState(source) {
     const payStatus = source.payment?.status;
     const hasEnrollmentId = source.enrollment?.id && source.enrollment.id !== "—";
 
+    let nextStepHtml = '';
+
     // 1. Confirmed (payment verified + enrollment created/active)
     if (enrStatus === "Enrolled" || enrStatus === "Confirmed" || enrStatus === "Active" || (hasEnrollmentId && enrStatus !== "Pending" && enrStatus !== "Not Enrolled")) {
         if (heroTitle) heroTitle.textContent = "Enrollment Confirmed";
@@ -423,8 +459,98 @@ function renderEnrollmentState(source) {
             statusBadge.textContent = enrStatus && enrStatus !== "—" ? enrStatus : "Enrolled";
             statusBadge.className = "badge green";
         }
-        if (nextStep) {
-            nextStep.innerHTML = "Your next step is batch and slot assignment. You will see the details here once they are assigned.";
+        
+        // Check overall progress for Next Step
+        if (source.certificate && source.certificate.status === "Issued") {
+            nextStepHtml = `
+              <div class="rounded-xl border border-green-100 bg-green-50 p-5">
+                <div class="flex gap-3">
+                  <div class="w-10 h-10 shrink-0 rounded-xl bg-white text-green-600 flex items-center justify-center shadow-sm">
+                    <i data-lucide="award" class="w-5 h-5"></i>
+                  </div>
+                  <div class="min-w-0">
+                    <p class="text-sm font-semibold text-green-900">Program Completed</p>
+                    <p class="mt-1 text-sm leading-6 text-green-700">You have successfully completed your assessment and your certificate has been issued.</p>
+                  </div>
+                </div>
+              </div>
+              <a href="certificates.html" class="mt-5 w-full inline-flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-green-600 hover:bg-green-700 text-white text-sm font-semibold transition">
+                View Certificates
+                <i data-lucide="arrow-right" class="w-4 h-4"></i>
+              </a>
+            `;
+        } else if (source.result && (source.result.status === "Completed" || source.result.status === "Available" || source.result.id)) {
+            nextStepHtml = `
+              <div class="rounded-xl border border-purple-100 bg-purple-50 p-5">
+                <div class="flex gap-3">
+                  <div class="w-10 h-10 shrink-0 rounded-xl bg-white text-purple-600 flex items-center justify-center shadow-sm">
+                    <i data-lucide="file-check-2" class="w-5 h-5"></i>
+                  </div>
+                  <div class="min-w-0">
+                    <p class="text-sm font-semibold text-purple-900">Result Evaluated</p>
+                    <p class="mt-1 text-sm leading-6 text-purple-700">Your assessment result has been evaluated. Please check your results.</p>
+                  </div>
+                </div>
+              </div>
+              <a href="results.html" class="mt-5 w-full inline-flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-purple-600 hover:bg-purple-700 text-white text-sm font-semibold transition">
+                View Results
+                <i data-lucide="arrow-right" class="w-4 h-4"></i>
+              </a>
+            `;
+        } else if (source.exam && source.exam.status === "Completed") {
+            nextStepHtml = `
+              <div class="rounded-xl border border-indigo-100 bg-indigo-50 p-5">
+                <div class="flex gap-3">
+                  <div class="w-10 h-10 shrink-0 rounded-xl bg-white text-indigo-600 flex items-center justify-center shadow-sm">
+                    <i data-lucide="timer" class="w-5 h-5"></i>
+                  </div>
+                  <div class="min-w-0">
+                    <p class="text-sm font-semibold text-indigo-900">Evaluation Pending</p>
+                    <p class="mt-1 text-sm leading-6 text-indigo-700">You have completed the assessment. Your results are currently being evaluated.</p>
+                  </div>
+                </div>
+              </div>
+              <a href="results.html" class="mt-5 w-full inline-flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-semibold transition">
+                Go to Results
+                <i data-lucide="arrow-right" class="w-4 h-4"></i>
+              </a>
+            `;
+        } else if (source.batch && source.batch.status === "Assigned") {
+            nextStepHtml = `
+              <div class="rounded-xl border border-blue-100 bg-blue-50 p-5">
+                <div class="flex gap-3">
+                  <div class="w-10 h-10 shrink-0 rounded-xl bg-white text-blue-600 flex items-center justify-center shadow-sm">
+                    <i data-lucide="laptop" class="w-5 h-5"></i>
+                  </div>
+                  <div class="min-w-0">
+                    <p class="text-sm font-semibold text-blue-900">Take Assessment</p>
+                    <p class="mt-1 text-sm leading-6 text-blue-700">Your batch has been assigned. Please proceed to take the assessment during your slot.</p>
+                  </div>
+                </div>
+              </div>
+              <a href="exam.html" class="mt-5 w-full inline-flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold transition">
+                Go to Exam
+                <i data-lucide="arrow-right" class="w-4 h-4"></i>
+              </a>
+            `;
+        } else {
+            nextStepHtml = `
+              <div class="rounded-xl border border-blue-100 bg-blue-50 p-5">
+                <div class="flex gap-3">
+                  <div class="w-10 h-10 shrink-0 rounded-xl bg-white text-blue-600 flex items-center justify-center shadow-sm">
+                    <i data-lucide="calendar-days" class="w-5 h-5"></i>
+                  </div>
+                  <div class="min-w-0">
+                    <p class="text-sm font-semibold text-blue-900">Batch &amp; Slot Assignment</p>
+                    <p class="mt-1 text-sm leading-6 text-blue-700">Your next step is batch and slot assignment. You will see the details here once they are assigned.</p>
+                  </div>
+                </div>
+              </div>
+              <a href="batches-slots.html" class="mt-5 w-full inline-flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold transition">
+                View Batches &amp; Slots
+                <i data-lucide="arrow-right" class="w-4 h-4"></i>
+              </a>
+            `;
         }
     }
     // 2. Pending (payment done, enrollment processing)
@@ -435,9 +561,19 @@ function renderEnrollmentState(source) {
             statusBadge.textContent = "Pending";
             statusBadge.className = "badge yellow";
         }
-        if (nextStep) {
-            nextStep.innerHTML = "Your enrollment is pending verification. Please check back shortly once your batch is allocated.";
-        }
+        nextStepHtml = `
+          <div class="rounded-xl border border-yellow-100 bg-yellow-50 p-5">
+            <div class="flex gap-3">
+              <div class="w-10 h-10 shrink-0 rounded-xl bg-white text-yellow-600 flex items-center justify-center shadow-sm">
+                <i data-lucide="clock" class="w-5 h-5"></i>
+              </div>
+              <div class="min-w-0">
+                <p class="text-sm font-semibold text-yellow-900">Enrollment Processing</p>
+                <p class="mt-1 text-sm leading-6 text-yellow-700">Your enrollment is pending verification. Please check back shortly once your batch is allocated.</p>
+              </div>
+            </div>
+          </div>
+        `;
     }
     // 3. Failed (payment not verified / failed)
     else if (payStatus === "Failed" || enrStatus === "Failed") {
@@ -447,9 +583,23 @@ function renderEnrollmentState(source) {
             statusBadge.textContent = "Failed";
             statusBadge.className = "badge gray";
         }
-        if (nextStep) {
-            nextStep.innerHTML = 'Please visit <a href="payment.html" style="color:#1652d6;font-weight:700;">Payments</a> to retry your payment and complete your enrollment.';
-        }
+        nextStepHtml = `
+          <div class="rounded-xl border border-rose-100 bg-rose-50 p-5">
+            <div class="flex gap-3">
+              <div class="w-10 h-10 shrink-0 rounded-xl bg-white text-rose-600 flex items-center justify-center shadow-sm">
+                <i data-lucide="alert-circle" class="w-5 h-5"></i>
+              </div>
+              <div class="min-w-0">
+                <p class="text-sm font-semibold text-rose-900">Action Required</p>
+                <p class="mt-1 text-sm leading-6 text-rose-700">Please retry your payment and complete your enrollment.</p>
+              </div>
+            </div>
+          </div>
+          <a href="payment.html" class="mt-5 w-full inline-flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-rose-600 hover:bg-rose-700 text-white text-sm font-semibold transition">
+            Go to Payments
+            <i data-lucide="arrow-right" class="w-4 h-4"></i>
+          </a>
+        `;
     }
     // 4. Not Started / Not Enrolled
     else {
@@ -459,8 +609,29 @@ function renderEnrollmentState(source) {
             statusBadge.textContent = enrStatus && enrStatus !== "—" ? enrStatus : "Not Enrolled";
             statusBadge.className = "badge gray";
         }
-        if (nextStep) {
-            nextStep.innerHTML = 'Please visit <a href="payment.html" style="color:#1652d6;font-weight:700;">Payments</a> to pay the registration fee and start your enrollment.';
+        nextStepHtml = `
+          <div class="rounded-xl border border-slate-200 bg-slate-50 p-5">
+            <div class="flex gap-3">
+              <div class="w-10 h-10 shrink-0 rounded-xl bg-white text-slate-600 flex items-center justify-center shadow-sm">
+                <i data-lucide="credit-card" class="w-5 h-5"></i>
+              </div>
+              <div class="min-w-0">
+                <p class="text-sm font-semibold text-slate-900">Payment Pending</p>
+                <p class="mt-1 text-sm leading-6 text-slate-700">Please pay the registration fee and start your enrollment.</p>
+              </div>
+            </div>
+          </div>
+          <a href="payment.html" class="mt-5 w-full inline-flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold transition">
+            Go to Payments
+            <i data-lucide="arrow-right" class="w-4 h-4"></i>
+          </a>
+        `;
+    }
+
+    if (nextStepContainer && nextStepHtml) {
+        nextStepContainer.innerHTML = nextStepHtml;
+        if (typeof lucide !== 'undefined' && lucide.createIcons) {
+            lucide.createIcons();
         }
     }
 }
