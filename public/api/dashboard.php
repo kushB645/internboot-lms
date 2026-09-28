@@ -11,6 +11,7 @@ if ($_SERVER['REQUEST_METHOD'] !== 'GET') {
 }
 
 require_once __DIR__ . '/../../src/core/candidate_resolver.php';
+require_once __DIR__ . '/../../src/modules/m5_batch_slots/service.php';
 
 
 
@@ -34,6 +35,9 @@ function parse_profile_details(?string $raw): array {
 }
 
 try {
+    // Dynamically check and cancel any underfilled slots (< 100 candidates) within 30 minutes
+    check_and_notify_underfilled_slots($conn);
+
     $candidateId = resolve_candidate_id($_GET);
 
     /* 1. Merged Candidate + Latest Payment + Latest Enrollment + Assessment query */
@@ -359,6 +363,16 @@ try {
 
     $profileStatus = !empty($candidate['profile_details']) ? 'Verified' : 'Basic Profile';
 
+    // Check for any unread batch_not_formed notification
+    $bNotif = null;
+    $notifStmt = $conn->prepare("SELECT id, message, created_at, is_read FROM notifications WHERE candidate_id = ? AND type = 'batch_not_formed' ORDER BY id DESC LIMIT 1");
+    if ($notifStmt) {
+        $notifStmt->bind_param("i", $candidateId);
+        $notifStmt->execute();
+        $bNotif = $notifStmt->get_result()->fetch_assoc();
+        $notifStmt->close();
+    }
+
     send_json_response('success', 'Dashboard data retrieved successfully', [
         'candidate' => [
             'name' => $candidate['full_name'],
@@ -378,6 +392,7 @@ try {
         'result' => $result,
         'certificate' => $certificate,
         'placement' => $placement,
+        'batch_not_formed_alert' => $bNotif,
         'demo_mode' => demo_mode()
     ]);
 } catch (Throwable $e) {

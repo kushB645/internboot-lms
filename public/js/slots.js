@@ -2,6 +2,7 @@
  * InternBoot - Batches & Slots Candidate Flow (M5 Integration)
  * Connects public/batches-slots.html to backend APIs:
  * - GET api/dashboard.php
+ * - GET/POST api/slots/preference.php
  * - GET api/slots/available.php
  * - POST api/slots/book.php
  */
@@ -71,7 +72,7 @@ async function initSlotsModule() {
         // Render Booked Slot status if already booked
         updateBookedSlotSection(data);
 
-        // === If candidate already has a booked slot — hide booking UI entirely ===
+        // If candidate already has a booked slot — hide booking UI entirely
         if (data.exam && data.exam.booked === true) {
             const slotsCard = document.getElementById("available-slots-card");
             if (slotsCard) {
@@ -110,9 +111,10 @@ async function initSlotsModule() {
         }
 
         // Check if candidate is awaiting batch formation
-        if (!data.batch || !data.batch.name || data.batch.name === "—") {
+        const isAwaitingBatch = !data.batch || !data.batch.name || data.batch.name === "—" || data.batch.name === "Not Assigned" || data.batch.status === "Pending" || !data.batch.id || data.batch.id === "—";
+        if (isAwaitingBatch) {
             const assessmentId = data.assessment ? data.assessment.id : 1;
-            await loadPreferences(assessmentId);
+            await loadPreferences(assessmentId, data.batch_not_formed_alert);
             return;
         }
 
@@ -333,288 +335,210 @@ function escapeHtml(str) {
         .replace(/'/g, "&#039;");
 }
 
-
-async function loadPreferences(assessmentId) {
-
+async function loadPreferences(assessmentId, initialNotifAlert = null) {
     const slotsListEl = document.getElementById("slots-list");
-
     if (!slotsListEl) return;
-
     const noticeContainer = document.getElementById("notice-container");
 
-
-
     try {
-
         const response = await fetch(`api/slots/preference.php?assessment_id=${encodeURIComponent(assessmentId)}`, {
-
             method: "GET",
-
             headers: { "Accept": "application/json" }
-
         });
 
-
-
         const payload = await response.json();
-
         if (!response.ok || payload.status !== "success") {
-
             throw new Error(payload.message || "Failed to fetch preference options.");
-
         }
-
-
 
         const data = payload.data;
-
         const currentPref = data.current_preference || {};
-
         const options = data.options || [];
+        const alertNotif = data.batch_not_formed_alert || initialNotifAlert;
 
-
+        // Render batch_not_formed banner if candidate's chosen batch couldn't be formed
+        if (alertNotif && noticeContainer) {
+            noticeContainer.innerHTML = `
+                <div class="notice notice-warning" style="background:#fffbeb; border:1px solid #fcd34d; color:#92400e; padding:18px 22px; border-radius:12px; margin-bottom:24px; display:flex; align-items:flex-start; gap:16px; box-shadow:0 4px 14px rgba(245,158,11,0.08);">
+                    <div style="font-size:26px; line-height:1; flex-shrink:0;">⚠️</div>
+                    <div style="flex:1;">
+                        <div style="font-weight:700; font-size:16px; color:#b45309; margin-bottom:6px;">Batch Not Formed — Minimum Required Candidates (100) Not Met</div>
+                        <div style="font-size:14px; color:#78350f; line-height:1.5;">${escapeHtml(alertNotif.message)}</div>
+                        <div style="margin-top:10px; font-size:13.5px; font-weight:600; color:#b45309; display:flex; align-items:center; gap:6px;">
+                            <span>👉 Your slot preference has been reopened. Only affected candidates have the option to choose an alternate slot from below.</span>
+                        </div>
+                    </div>
+                </div>`;
+        }
 
         if (options.length === 0) {
-
-            slotsListEl.innerHTML = `<p style="color:#60728b;">No available dates found for selection at this time.</p>`;
-
+            slotsListEl.innerHTML = `<p style="color:#60728b; padding:16px;">No available provisional dates found for selection at this time. Please check back later.</p>`;
             return;
-
         }
-
-
 
         let html = `
-
-            <div style="margin-bottom:20px; background:#f0f9ff; border:1px solid #bae6fd; padding:15px; border-radius:8px; color:#0369a1;">
-
-                <strong>Batch Selection Mode:</strong> Please select your preferred exam date. Once 100 candidates choose the same date, your batch will be formed automatically!
-
+            <div style="margin-bottom:20px; background:#eff6ff; border:1px solid #bfdbfe; padding:16px 20px; border-radius:12px; color:#1e40af; display:flex; align-items:center; gap:12px;">
+                <span style="font-size:20px;">ℹ️</span>
+                <div style="font-size:14px; line-height:1.4;">
+                    <strong>Slot Selection Mode:</strong> Please select your preferred examination slot. 
+                    A minimum of <strong>100 candidates</strong> must register for the same slot. 
+                    If 100 candidates are not reached by 30 minutes before the exam, the batch will not form and affected candidates can re-select another slot.
+                </div>
             </div>
-
         `;
 
-        
-
         if (currentPref.preferred_date && currentPref.preferred_time_slot) {
-
             const formattedTime = formatHHMM(currentPref.preferred_time_slot);
-
             html += `
-
-                <div style="margin-bottom:24px; padding:16px; border:1px solid #10b981; border-radius:8px; background:#ecfdf5;">
-
-                    <h3 style="margin:0 0 8px; color:#047857; font-size:16px;">Your Current Preference</h3>
-
-                    <p style="margin:0; color:#065f46;"><strong>Date:</strong> ${escapeHtml(currentPref.preferred_date)} <br><strong>Time:</strong> ${escapeHtml(formattedTime)}</p>
-
-                    <p style="margin:8px 0 0; font-size:13px; color:#047857;">Waiting for other candidates to select this slot...</p>
-
+                <div style="margin-bottom:24px; padding:18px 20px; border:1px solid #10b981; border-radius:12px; background:#f0fdf4; box-shadow:0 2px 8px rgba(16,185,129,0.06);">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+                        <h3 style="margin:0; color:#047857; font-size:16px; font-weight:700;">Your Selected Preference</h3>
+                        <span style="background:#dcfce7; color:#15803d; font-size:12px; font-weight:700; padding:4px 10px; border-radius:20px;">Awaiting 100 Candidates</span>
+                    </div>
+                    <p style="margin:0; color:#065f46; font-size:14px;">
+                        <strong>Date:</strong> ${escapeHtml(currentPref.preferred_date)} &nbsp;|&nbsp; 
+                        <strong>Time:</strong> ${escapeHtml(formattedTime)}
+                    </p>
+                    <p style="margin:8px 0 0; font-size:13px; color:#047857;">
+                        Waiting for other candidates to select this slot. Batch forms automatically once 100 candidates register.
+                    </p>
                 </div>
-
-                <h3 style="font-size:16px; margin-bottom:12px;">Change Preference</h3>
-
+                <h3 style="font-size:16px; font-weight:700; margin-bottom:14px; color:#1e293b;">Change or Select Alternate Slot</h3>
             `;
-
         }
 
-
-
-        html += `<div style="display:grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap:16px;">`;
-
-        
+        html += `<div style="display:grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap:18px;">`;
 
         options.forEach(opt => {
-
             const dayLabel = getWeekdayLabel(opt.date);
-
             const dateHeader = dayLabel ? `${dayLabel} (${opt.date})` : opt.date;
-
             const timeParts = opt.time_slot.split('-');
-
             const startTimeFormatted = formatHHMM(timeParts[0]);
-
             const endTimeFormatted = formatHHMM(timeParts[1]);
+            const threshold = opt.threshold || 100;
+            const count = opt.preference_count || 0;
+            const percentage = opt.percentage !== undefined ? opt.percentage : Math.min(100, Math.round((count / threshold) * 100));
 
-            
-
-            const isCurrent = currentPref.preferred_date === opt.date && currentPref.preferred_time_slot === opt.time_slot;
-
-            
+            const isCurrent = (currentPref.provisional_schedule_id && currentPref.provisional_schedule_id === opt.provisional_schedule_id) ||
+                              (currentPref.preferred_date === opt.date && currentPref.preferred_time_slot === opt.time_slot);
 
             html += `
+            <div style="border:1px solid ${isCurrent ? '#10b981' : '#e2e8f0'}; border-radius:12px; padding:20px; background:${isCurrent ? '#f0fdf4' : '#ffffff'}; box-shadow:0 2px 10px rgba(0,0,0,0.03); display:flex; flex-direction:column; justify-content:space-between;">
+                <div>
+                    <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:8px;">
+                        <div style="font-weight:700; font-size:16px; color:#1e293b;">
+                            ${escapeHtml(dateHeader)}
+                        </div>
+                        ${isCurrent ? `<span style="background:#10b981; color:#fff; font-size:11px; font-weight:700; padding:3px 8px; border-radius:12px;">Active Choice</span>` : ''}
+                    </div>
 
-            <div style="border:1px solid ${isCurrent ? '#10b981' : '#e5ebf2'}; border-radius:10px; padding:18px; background:${isCurrent ? '#ecfdf5' : '#ffffff'}; box-shadow:0 2px 8px rgba(0,0,0,0.03);">
+                    <div style="font-size:14px; color:#475569; margin-bottom:14px; display:flex; align-items:center; gap:6px;">
+                        <span>🕒</span>
+                        <span>${escapeHtml(startTimeFormatted)} – ${escapeHtml(endTimeFormatted)}</span>
+                    </div>
 
-                <div style="font-weight:700; font-size:16px; color:#17243a; margin-bottom:6px;">
-
-                    ${escapeHtml(dateHeader)}
-
+                    <!-- 100 Candidates Progress Bar -->
+                    <div style="margin-bottom:16px; background:#f8fafc; padding:10px 12px; border-radius:8px; border:1px solid #f1f5f9;">
+                        <div style="display:flex; justify-content:space-between; font-size:12px; margin-bottom:6px; color:#475569;">
+                            <span>Registered: <strong style="color:#0f172a;">${count}</strong> / ${threshold}</span>
+                            <span style="font-weight:700; color:${percentage >= 100 ? '#10b981' : '#2563eb'};">${percentage}%</span>
+                        </div>
+                        <div style="height:6px; background:#e2e8f0; border-radius:3px; overflow:hidden;">
+                            <div style="width:${percentage}%; height:100%; background:${percentage >= 100 ? '#10b981' : '#2563eb'}; border-radius:3px; transition:width 0.3s ease;"></div>
+                        </div>
+                        <div style="font-size:11px; color:#64748b; margin-top:5px;">
+                            ${count >= threshold ? '✅ Ready to form batch' : `${threshold - count} more candidates needed`}
+                        </div>
+                    </div>
                 </div>
 
-                <div style="font-size:14px; color:#4b5563; margin-bottom:10px;">
-
-                    ��� ${escapeHtml(startTimeFormatted)} ��   ${escapeHtml(endTimeFormatted)}
-
-                </div>
-
-                <div style="display:flex; justify-content:flex-end; margin-top:12px;">
-
+                <div style="display:flex; justify-content:flex-end; margin-top:10px;">
                     ${isCurrent ? 
-
-                        `<span style="color:#10b981; font-weight:700; display:flex; align-items:center;">�S&  Selected</span>` : 
-
+                        `<span style="color:#10b981; font-weight:700; font-size:14px; display:flex; align-items:center; gap:6px;">
+                            <span>✓</span> Selected
+                        </span>` : 
                         `<button 
-
                             class="btn-set-preference" 
-
-                            data-date="${opt.date}" 
-
-                            data-time="${opt.time_slot}"
-
+                            data-date="${escapeHtml(opt.date)}" 
+                            data-time="${escapeHtml(opt.time_slot)}"
+                            data-schedule-id="${opt.provisional_schedule_id}"
                             data-assessment-id="${assessmentId}"
-
-                            style="background:#2563eb; color:#fff; border:none; padding:8px 16px; border-radius:6px; font-weight:700; cursor:pointer;"
-
+                            style="background:#2563eb; color:#fff; border:none; padding:9px 18px; border-radius:8px; font-weight:700; font-size:13.5px; cursor:pointer; transition:background 0.2s; box-shadow:0 2px 6px rgba(37,99,235,0.2);"
                         >
-
                             Choose This Slot
-
                         </button>`
-
                     }
-
                 </div>
-
             </div>`;
-
         });
-
-        
 
         html += `</div>`;
-
         slotsListEl.innerHTML = html;
 
-
-
         slotsListEl.querySelectorAll(".btn-set-preference").forEach(btn => {
-
             btn.addEventListener("click", () => handleSetPreferenceClick(btn));
-
         });
-
-
 
     } catch (err) {
-
-        slotsListEl.innerHTML = `<p style="color:#dc2626;">Error: ${escapeHtml(err.message)}</p>`;
-
+        slotsListEl.innerHTML = `<p style="color:#dc2626; padding:16px;">Error: ${escapeHtml(err.message)}</p>`;
     }
-
 }
 
-
-
 async function handleSetPreferenceClick(btn) {
-
     const assessmentId = btn.dataset.assessmentId;
-
+    const scheduleId = btn.dataset.scheduleId;
     const date = btn.dataset.date;
-
     const time = btn.dataset.time;
-
     const noticeContainer = document.getElementById("notice-container");
 
-
-
     btn.disabled = true;
-
+    const originalText = btn.textContent;
     btn.textContent = "Saving...";
 
-
-
     try {
-
         const token = await getCsrfToken();
-
         const response = await fetch("api/slots/preference.php", {
-
             method: "POST",
-
             headers: {
-
                 "Content-Type": "application/json",
-
                 "Accept": "application/json",
-
                 "X-CSRF-Token": token
-
             },
-
             body: JSON.stringify({
-
                 assessment_id: Number(assessmentId),
-
+                provisional_schedule_id: scheduleId ? Number(scheduleId) : undefined,
                 preferred_date: date,
-
                 preferred_time_slot: time
-
             })
-
         });
-
-
 
         const payload = await response.json();
 
-
-
         if (!response.ok || payload.status !== "success") {
-
             throw new Error(payload.message || "Failed to save preference.");
-
         }
-
-
 
         if (noticeContainer) {
-
             noticeContainer.innerHTML = `
-
-                <div class="notice notice-success" style="background:#f0fdf4; border:1px solid #bbf7d0; color:#166534; padding:14px 18px; border-radius:8px; margin-bottom:18px;">
-
-                    �S&  Preference saved! You will be allocated to a batch once 100 candidates choose this date.
-
+                <div class="notice notice-success" style="background:#f0fdf4; border:1px solid #bbf7d0; color:#166534; padding:16px 20px; border-radius:10px; margin-bottom:20px; display:flex; align-items:center; gap:12px; box-shadow:0 2px 8px rgba(22,101,52,0.06);">
+                    <span style="font-size:20px;">✅</span>
+                    <div style="font-size:14px; line-height:1.4;">
+                        <strong>Preference Saved!</strong> Your choice for <strong>${escapeHtml(date)}</strong> has been recorded. Once 100 candidates choose this slot, the batch will be created automatically.
+                    </div>
                 </div>`;
-
         }
-
-
 
         await loadPreferences(assessmentId);
 
-
-
     } catch (err) {
-
         btn.disabled = false;
-
-        btn.textContent = "Choose This Slot";
-
+        btn.textContent = originalText;
         if (noticeContainer) {
-
             noticeContainer.innerHTML = `
-
-                <div class="notice notice-error" style="background:#fdf2f2; border:1px solid #f8cdcd; color:#b91c1c; padding:14px 18px; border-radius:8px; margin-bottom:18px;">
-
-                    ��R ${escapeHtml(err.message)}
-
+                <div class="notice notice-error" style="background:#fdf2f2; border:1px solid #f8cdcd; color:#b91c1c; padding:14px 18px; border-radius:8px; margin-bottom:18px; display:flex; align-items:center; gap:10px;">
+                    <span style="font-size:18px;">❌</span>
+                    <span>${escapeHtml(err.message)}</span>
                 </div>`;
-
         }
-
     }
-
 }
-

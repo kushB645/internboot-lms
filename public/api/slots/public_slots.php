@@ -6,6 +6,7 @@
 require_once __DIR__ . '/../../../src/core/bootstrap.php';
 require_once __DIR__ . '/../../../src/core/candidate_resolver.php';
 require_once __DIR__ . '/../../../src/modules/m5_batch_slots/queries.php';
+require_once __DIR__ . '/../../../src/modules/m5_batch_slots/service.php';
 
 if ($_SERVER['REQUEST_METHOD'] !== 'GET') {
     send_json_response('error', 'Only GET is allowed', null, 405);
@@ -22,6 +23,9 @@ if ($assessmentId <= 0) {
 }
 
 try {
+    // Dynamically check and cancel any underfilled slots (< 100 candidates) within 30 minutes
+    check_and_notify_underfilled_slots($conn, $assessmentId);
+
     // Get candidate's current enrollment & preference
     $enrollment = get_candidate_enrollment($candidateId, $assessmentId, $conn);
     if (!$enrollment) {
@@ -136,12 +140,29 @@ try {
         $bs->close();
     }
 
+    // Check if candidate has recent batch_not_formed notification
+    $notifStmt = $conn->prepare("
+        SELECT id, message, created_at, is_read 
+        FROM notifications 
+        WHERE candidate_id = ? AND type = 'batch_not_formed'
+        ORDER BY id DESC LIMIT 1
+    ");
+    $notifStmt->bind_param("i", $candidateId);
+    $notifStmt->execute();
+    $batchNotFormedNotif = $notifStmt->get_result()->fetch_assoc();
+    $notifStmt->close();
+
     send_json_response('success', 'Slots retrieved', [
-        'slots'             => $slots,
-        'my_preference_id'  => $myPreference ?: null,
-        'preference_failed' => $preferenceFailed,
-        'batch_assigned'    => $batchAlready,
-        'is_eligible'       => ($enrollment['eligibility_status'] === 'eligible'),
+        'slots'                  => $slots,
+        'my_preference_id'       => $myPreference ?: null,
+        'preference_failed'      => $preferenceFailed || ($batchNotFormedNotif && !$batchNotFormedNotif['is_read']),
+        'batch_not_formed_alert' => $batchNotFormedNotif ? [
+            'message' => $batchNotFormedNotif['message'],
+            'created_at' => $batchNotFormedNotif['created_at'],
+            'is_read' => (bool)$batchNotFormedNotif['is_read']
+        ] : null,
+        'batch_assigned'         => $batchAlready,
+        'is_eligible'            => ($enrollment['eligibility_status'] === 'eligible'),
     ], 200);
 
 } catch (Throwable $e) {

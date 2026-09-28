@@ -672,3 +672,223 @@ function is_within_reassignment_cutoff(string $examDate, string $startTime, ?str
     $current = $now ? new DateTime($now) : new DateTime();
     return $current < $cutoff;
 }
+
+/**
+ * Checks all open provisional slots that are within 30 minutes of their start time
+ * (or where the start time has already passed).
+ * 
+ * Rules:
+ * - If candidate registrations < batch_threshold (default 100):
+ *   1. Batch CANNOT be created.
+ *   2. Exam schedule is cancelled (status = 'cancelled', is_closed = 1).
+ *   3. All enrolled candidates who chose this slot are notified (notifications table type 'batch_not_formed' and email).
+ *   4. The slot reservation is unlocked ONLY for these specific affected candidates:
+ *      (provisional_schedule_id = NULL, preferred_date = NULL, preferred_time_slot = NULL).
+ *   5. Specifically and exclusively these candidates have their choice reopened to select an alternate slot.
+ * - If candidate registrations >= batch_threshold (100+):
+ *   1. Batch IS formed and finalized (finalize_provisional_batch).
+ *   2. Exam schedule status becomes 'scheduled' and candidates are confirmed.
+ */
+function check_and_notify_underfilled_slots(mysqli $conn, ?int $assessmentId = null, ?int $customThreshold = null): array {
+    $threshold = get_batch_threshold($conn, $customThreshold);
+    $cutoffTime = time() + (30 * 60); // 30 minutes from now
+    $cutoffDateTimeStr = date('Y-m-d H:i:s', $cutoffTime);
+
+    // Find all provisional schedules where exam_date + start_time <= NOW() + 30 minutes
+    $sql = "
+        SELECT 
+            s.id AS schedule_id,
+            s.batch_id,
+            s.exam_date,
+            s.status,
+            s.is_closed,
+            b.assessment_id,
+            b.batch_number,
+            es.id AS slot_id,
+            es.start_time,
+            es.end_time
+        FROM exam_schedules s
+        JOIN batches b ON b.id = s.batch_id
+        JOIN exam_slots es ON es.exam_schedule_id = s.id
+        WHERE s.status = 'provisional'
+          AND s.is_closed = 0
+          AND CONCAT(s.exam_date, ' ', es.start_time) <= ?
+    ";
+    $params = [$cutoffDateTimeStr];
+    $types = "s";
+
+    if ($assessmentId !== null && $assessmentId > 0) {
+        $sql .= " AND b.assessment_id = ?";
+        $params[] = $assessmentId;
+        $types .= "i";
+    }
+
+    $sql .= " ORDER BY s.exam_date ASC, es.start_time ASC";
+
+    $stmt = $conn->prepare($sql);
+    $stmt->bind_param($types, ...$params);
+    $stmt->execute();
+    $schedulesRes = $stmt->get_result();
+    $schedules = $schedulesRes->fetch_all(MYSQLI_ASSOC);
+    $stmt->close();
+
+    $results = [
+        'evaluated_schedules' => count($schedules),
+        'cancelled_schedules' => 0,
+        'finalized_schedules' => 0,
+        'notified_candidates' => 0,
+        'details' => []
+    ];
+
+    if (empty($schedules)) {
+        return $results;
+    }
+
+    foreach ($schedules as $sched) {
+        $scheduleId = (int)$sched['schedule_id'];
+        $schedAssessmentId = (int)$sched['assessment_id'];
+        $slotId = (int)$sched['slot_id'];
+        $examDate = $sched['exam_date'];
+        $startTime = $sched['start_time'];
+        $endTime = $sched['end_time'];
+        $batchNumber = $sched['batch_number'];
+
+        // Get all eligible candidates registered for this provisional schedule
+        $candSql = "
+            SELECT 
+                e.id AS enrollment_id,
+                e.candidate_id,
+                u.email,
+                c.full_name
+            FROM enrollments e
+            JOIN candidates c ON e.candidate_id = c.id
+            LEFT JOIN users u ON c.user_id = u.id
+            WHERE e.provisional_schedule_id = ?
+              AND e.eligibility_status = 'eligible'
+              AND e.batch_id IS NULL
+        ";
+        $cStmt = $conn->prepare($candSql);
+        $cStmt->bind_param("i", $scheduleId);
+        $cStmt->execute();
+        $candidates = $cStmt->get_result()->fetch_all(MYSQLI_ASSOC);
+        $cStmt->close();
+
+        $candidateCount = count($candidates);
+
+        if ($candidateCount >= $threshold) {
+            // Threshold MET: Form the batch!
+            try {
+                finalize_provisional_batch($scheduleId, $schedAssessmentId, $conn);
+                $results['finalized_schedules']++;
+                $results['details'][] = [
+                    'schedule_id' => $scheduleId,
+                    'status' => 'finalized',
+                    'candidate_count' => $candidateCount,
+                    'threshold' => $threshold
+                ];
+            } catch (Throwable $finEx) {
+                error_log("Failed auto-finalizing batch for schedule #$scheduleId: " . $finEx->getMessage());
+            }
+            continue;
+        }
+
+        // Threshold NOT MET: Batch cannot be created!
+        // Begin transaction for atomic cancellation and candidate reassignment unlock
+        $conn->begin_transaction();
+        try {
+            // Cancel schedule and close slot
+            $cancelSchedStmt = $conn->prepare("UPDATE exam_schedules SET status = 'cancelled', is_closed = 1, updated_at = NOW() WHERE id = ?");
+            $cancelSchedStmt->bind_param("i", $scheduleId);
+            $cancelSchedStmt->execute();
+            $cancelSchedStmt->close();
+
+            $closeSlotStmt = $conn->prepare("UPDATE exam_slots SET seats_remaining = 0, updated_at = NOW() WHERE exam_schedule_id = ?");
+            $closeSlotStmt->bind_param("i", $scheduleId);
+            $closeSlotStmt->execute();
+            $closeSlotStmt->close();
+
+            $notifiedThisSlot = 0;
+            $formattedDate = date('d M Y', strtotime($examDate));
+            $formattedTime = date('h:i A', strtotime($startTime)) . (!empty($endTime) ? ' - ' . date('h:i A', strtotime($endTime)) : '');
+
+            // Notification message explicitly conveying the 100 candidate requirement
+            $notifMessage = "Your batch for the slot on {$formattedDate} ({$formattedTime}) could not be created because the minimum required candidates ({$threshold}) were not met. Please select an alternate slot.";
+
+            // Mailer setup if file exists
+            if (file_exists(__DIR__ . '/../../core/Mailer.php')) {
+                require_once __DIR__ . '/../../core/Mailer.php';
+            }
+
+            foreach ($candidates as $cand) {
+                $enrollmentId = (int)$cand['enrollment_id'];
+                $candidateId = (int)$cand['candidate_id'];
+                $email = $cand['email'] ?? '';
+                $fullName = $cand['full_name'] ?? 'Candidate';
+
+                // Insert notification (avoid duplicates)
+                $chkNotif = $conn->prepare("SELECT id FROM notifications WHERE candidate_id = ? AND related_schedule_id = ? AND type = 'batch_not_formed' LIMIT 1");
+                $chkNotif->bind_param("ii", $candidateId, $scheduleId);
+                $chkNotif->execute();
+                $hasNotif = $chkNotif->get_result()->fetch_assoc();
+                $chkNotif->close();
+
+                if (!$hasNotif) {
+                    $insNotif = $conn->prepare("INSERT INTO notifications (candidate_id, type, related_schedule_id, message, is_read, created_at) VALUES (?, 'batch_not_formed', ?, ?, 0, NOW())");
+                    $insNotif->bind_param("iis", $candidateId, $scheduleId, $notifMessage);
+                    $insNotif->execute();
+                    $insNotif->close();
+                }
+
+                // Reset slot preference ONLY for this specific candidate
+                $resetPref = $conn->prepare("UPDATE enrollments SET provisional_schedule_id = NULL, preferred_date = NULL, preferred_time_slot = NULL, updated_at = NOW() WHERE id = ?");
+                $resetPref->bind_param("i", $enrollmentId);
+                $resetPref->execute();
+                $resetPref->close();
+
+                // Remove any unstarted attempt for this slot
+                if ($slotId > 0) {
+                    $delAtt = $conn->prepare("DELETE FROM attempts WHERE candidate_id = ? AND exam_slot_id = ? AND status = 'in_progress' AND start_time IS NULL");
+                    $delAtt->bind_param("ii", $candidateId, $slotId);
+                    $delAtt->execute();
+                    $delAtt->close();
+                }
+
+                // Send email notification if candidate has an email
+                if (!empty($email) && function_exists('send_mail')) {
+                    $subject = "Batch Update: Slot on {$formattedDate} Could Not Be Formed";
+                    $htmlBody = "<p>Dear <strong>" . htmlspecialchars($fullName) . "</strong>,</p>"
+                              . "<p>We regret to inform you that the examination batch for your selected slot on <strong>{$formattedDate}</strong> at <strong>{$formattedTime}</strong> could not be formed because the minimum requirement of <strong>{$threshold} candidates</strong> was not reached 30 minutes prior to the exam start time.</p>"
+                              . "<p>Your slot choice has been reopened. <strong>Only affected candidates like you</strong> can now log in to the student dashboard and choose an alternate available slot.</p>"
+                              . "<p><a href=\"" . (function_exists('env_value') ? env_value('APP_URL', 'http://localhost:8000') : 'http://localhost:8000') . "/batches-slots.html\" style=\"display:inline-block;padding:10px 18px;background:#2563eb;color:#fff;border-radius:6px;text-decoration:none;font-weight:bold;\">Choose Alternate Slot &rarr;</a></p>"
+                              . "<p>Best regards,<br>InternBoot Team</p>";
+                    try {
+                        send_mail($email, $fullName, $subject, $htmlBody, strip_tags($htmlBody));
+                    } catch (Throwable $mEx) {
+                        error_log("Failed to send batch_not_formed email to $email: " . $mEx->getMessage());
+                    }
+                }
+
+                $notifiedThisSlot++;
+                $results['notified_candidates']++;
+            }
+
+            $conn->commit();
+
+            $results['cancelled_schedules']++;
+            $results['details'][] = [
+                'schedule_id' => $scheduleId,
+                'status' => 'cancelled_underfilled',
+                'candidate_count' => $candidateCount,
+                'threshold' => $threshold,
+                'notified_count' => $notifiedThisSlot
+            ];
+
+        } catch (Throwable $slotEx) {
+            $conn->rollback();
+            error_log("Error cancelling underfilled schedule #$scheduleId: " . $slotEx->getMessage());
+        }
+    }
+
+    return $results;
+}
+
