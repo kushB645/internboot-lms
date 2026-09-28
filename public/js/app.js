@@ -307,12 +307,16 @@ function renderCertificateState(source) {
         }
 
         if (certPreviewContainer) {
-            certPreviewContainer.style.display = "flex";
+            certPreviewContainer.style.display = "grid";
             const badge = document.getElementById("certificate-status-badge");
             if (badge) {
                 badge.textContent = "Issued";
-                badge.className = "badge green";
+                badge.className = "inline-flex items-center px-3 py-1.5 rounded-full bg-green-100 text-green-700 text-xs font-semibold";
             }
+            
+            document.querySelectorAll('[data-certificate="number"]').forEach(el => el.textContent = source.certificate.number || '—');
+            document.querySelectorAll('[data-certificate="level"]').forEach(el => el.textContent = source.certificate.level || '—');
+            document.querySelectorAll('[data-certificate="issue_date"]').forEach(el => el.textContent = source.certificate.issueDate || '—');
         }
 
         if (dashCertDownload) {
