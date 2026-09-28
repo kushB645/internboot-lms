@@ -194,7 +194,7 @@ try {
     ] : null;
 
     $payment = [
-        'totalFee' => '—', 'paidAmount' => '—', 'status' => 'Pending',
+        'totalFee' => '₹3,538.82', 'paidAmount' => '₹0.00', 'status' => 'Unpaid',
         'paymentId' => '—', 'transactionId' => '—', 'paymentDate' => '—',
         'method' => 'Sandbox / Database', 'verification' => 'Not Verified'
     ];
