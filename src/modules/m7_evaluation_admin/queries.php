@@ -274,7 +274,8 @@ function get_batches(mysqli $conn): array
         FROM enrollments e
         JOIN candidates c ON c.id=e.candidate_id
         JOIN users u ON u.id=c.user_id
-        WHERE e.eligibility_status='eligible'
+        WHERE e.eligibility_status='eligible' AND e.batch_id IS NULL
+        AND NOT EXISTS (SELECT 1 FROM attempts a2 WHERE a2.candidate_id = c.id AND a2.assessment_id = e.assessment_id)
         ORDER BY c.full_name ASC");
 
     $assessments = q_all($conn, "SELECT id,title,status,total_questions,duration_minutes
@@ -419,8 +420,14 @@ function update_question_status(mysqli $conn, int $questionId, string $status): 
     if (!in_array($status,$allowed,true)) throw new InvalidArgumentException('Invalid question status.');
     $exists=q_one($conn,'SELECT id FROM questions WHERE id=?','i',[$questionId]);
     if(!$exists) throw new InvalidArgumentException('Question not found.');
-    $stmt=$conn->prepare('UPDATE questions SET approval_status=?, updated_at=NOW() WHERE id=?');
-    $stmt->bind_param('si',$status,$questionId);
+    
+    if ($status === 'rejected') {
+        $stmt=$conn->prepare('DELETE FROM questions WHERE id=?');
+        $stmt->bind_param('i',$questionId);
+    } else {
+        $stmt=$conn->prepare('UPDATE questions SET approval_status=?, updated_at=NOW() WHERE id=?');
+        $stmt->bind_param('si',$status,$questionId);
+    }
     $stmt->execute();
     $stmt->close();
 }

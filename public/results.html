@@ -325,7 +325,7 @@
                     </div>
                   </div>
 
-                  <span
+                  <span id="result-status-badge"
                     class="inline-flex items-center gap-2 self-start sm:self-auto px-3 py-1.5 rounded-full bg-blue-50 text-blue-600 text-xs font-semibold"
                   >
                     <span class="w-1.5 h-1.5 rounded-full bg-blue-500"></span>
@@ -335,7 +335,7 @@
                 </div>
 
                 <!-- Pending Result -->
-                <div
+                <div id="result-state-container"
                   class="rounded-2xl border border-blue-100 bg-blue-50 px-6 py-10 text-center"
                 >
                   <div
@@ -539,16 +539,7 @@
         // Initial sync
         syncSidebarProfile();
 
-        // Watch for real-time changes made by app.js/API rendering
-        const observer = new MutationObserver(() => {
-          syncSidebarProfile();
-        });
-
-        observer.observe(document.body, {
-          subtree: true,
-          childList: true,
-          characterData: true,
-        });
+        
       });
     </script>
   </body>

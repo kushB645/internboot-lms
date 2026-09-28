@@ -11,27 +11,34 @@ async function initExamStatusModule() {
     const container = document.getElementById("exam-details-body");
     if (!container) return;
 
-    const attemptId = localStorage.getItem("ib_attempt_id");
-
-    if (!attemptId || isNaN(Number(attemptId)) || Number(attemptId) <= 0) {
-        container.innerHTML = `
-            <div class="notice notice-info" style="background:#edf4ff; border:1px solid #d4e4ff; color:#1c52b8; padding:24px; border-radius:10px; text-align:center;">
-                <h2 style="margin:0 0 10px; color:#17243a; font-size:20px;">No Slot Booked Yet</h2>
-                <p style="margin:0 0 16px; color:#4b5563;">You haven't booked an exam slot yet. Please select an available slot from your assigned batch.</p>
-                <a href="batches-slots.html" class="btn btn-ib-primary" style="background:#2563eb; color:#fff; padding:10px 20px; border-radius:6px; text-decoration:none; display:inline-block; font-weight:700;">Go to Batches &amp; Slots →</a>
-            </div>`;
-        return;
-    }
-
+    // Attempt ID is now automatically resolved by the backend for the logged in user
     try {
-        const response = await fetch(`api/exam/exam_status.php?attempt_id=${encodeURIComponent(attemptId)}`, {
+        const response = await fetch(`api/exam/exam_status.php`, {
             method: "GET",
             headers: { "Accept": "application/json" }
         });
 
         const payload = await response.json();
 
-        if (!response.ok || payload.status !== "success" || !payload.data) {
+                if (!response.ok || payload.status !== "success" || !payload.data) {
+            if (payload.message === "No attempt found for this candidate") {
+                container.innerHTML = `
+                    <div class="notice notice-info" style="background:#edf4ff; border:1px solid #d4e4ff; color:#1c52b8; padding:24px; border-radius:10px; text-align:center;">
+                        <h2 style="margin:0 0 10px; color:#17243a; font-size:20px;">No Slot Booked Yet</h2>
+                        <p style="margin:0 0 16px; color:#4b5563;">You haven't booked an exam slot yet. Please select an available slot from your assigned batch.</p>
+                        <a href="batches-slots.html" class="btn btn-ib-primary" style="background:#2563eb; color:#fff; padding:10px 20px; border-radius:6px; text-decoration:none; display:inline-block; font-weight:700;">Go to Batches &amp; Slots →</a>
+                    </div>`;
+                return;
+            }
+            if (payload.message === "No attempt found for this candidate") {
+                container.innerHTML = `
+                    <div class="notice notice-info" style="background:#edf4ff; border:1px solid #d4e4ff; color:#1c52b8; padding:24px; border-radius:10px; text-align:center;">
+                        <h2 style="margin:0 0 10px; color:#17243a; font-size:20px;">No Slot Booked Yet</h2>
+                        <p style="margin:0 0 16px; color:#4b5563;">You haven't booked an exam slot yet. Please select an available slot from your assigned batch.</p>
+                        <a href="batches-slots.html" class="btn btn-ib-primary" style="background:#2563eb; color:#fff; padding:10px 20px; border-radius:6px; text-decoration:none; display:inline-block; font-weight:700;">Go to Batches &amp; Slots →</a>
+                    </div>`;
+                return;
+            }
             container.innerHTML = `
                 <div class="notice notice-error" style="background:#fdf2f2; border:1px solid #f8cdcd; color:#b91c1c; padding:20px; border-radius:10px; text-align:center;">
                     <h3 style="margin:0 0 10px; font-size:18px;">Attempt Access Error</h3>

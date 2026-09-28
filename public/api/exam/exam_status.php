@@ -17,8 +17,18 @@ try {
         ? (int) $_GET['attempt_id']
         : 0;
 
-    if ($attemptId <= 0) {
-        send_json_response('error', 'Invalid attempt ID', null, 400);
+        if ($attemptId <= 0) {
+        $findLatestSql = "SELECT id FROM attempts WHERE candidate_id = ? ORDER BY id DESC LIMIT 1";
+        $stmtLatest = $conn->prepare($findLatestSql);
+        $stmtLatest->bind_param("i", $candidateId);
+        $stmtLatest->execute();
+        $latest = $stmtLatest->get_result()->fetch_assoc();
+        
+        if ($latest) {
+            $attemptId = (int)$latest['id'];
+        } else {
+            send_json_response('error', 'No attempt found for this candidate', null, 404);
+        }
     }
 
     /*

@@ -191,7 +191,8 @@ function generate_questions_via_ai(
                 CURLOPT_HTTPHEADER => ['Content-Type: application/json'],
                 CURLOPT_POSTFIELDS => json_encode($payload),
                 CURLOPT_TIMEOUT => 30,
-                CURLOPT_CONNECTTIMEOUT => 10
+                CURLOPT_CONNECTTIMEOUT => 10,
+                CURLOPT_SSL_VERIFYPEER => false
             ]);
             $response = curl_exec($ch);
             $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
@@ -231,7 +232,8 @@ function generate_questions_via_ai(
                 ],
                 CURLOPT_POSTFIELDS => json_encode($payload),
                 CURLOPT_TIMEOUT => 30,
-                CURLOPT_CONNECTTIMEOUT => 10
+                CURLOPT_CONNECTTIMEOUT => 10,
+                CURLOPT_SSL_VERIFYPEER => false
             ]);
             $response = curl_exec($ch);
             $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
@@ -415,8 +417,6 @@ function generate_questions_via_ai(
         throw new Exception("Database insertion failed: " . $e->getMessage());
     }
 }
-?>
-
 
 function edit_manual_question(int $questionId, string $questionText, string $difficulty, array $options, mysqli $conn, bool $forcePending = false): void {
     $correctCount = 0;

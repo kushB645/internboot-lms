@@ -451,8 +451,8 @@
     </div>
 
     <!-- Existing functionality — unchanged -->
-    <script src="js/app.js"></script>
-    <script src="js/exam-status.js"></script>
+    <script src="js/app.js?v=4"></script>
+    <script src="js/exam-status.js?v=2"></script>
 
     <!-- Lucide -->
     <script>
@@ -496,16 +496,7 @@
     // Initial sync
     syncSidebarProfile();
 
-    // Watch for real-time changes made by app.js/API rendering
-    const observer = new MutationObserver(() => {
-      syncSidebarProfile();
-    });
-
-    observer.observe(document.body, {
-      subtree: true,
-      childList: true,
-      characterData: true,
-    });
+    
   });
 </script>
   </body>

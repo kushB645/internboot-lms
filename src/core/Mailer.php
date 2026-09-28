@@ -181,4 +181,4 @@ function send_password_reset_email(string $toEmail, string $toName, string $rese
 
     return send_mail($toEmail, $toName, $subject, $htmlBody, $altBody, $mailOut, $send);
 }
-?>
+

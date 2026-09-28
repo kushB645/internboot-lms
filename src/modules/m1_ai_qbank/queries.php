@@ -87,4 +87,4 @@ function get_options_by_question_id(int $questionId, mysqli $conn): array {
 
     return $options;
 }
-?>
+

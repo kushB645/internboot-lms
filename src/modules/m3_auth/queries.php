@@ -356,4 +356,4 @@ function record_registration_attempt(mysqli $conn, string $ipAddress): void
     $stmt->close();
 }
 
-?>
+

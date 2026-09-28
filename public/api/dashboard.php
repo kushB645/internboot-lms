@@ -305,6 +305,7 @@ try {
         $percentage = (float)$resultRow['percentage'];
         $level = $resultRow['level_assigned'];
         $result = [
+            'id' => $resultRow['id'],
             'score' => number_format($percentage, 2) . ' / 100',
             'level' => $level !== null && $level !== '' ? 'Level ' . $level : '—',
             'level_assigned' => $level !== null && $level !== '' ? 'Level ' . $level : null,

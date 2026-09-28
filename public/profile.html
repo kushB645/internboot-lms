@@ -7,7 +7,7 @@
     <title>InternBoot | My Profile</title>
 
     <!-- Tailwind -->
-    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.tailwindcss.com" defer></script>
 
     <script>
       tailwind.config = {
@@ -23,7 +23,7 @@
     </script>
 
     <!-- Lucide -->
-    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://unpkg.com/lucide@latest" defer></script>
 
     <style>
       html {
@@ -723,7 +723,7 @@
          DO NOT CHANGE
     ====================================================== -->
 
-    <script src="js/app.js"></script>
+    <script src="js/app.js?v=3"></script>
 
     <!-- Lucide Icons -->
     <script>
@@ -767,16 +767,7 @@
     // Initial sync
     syncSidebarProfile();
 
-    // Watch for real-time changes made by app.js/API rendering
-    const observer = new MutationObserver(() => {
-      syncSidebarProfile();
-    });
-
-    observer.observe(document.body, {
-      subtree: true,
-      childList: true,
-      characterData: true,
-    });
+    
   });
 </script>
   </body>

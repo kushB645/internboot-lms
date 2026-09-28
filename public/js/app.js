@@ -103,6 +103,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         renderCertificateState(source);
         renderProfileState(source);
         renderEnrollmentState(source);
+        renderResultState(source);
     } catch (error) {
         console.error("Dashboard API Error:", error);
 
@@ -110,6 +111,8 @@ document.addEventListener("DOMContentLoaded", async () => {
         if (errorBox) {
             errorBox.textContent = "Unable to load dashboard data. Please try again.";
             errorBox.style.display = "block";
+        } else {
+            console.error("Critical Dashboard API Error: " + error.message);
         }
     }
 });
@@ -155,8 +158,8 @@ function fillSection(attribute, data) {
 }
 
 function updateAvatar(name) {
-    const avatar = document.querySelector('[data-candidate="initials"]');
-    if (!avatar || !name || name === "—") return;
+    const avatars = document.querySelectorAll('[data-candidate="initials"]');
+    if (!avatars.length || !name || name === "—") return;
 
     const initials = name
         .trim()
@@ -166,7 +169,7 @@ function updateAvatar(name) {
         .map((part) => part[0].toUpperCase())
         .join("");
 
-    avatar.textContent = initials || "--";
+    avatars.forEach(avatar => avatar.textContent = initials || "--");
 }
 
 function updateStatusCards(source) {
@@ -290,7 +293,7 @@ function renderCertificateState(source) {
     const dashCertDownload = document.getElementById("dashboard-certificate-download");
 
     if (source.certificate && source.certificate.status === "Issued" && source.result && source.result.id) {
-        const downloadUrl = `api/admin/certificate_pdf.php?result_id=${source.result.id}`;
+        const downloadUrl = `api/admin/certificate_pdf.php?result_id=${source.result.id}&t=${Date.now()}`;
         
         if (certStateContainer) {
             certStateContainer.innerHTML = `
@@ -376,7 +379,7 @@ function renderProfileState(source) {
         const isIssued = cert && (cert.status === "Issued" || (cert.number && cert.number !== "Not issued" && cert.number !== "—"));
 
         if (isIssued && resultId) {
-            const downloadUrl = `api/admin/certificate_pdf.php?result_id=${resultId}`;
+            const downloadUrl = `api/admin/certificate_pdf.php?result_id=${resultId}&t=${Date.now()}`;
             const certNumber = cert.number || cert.certificate_number || "—";
             const certLevel = cert.level || (result?.level && result.level !== "—" ? result.level : "—");
             const issueDate = cert.issueDate || cert.issue_date || "—";
@@ -458,5 +461,30 @@ function renderEnrollmentState(source) {
         if (nextStep) {
             nextStep.innerHTML = 'Please visit <a href="payment.html" style="color:#1652d6;font-weight:700;">Payments</a> to pay the registration fee and start your enrollment.';
         }
+    }
+}
+
+function renderResultState(source) {
+    const container = document.getElementById('result-state-container');
+    if (!container) return;
+
+    if (source.result && source.result.status === 'Available') {
+        const badge = document.getElementById('result-status-badge');
+        if (badge) {
+            badge.className = 'inline-flex items-center gap-2 self-start sm:self-auto px-3 py-1.5 rounded-full bg-emerald-50 text-emerald-600 text-xs font-semibold';
+            badge.innerHTML = '<span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span> Available';
+        }
+        
+        container.innerHTML = `
+            <div class="mx-auto w-14 h-14 rounded-2xl bg-white border border-emerald-100 flex items-center justify-center text-emerald-500 mb-5">
+                <i data-lucide="check-circle" class="w-7 h-7"></i>
+            </div>
+            <h2 class="text-xl font-semibold text-slate-900">Result Evaluated</h2>
+            <p class="mt-2 text-sm text-slate-600 max-w-md mx-auto leading-6">
+                Your assessment has been successfully evaluated. Your final score and assigned level are now available below.
+            </p>
+        `;
+        container.className = 'rounded-2xl border border-emerald-100 bg-emerald-50 px-6 py-10 text-center';
+        if (window.lucide) { window.lucide.createIcons(); }
     }
 }

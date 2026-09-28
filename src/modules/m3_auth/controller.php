@@ -383,4 +383,4 @@ function handle_reset_password_request(array $data, mysqli $conn): void {
 
     send_json_response('success', 'Password reset successfully. You can now log in.', null, 200);
 }
-?>
+

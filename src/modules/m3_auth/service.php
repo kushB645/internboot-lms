@@ -122,4 +122,4 @@ function complete_registration_with_otp(mysqli $conn, string $email, string $otp
     return ['success' => true, 'user_id' => $result['user_id']];
 }
 
-?>
+

@@ -137,7 +137,7 @@ function handle_ai_status_request(mysqli $conn): void {
     
     send_json_response('success', 'AI status retrieved', ['provider' => $provider, 'configured' => $configured], 200);
 }
-?>
+
 
 
 function handle_edit_question_request(array $input, mysqli $conn): void {
@@ -181,11 +181,11 @@ function handle_delete_question_request(array $input, mysqli $conn): void {
     }
 
     try {
-        $stmt = $conn->prepare("UPDATE questions SET approval_status = 'rejected' WHERE id = ?");
+        $stmt = $conn->prepare("DELETE FROM questions WHERE id = ?");
         $stmt->bind_param('i', $questionId);
         $stmt->execute();
         $stmt->close();
-        send_json_response('success', 'Question soft-deleted', null, 200);
+        send_json_response('success', 'Question deleted completely', null, 200);
     } catch (Throwable $e) {
         send_json_response('error', $e->getMessage(), null, 400);
     }

@@ -584,16 +584,7 @@
     // Initial sync
     syncSidebarProfile();
 
-    // Watch for real-time changes made by app.js/API rendering
-    const observer = new MutationObserver(() => {
-      syncSidebarProfile();
-    });
-
-    observer.observe(document.body, {
-      subtree: true,
-      childList: true,
-      characterData: true,
-    });
+    
   });
 </script>
   </body>
