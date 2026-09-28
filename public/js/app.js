@@ -289,7 +289,9 @@ if (document.readyState === "loading") {
 
 function renderCertificateState(source) {
     const certStateContainer = document.getElementById("certificate-state-container");
-    const certPreviewContainer = document.getElementById("certificate-preview-container");
+    const certPreviewCard = document.getElementById("certificate-preview-card");
+    const certMainContainer = document.getElementById("certificate-main-container");
+    const certBadge = document.getElementById("certificate-status-badge");
     const dashCertDownload = document.getElementById("dashboard-certificate-download");
 
     if (source.certificate && source.certificate.status === "Issued" && source.result && source.result.id) {
@@ -297,22 +299,36 @@ function renderCertificateState(source) {
         
         if (certStateContainer) {
             certStateContainer.innerHTML = `
-                <div class='empty' style='padding: 40px;'>
-                    <div style='font-size:42px'>🎓</div>
-                    <h2 style='color:#17243a; margin-top: 10px;'>Certificate Issued</h2>
-                    <p style='margin-bottom: 20px;'>Congratulations! Your certificate is ready to download.</p>
-                    <a href="${downloadUrl}" class="button" target="_blank" style="background: #1652d6; color: white; padding: 10px 20px; text-decoration: none; border-radius: 4px; font-weight: bold; display: inline-block;">Download Certificate (PDF)</a>
+                <div class="mx-auto w-16 h-16 rounded-2xl bg-green-50 border border-green-100 flex items-center justify-center text-green-600 mb-5">
+                    <i data-lucide="award" class="w-8 h-8"></i>
+                </div>
+                <h3 class="text-xl font-bold text-slate-900 mb-2">Certificate Issued</h3>
+                <p class="text-slate-500 mb-6 max-w-sm">Congratulations! Your certificate has been generated successfully and is ready.</p>
+                <div class="flex flex-col sm:flex-row justify-center gap-3 w-full sm:w-auto">
+                    <a href="${downloadUrl}" target="_blank" class="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-medium transition-colors shadow-sm focus:ring-2 focus:ring-blue-500/20">
+                        <i data-lucide="download" class="w-4 h-4"></i> Download PDF
+                    </a>
+                    <a href="${downloadUrl}" target="_blank" class="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 font-medium transition-colors shadow-sm">
+                        <i data-lucide="eye" class="w-4 h-4"></i> View Online
+                    </a>
                 </div>
             `;
+            if (typeof lucide !== 'undefined' && lucide.createIcons) {
+                lucide.createIcons();
+            }
         }
 
-        if (certPreviewContainer) {
-            certPreviewContainer.style.display = "grid";
-            const badge = document.getElementById("certificate-status-badge");
-            if (badge) {
-                badge.textContent = "Issued";
-                badge.className = "inline-flex items-center px-3 py-1.5 rounded-full bg-green-100 text-green-700 text-xs font-semibold";
-            }
+        if (certBadge) {
+            certBadge.textContent = "Issued";
+            certBadge.className = "inline-flex items-center px-3 py-1.5 rounded-full bg-green-100 text-green-700 text-xs font-semibold";
+        }
+
+        if (certMainContainer) {
+            certMainContainer.className = "grid grid-cols-1 xl:grid-cols-2 gap-5 mb-6";
+        }
+
+        if (certPreviewCard) {
+            certPreviewCard.style.display = "block";
             
             document.querySelectorAll('[data-certificate="number"]').forEach(el => el.textContent = source.certificate.number || '—');
             document.querySelectorAll('[data-certificate="level"]').forEach(el => el.textContent = source.certificate.level || '—');
@@ -325,16 +341,30 @@ function renderCertificateState(source) {
     } else {
         if (certStateContainer) {
             certStateContainer.innerHTML = `
-                <div class='empty'>
-                    <div style='font-size:42px'>🏅</div>
-                    <h2 style='color:#17243a'>No Certificate Issued</h2>
-                    <p>Your certificate will appear here after successful evaluation and level assignment.</p>
+                <div class="mx-auto w-16 h-16 rounded-2xl bg-slate-50 border border-slate-100 flex items-center justify-center text-slate-400 mb-5">
+                    <i data-lucide="clock" class="w-8 h-8"></i>
                 </div>
+                <h3 class="text-xl font-bold text-slate-900 mb-2">No Certificate Issued</h3>
+                <p class="text-slate-500 max-w-sm">Your certificate will appear here after successful evaluation and level assignment.</p>
             `;
+            if (typeof lucide !== 'undefined' && lucide.createIcons) {
+                lucide.createIcons();
+            }
         }
-        if (certPreviewContainer) {
-            certPreviewContainer.style.display = "none";
+
+        if (certBadge) {
+            certBadge.textContent = "Pending";
+            certBadge.className = "inline-flex items-center px-3 py-1.5 rounded-full bg-slate-100 text-slate-600 text-xs font-semibold";
         }
+
+        if (certMainContainer) {
+            certMainContainer.className = "grid grid-cols-1 gap-5 mb-6";
+        }
+
+        if (certPreviewCard) {
+            certPreviewCard.style.display = "none";
+        }
+        
         if (dashCertDownload) {
             dashCertDownload.innerHTML = "";
         }

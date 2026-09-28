@@ -315,116 +315,70 @@
             </section>
 
             <!-- =================================================
-                 CERTIFICATE STATUS
-            ================================================== -->
-
-            <section
-              class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden mb-6"
-            >
-              <div class="p-6">
-                <!-- Card Header -->
-                <div
-                  class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-5"
-                >
-                  <div class="flex items-center gap-3">
-                    <div
-                      class="w-10 h-10 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center shrink-0"
-                    >
-                      <i data-lucide="award" class="w-5 h-5"></i>
-                    </div>
-
-                    <div>
-                      <h2 class="text-lg font-semibold text-slate-900">
-                        Certificate Status
-                      </h2>
-
-                      <p class="text-sm text-slate-500 mt-0.5">
-                        Your certificate availability
-                      </p>
-                    </div>
-                  </div>
-
-                  <span
-                    class="inline-flex items-center gap-2 self-start sm:self-auto px-3 py-1.5 rounded-full bg-blue-50 text-blue-600 text-xs font-semibold"
-                  >
-                    <span class="w-1.5 h-1.5 rounded-full bg-blue-500"></span>
-
-                    Certificate
-                  </span>
-                </div>
-
-                <!-- IMPORTANT:
-                     Existing certificate logic updates this container.
-                     ID MUST NOT CHANGE.
-                -->
-
-                <div id="certificate-state-container">
-                  <div
-                    class="rounded-xl border border-blue-100 bg-blue-50/70 px-6 py-8 text-center"
-                  >
-                    <div
-                      class="mx-auto w-12 h-12 rounded-xl bg-white border border-blue-100 flex items-center justify-center text-blue-600 mb-4"
-                    >
-                      <i data-lucide="badge-check" class="w-6 h-6"></i>
-                    </div>
-
-                    <h2 class="text-lg font-semibold text-slate-900">
-                      Loading Certificate Status...
-                    </h2>
-
-                    <p class="mt-2 text-sm text-slate-500">
-                      Please wait while we check your certificate information.
-                    </p>
-                  </div>
-                </div>
-              </div>
-            </section>
-
-            <!-- =================================================
-                 CERTIFICATE PREVIEW
+                 CERTIFICATE CONTENT
             ================================================== -->
 
             <div
-              id="certificate-preview-container"
-              class="grid grid-cols-1 xl:grid-cols-[minmax(0,1.5fr)_minmax(280px,.7fr)] gap-5 mb-6"
-              style="display: none"
+              id="certificate-main-container"
+              class="grid grid-cols-1 xl:grid-cols-2 gap-5 mb-6"
             >
+              <!-- Status / Actions -->
+              <section
+                class="bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden flex flex-col"
+              >
+                <div class="p-6 border-b border-slate-100 flex items-center justify-between gap-4">
+                  <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center shrink-0">
+                      <i data-lucide="award" class="w-5 h-5"></i>
+                    </div>
+                    <div>
+                      <h2 class="text-lg font-semibold text-slate-900">Certificate Status</h2>
+                      <p class="text-sm text-slate-500 mt-0.5">Your certificate availability</p>
+                    </div>
+                  </div>
+                  <span
+                    id="certificate-status-badge"
+                    class="inline-flex items-center px-3 py-1.5 rounded-full bg-slate-100 text-slate-600 text-xs font-semibold"
+                  >
+                    Pending
+                  </span>
+                </div>
+
+                <!-- JS updates this container with Download/View OR Loading -->
+                <div id="certificate-state-container" class="flex-1 p-6 flex flex-col items-center justify-center text-center">
+                  <div class="mx-auto w-12 h-12 rounded-xl bg-white border border-blue-100 flex items-center justify-center text-blue-600 mb-4">
+                    <i data-lucide="badge-check" class="w-6 h-6"></i>
+                  </div>
+                  <h2 class="text-lg font-semibold text-slate-900">Loading Certificate Status...</h2>
+                  <p class="mt-2 text-sm text-slate-500">Please wait while we check your certificate information.</p>
+                </div>
+              </section>
+
               <!-- Certificate Details -->
               <section
+                id="certificate-preview-card"
                 class="bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden"
+                style="display: none"
               >
                 <div class="p-6">
                   <div class="flex items-center gap-3 mb-5">
-                    <div
-                      class="w-10 h-10 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center"
-                    >
+                    <div class="w-10 h-10 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center">
                       <i data-lucide="file-badge" class="w-5 h-5"></i>
                     </div>
-
                     <div>
-                      <h2 class="text-lg font-semibold text-slate-900">
-                        Certificate Preview
-                      </h2>
-
-                      <p class="text-sm text-slate-500 mt-0.5">
-                        Certificate information
-                      </p>
+                      <h2 class="text-lg font-semibold text-slate-900">Certificate Preview</h2>
+                      <p class="text-sm text-slate-500 mt-0.5">Certificate information</p>
                     </div>
                   </div>
 
                   <!-- Certificate Information -->
                   <div class="divide-y divide-slate-100">
                     <!-- Certificate Number -->
-                    <div
-                      class="py-4 first:pt-0 flex items-center justify-between gap-6"
-                    >
+                    <div class="py-4 first:pt-0 flex items-center justify-between gap-6">
                       <span class="text-sm text-slate-500">
                         Certificate Number
                       </span>
-
-                      <span
-                        class="text-sm font-semibold text-slate-900 text-right"
-                      >
+                      <span class="text-sm font-semibold text-slate-900 text-right">
                         <span data-certificate="number"></span>
                       </span>
                     </div>
@@ -432,74 +386,16 @@
                     <!-- Level -->
                     <div class="py-4 flex items-center justify-between gap-6">
                       <span class="text-sm text-slate-500"> Level </span>
-
-                      <span
-                        class="text-sm font-semibold text-slate-900 text-right"
-                      >
+                      <span class="text-sm font-semibold text-slate-900 text-right">
                         <span data-certificate="level"></span>
                       </span>
                     </div>
 
                     <!-- Issue Date -->
-                    <div
-                      class="py-4 last:pb-0 flex items-center justify-between gap-6"
-                    >
+                    <div class="py-4 last:pb-0 flex items-center justify-between gap-6">
                       <span class="text-sm text-slate-500"> Issue Date </span>
-
-                      <span
-                        class="text-sm font-semibold text-slate-900 text-right"
-                      >
+                      <span class="text-sm font-semibold text-slate-900 text-right">
                         <span data-certificate="issue_date"></span>
-                      </span>
-                    </div>
-                  </div>
-                </div>
-              </section>
-
-              <!-- Status -->
-              <section
-                class="bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden"
-              >
-                <div class="p-6">
-                  <div class="flex items-center gap-3 mb-5">
-                    <div
-                      class="w-10 h-10 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center"
-                    >
-                      <i data-lucide="shield-check" class="w-5 h-5"></i>
-                    </div>
-
-                    <div>
-                      <h2 class="text-lg font-semibold text-slate-900">
-                        Status
-                      </h2>
-
-                      <p class="text-sm text-slate-500 mt-0.5">
-                        Current certificate status
-                      </p>
-                    </div>
-                  </div>
-
-                  <div
-                    class="rounded-xl bg-slate-50 border border-slate-200 p-5"
-                  >
-                    <div class="flex items-center justify-between gap-4">
-                      <div>
-                        <p
-                          class="text-xs font-medium text-slate-500 uppercase tracking-wide"
-                        >
-                          Certificate
-                        </p>
-
-                        <p class="mt-1 text-sm font-semibold text-slate-900">
-                          Current Status
-                        </p>
-                      </div>
-
-                      <span
-                        class="inline-flex items-center px-3 py-1.5 rounded-full bg-slate-100 text-slate-600 text-xs font-semibold"
-                        id="certificate-status-badge"
-                      >
-                        Pending
                       </span>
                     </div>
                   </div>
