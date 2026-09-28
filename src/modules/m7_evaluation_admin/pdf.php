@@ -82,8 +82,8 @@ function output_certificate_pdf(array $data): void
         $nameWidth = $pdf->GetStringWidth($name);
     }
     
-    // Y approx 215, X approx 250
-    $pdf->SetXY(250, 215);
+    // Y approx 238, X approx 280
+    $pdf->SetXY(280, 238);
     $pdf->Cell(450, 24, $name, 0, 1, 'L');
 
     // 2. Domain (Assessment Title)
@@ -96,20 +96,20 @@ function output_certificate_pdf(array $data): void
         $domainWidth = $pdf->GetStringWidth($assessment);
     }
     
-    // Y approx 260
-    $pdf->SetXY(250, 260);
+    // Y approx 283
+    $pdf->SetXY(280, 283);
     $pdf->Cell(450, 20, $assessment, 0, 1, 'L');
 
     // 3. Level Achieved
     $pdf->SetFont('freesans', 'B', 16);
-    // Y approx 305
-    $pdf->SetXY(250, 305);
+    // Y approx 328
+    $pdf->SetXY(280, 328);
     $pdf->Cell(450, 20, $levelDisplay, 0, 1, 'L');
 
     // 4. Certificate ID
     $pdf->SetFont('freesans', 'B', 12);
-    // Y approx 492, X approx 260
-    $pdf->SetXY(260, 492);
+    // Y approx 500, X approx 290
+    $pdf->SetXY(290, 500);
     $pdf->Cell(200, 20, $cert, 0, 1, 'L');
 
     $pdfContent = $pdf->Output('', 'S');
