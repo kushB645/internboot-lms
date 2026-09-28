@@ -1214,3 +1214,62 @@
     padding: 36px 24px;
   }
 }
+
+/* ── Password visibility toggle ────────────────────────────── */
+.ib-password-wrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.ib-password-wrap .ib-input {
+  width: 100%;
+  padding-right: 44px !important;
+}
+
+.ib-toggle-password {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  padding: 4px;
+  cursor: pointer;
+  color: #94a3b8;
+  line-height: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px;
+  transition: color 0.18s ease;
+}
+
+.ib-toggle-password:hover {
+  color: var(--ib-blue);
+}
+
+.ib-toggle-password:focus-visible {
+  outline: 2px solid var(--ib-blue);
+  outline-offset: 2px;
+}
+
+.ib-toggle-password .eye-icon {
+  width: 18px;
+  height: 18px;
+  display: block;
+}
+
+/* Show "open eye" by default; hide "closed eye" */
+.ib-toggle-password .eye-closed {
+  display: none;
+}
+
+/* When password is visible, flip which icon shows */
+.ib-toggle-password.is-visible .eye-open {
+  display: none;
+}
+
+.ib-toggle-password.is-visible .eye-closed {
+  display: block;
+}
