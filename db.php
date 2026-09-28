@@ -15,7 +15,7 @@ function load_local_env(string $file): void
         if ($line === '' || str_starts_with($line, '#') || !str_contains($line, '=')) continue;
         [$key, $value] = array_map('trim', explode('=', $line, 2));
         $value = trim($value, " \t\n\r\0\x0B\"'");
-        if ($key !== '' && getenv($key) === false) {
+        if ($key !== '') {
             putenv($key . '=' . $value);
             $_ENV[$key] = $value;
         }

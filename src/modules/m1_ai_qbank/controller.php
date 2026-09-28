@@ -129,9 +129,9 @@ function handle_generate_questions_request(array $input, mysqli $conn): void {
         $msg = $e->getMessage();
         error_log('InternBoot M1 question generation error: ' . $msg);
         if (str_contains($msg, 'AI provider') || str_contains($msg, 'network')) {
-            send_json_response('error', 'AI question generation service is currently unavailable. Please try again later.', null, 502);
+            send_json_response('error', 'AI Generation Error: ' . $msg, null, 502);
         } else {
-            send_json_response('error', is_dev_env() ? $msg : 'Failed to generate questions. Please try again.', null, 500);
+            send_json_response('error', $msg, null, 500);
         }
     }
 }
