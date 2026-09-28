@@ -15,7 +15,13 @@
 
 .ib-auth-page {
   display: flex;
+  align-items: flex-start;
   background: var(--ib-light-bg);
+  min-height: 100vh;
+}
+
+.ib-auth-page .ib-auth-grid {
+  min-height: 100vh;
 }
 
 .ib-auth-grid {
@@ -343,33 +349,58 @@
 
 .ib-password-wrap {
   position: relative;
+  display: flex;
+  align-items: center;
 }
 
 .ib-password-wrap .ib-input {
-  padding-right: 48px;
+  width: 100%;
+  padding-right: 48px !important;
 }
 
 .ib-toggle-password {
   position: absolute;
-  right: 14px;
+  right: 12px;
   top: 50%;
   transform: translateY(-50%);
-  width: 30px;
-  height: 30px;
-  background: transparent url("https://img.icons8.com/?size=100&id=59814&format=png&color=000000") center / 20px 20px no-repeat;
+  background: none;
   border: none;
-  cursor: pointer;
   padding: 4px;
-  font-size: 0;
-  transition: opacity 0.15s ease;
-}
-
-.ib-toggle-password.is-visible {
-  background-image: url("https://img.icons8.com/?size=100&id=60022&format=png&color=000000");
+  cursor: pointer;
+  color: #94a3b8;
+  line-height: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px;
+  transition: color 0.18s ease;
 }
 
 .ib-toggle-password:hover {
-  opacity: 1;
+  color: var(--ib-blue);
+}
+
+.ib-toggle-password:focus-visible {
+  outline: 2px solid var(--ib-blue);
+  outline-offset: 2px;
+}
+
+.ib-toggle-password .eye-icon {
+  width: 18px;
+  height: 18px;
+  display: block;
+}
+
+.ib-toggle-password .eye-closed {
+  display: none;
+}
+
+.ib-toggle-password.is-visible .eye-open {
+  display: none;
+}
+
+.ib-toggle-password.is-visible .eye-closed {
+  display: block;
 }
 
 /* Registration page */
@@ -398,7 +429,8 @@
 .ib-auth-page:has(.ib-register-role) .ib-auth-grid {
   grid-template-columns: 0.82fr 1.18fr;
   max-width: 1030px;
-  min-height: 680px;
+  min-height: unset;
+  height: auto;
   margin: auto;
   border-radius: 16px;
   overflow: hidden;
@@ -407,7 +439,7 @@
 }
 
 .ib-auth-page:has(.ib-register-role) .ib-brand-panel {
-  min-height: 680px;
+  min-height: unset;
   padding: 44px 30px;
   justify-content: flex-start;
   background: linear-gradient(165deg, #172f69 0%, #2052b7 55%, #2862e5 100%);
@@ -561,7 +593,7 @@
 }
 
 .ib-auth-page:has(.ib-register-role) .ib-password-wrap .ib-input {
-  padding-right: 13px;
+  padding-right: 44px !important;
 }
 
 .ib-auth-page:has(.ib-register-role) #formAlert,
@@ -632,7 +664,8 @@
 .ib-login-page .ib-auth-grid {
   grid-template-columns: 0.82fr 1.18fr;
   max-width: 1030px;
-  min-height: 680px;
+  min-height: unset;
+  height: auto;
   margin: auto;
   border-radius: 16px;
   overflow: hidden;
@@ -641,7 +674,7 @@
 }
 
 .ib-login-page .ib-brand-panel {
-  min-height: 680px;
+  min-height: unset;
   padding: 44px 30px;
   justify-content: flex-start;
   background: linear-gradient(165deg, #172f69 0%, #2052b7 55%, #2862e5 100%);
@@ -762,7 +795,7 @@
 }
 
 .ib-login-page #loginForm .ib-password-wrap .ib-input {
-  padding-right: 13px;
+  padding-right: 44px !important;
 }
 
 .ib-login-page #loginForm .ib-btn-primary {
@@ -1147,9 +1180,6 @@
 }
 
 .ib-brand-panel {
-  position: sticky;
-  top: 0;
-  height: 100vh;
   align-self: start;
 }
 
@@ -1213,63 +1243,4 @@
   .ib-auth-page-rich .ib-auth-card-full {
     padding: 36px 24px;
   }
-}
-
-/* ── Password visibility toggle ────────────────────────────── */
-.ib-password-wrap {
-  position: relative;
-  display: flex;
-  align-items: center;
-}
-
-.ib-password-wrap .ib-input {
-  width: 100%;
-  padding-right: 44px !important;
-}
-
-.ib-toggle-password {
-  position: absolute;
-  right: 12px;
-  top: 50%;
-  transform: translateY(-50%);
-  background: none;
-  border: none;
-  padding: 4px;
-  cursor: pointer;
-  color: #94a3b8;
-  line-height: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 4px;
-  transition: color 0.18s ease;
-}
-
-.ib-toggle-password:hover {
-  color: var(--ib-blue);
-}
-
-.ib-toggle-password:focus-visible {
-  outline: 2px solid var(--ib-blue);
-  outline-offset: 2px;
-}
-
-.ib-toggle-password .eye-icon {
-  width: 18px;
-  height: 18px;
-  display: block;
-}
-
-/* Show "open eye" by default; hide "closed eye" */
-.ib-toggle-password .eye-closed {
-  display: none;
-}
-
-/* When password is visible, flip which icon shows */
-.ib-toggle-password.is-visible .eye-open {
-  display: none;
-}
-
-.ib-toggle-password.is-visible .eye-closed {
-  display: block;
 }
