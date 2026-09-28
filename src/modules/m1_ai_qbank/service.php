@@ -178,47 +178,62 @@ function generate_questions_via_ai(
         $rawText = '';
         try {
             if ($provider === 'gemini') {
-                $url = "https://generativelanguage.googleapis.com/v1beta/models/" . rawurlencode($model) . ":generateContent?key=" . rawurlencode($apiKey);
-                $payload = [
-                    'contents' => [
-                        [
-                            'parts' => [
-                                ['text' => $prompt]
+                $candidates = array_unique(array_filter([$model, 'gemini-flash-latest', 'gemini-3.7-flash', 'gemini-3.8-flash']));
+                $lastErr = '';
+                $gotSuccess = false;
+
+                foreach ($candidates as $candModel) {
+                    $url = "https://generativelanguage.googleapis.com/v1beta/models/" . rawurlencode($candModel) . ":generateContent?key=" . rawurlencode($apiKey);
+                    $payload = [
+                        'contents' => [
+                            [
+                                'parts' => [
+                                    ['text' => $prompt]
+                                ]
                             ]
+                        ],
+                        'generationConfig' => [
+                            'temperature' => 0.7,
+                            'responseMimeType' => 'application/json'
                         ]
-                    ],
-                    'generationConfig' => [
-                        'temperature' => 0.7,
-                        'responseMimeType' => 'application/json'
-                    ]
-                ];
+                    ];
 
-                $ch = curl_init($url);
-                curl_setopt_array($ch, [
-                    CURLOPT_RETURNTRANSFER => true,
-                    CURLOPT_POST => true,
-                    CURLOPT_HTTPHEADER => ['Content-Type: application/json'],
-                    CURLOPT_POSTFIELDS => json_encode($payload),
-                    CURLOPT_TIMEOUT => 60,
-                    CURLOPT_CONNECTTIMEOUT => 15,
-                    CURLOPT_SSL_VERIFYPEER => false
-                ]);
-                $response = curl_exec($ch);
-                $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-                $curlErr = curl_error($ch);
-                curl_close($ch);
+                    $ch = curl_init($url);
+                    curl_setopt_array($ch, [
+                        CURLOPT_RETURNTRANSFER => true,
+                        CURLOPT_POST => true,
+                        CURLOPT_HTTPHEADER => ['Content-Type: application/json'],
+                        CURLOPT_POSTFIELDS => json_encode($payload),
+                        CURLOPT_TIMEOUT => 60,
+                        CURLOPT_CONNECTTIMEOUT => 15,
+                        CURLOPT_SSL_VERIFYPEER => false
+                    ]);
+                    $response = curl_exec($ch);
+                    $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+                    $curlErr = curl_error($ch);
+                    curl_close($ch);
 
-                if ($response === false || !empty($curlErr)) {
-                    throw new RuntimeException("AI provider request failed: " . ($curlErr ?: 'Network or cURL timeout error'));
+                    if ($response === false || !empty($curlErr)) {
+                        $lastErr = ($curlErr ?: 'Network or cURL timeout error');
+                        continue;
+                    }
+                    if ($httpCode !== 200) {
+                        $errData = json_decode((string)$response, true);
+                        $lastErr = $errData['error']['message'] ?? "HTTP response code {$httpCode}";
+                        continue;
+                    }
+
+                    $resData = json_decode((string)$response, true);
+                    $rawText = $resData['candidates'][0]['content']['parts'][0]['text'] ?? '';
+                    if ($rawText !== '') {
+                        $gotSuccess = true;
+                        break;
+                    }
                 }
-                if ($httpCode !== 200) {
-                    $errData = json_decode((string)$response, true);
-                    $errMsg = $errData['error']['message'] ?? "HTTP response code {$httpCode}";
-                    throw new RuntimeException("AI provider request failed: {$errMsg}");
-                }
 
-                $resData = json_decode((string)$response, true);
-                $rawText = $resData['candidates'][0]['content']['parts'][0]['text'] ?? '';
+                if (!$gotSuccess) {
+                    throw new RuntimeException("AI provider request failed: " . ($lastErr ?: 'Failed across all Gemini model fallbacks.'));
+                }
             } else {
                 // OpenAI
                 $url = "https://api.openai.com/v1/chat/completions";
