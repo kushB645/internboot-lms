@@ -91,7 +91,24 @@ function m7_handle_request(mysqli $conn): void
             case 'placements': send_json_response('success','Placement records loaded',['placements'=>m7_placements($conn)]);
             case 'questions':
                 $isAdmin = ($_SESSION['role'] ?? '') === 'admin';
-                send_json_response('success','Questions loaded',['questions'=>m7_questions($conn, $isAdmin)]);
+                $questions = m7_questions($conn, $isAdmin);
+                $counts = [
+                    'total' => count($questions),
+                    'available' => 0,
+                    'approved' => 0,
+                    'pending' => 0,
+                    'used' => 0
+                ];
+                foreach ($questions as $q) {
+                    if (!empty($q['is_used']) || ($q['approval_status'] ?? '') === 'archived') {
+                        $counts['used']++;
+                    } else {
+                        $counts['available']++;
+                        if (($q['approval_status'] ?? '') === 'approved') $counts['approved']++;
+                        if (($q['approval_status'] ?? '') === 'pending') $counts['pending']++;
+                    }
+                }
+                send_json_response('success','Questions loaded',['questions'=>$questions, 'counts'=>$counts]);
             case 'batches': send_json_response('success','Batches loaded',m7_batches($conn));
             case 'question-banks': send_json_response('success','Question banks loaded',['question_banks'=>m7_question_banks($conn)]);
             case 'settings': send_json_response('success','Settings loaded',m7_settings($conn));
@@ -105,6 +122,12 @@ function m7_handle_request(mysqli $conn): void
                 }
                 $stmt->close();
                 send_json_response('success','M7 health check completed',['database'=>'connected','missing_tables'=>$missing,'ready'=>count($missing)===0]);
+            case 'integrity_check':
+                $desynced = check_payment_enrollment_integrity($conn);
+                send_json_response('success', 'Integrity check completed', [
+                    'desync_count' => count($desynced),
+                    'desynced_records' => $desynced
+                ]);
             default: throw new InvalidArgumentException('Unknown admin action.');
         }
     }
@@ -113,8 +136,8 @@ function m7_handle_request(mysqli $conn): void
     require_csrf();
 
     if (in_array($action, [
-        'setting', 'batch', 'slot', 'slot_delete', 'allocate',
-        'evaluate', 'certificate', 'certificate-next', 'placement', 'question-status'
+        'setting', 'batch', 'batch_delete', 'slot', 'slot_delete', 'allocate',
+        'evaluate', 'certificate', 'certificate-next', 'certificate-bulk', 'placement', 'question-status', 'provisional_batch'
     ], true)) {
         require_admin_only($conn);
     }
@@ -193,6 +216,53 @@ function m7_handle_request(mysqli $conn): void
             create_admin_log($conn,$_SESSION['user_id']??null,'generate_certificate',json_encode(['result_id'=>$data['result_id']??null,'certificate_id'=>$data['id']]));
             send_json_response('success','Certificate generated successfully.',$data);
 
+        case 'certificate-bulk':
+            set_time_limit(0);
+            require_once __DIR__ . '/../m5_batch_slots/queries.php';
+            $minCertLevel = (int)(get_setting_value('min_certificate_level', $conn) ?? 4);
+            $minCertPct = (float)(get_setting_value('min_certificate_percentage', $conn) ?? 40.0);
+            
+            $conn->begin_transaction();
+            try {
+                $eligibleResults = q_all($conn, "
+                    SELECT r.id as result_id, at.candidate_id, r.level_assigned
+                    FROM results r
+                    JOIN attempts at ON at.id = r.attempt_id
+                    LEFT JOIN certificates c ON c.result_id = r.id
+                    WHERE c.id IS NULL 
+                      AND r.level_assigned <= ? 
+                      AND r.percentage >= ?
+                    ORDER BY r.created_at ASC
+                ", 'id', [$minCertLevel, $minCertPct]);
+                
+                $count = count($eligibleResults);
+                if ($count > 0) {
+                    $row = q_one($conn, "SELECT certificate_number FROM certificates ORDER BY id DESC LIMIT 1 FOR UPDATE");
+                    $currentNum = 100;
+                    if ($row && !empty($row['certificate_number']) && preg_match('/^C(\d+)$/', $row['certificate_number'], $matches)) {
+                        $currentNum = (int)$matches[1];
+                    }
+                    
+                    $stmt = $conn->prepare('INSERT INTO certificates (certificate_number, candidate_id, result_id, level, issue_date) VALUES (?, ?, ?, ?, CURDATE())');
+                    
+                    foreach ($eligibleResults as $res) {
+                        $currentNum++;
+                        $number = 'C' . $currentNum;
+                        $stmt->bind_param('siii', $number, $res['candidate_id'], $res['result_id'], $res['level_assigned']);
+                        $stmt->execute();
+                    }
+                    $stmt->close();
+                }
+                
+                $conn->commit();
+                create_admin_log($conn, $_SESSION['user_id'] ?? null, 'generate_certificates_bulk', json_encode(['count' => $count]));
+                send_json_response('success', "Generated $count certificates successfully.", ['count' => $count]);
+            } catch (Throwable $e) {
+                $conn->rollback();
+                error_log('Bulk certificate generation error: ' . $e->getMessage());
+                send_json_response('error', 'Failed to generate certificates.', null, 500);
+            }
+
         case 'placement':
             $id=require_positive_int($body['id']??null,'id');
             $status=trim((string)($body['status']??''));
@@ -201,6 +271,17 @@ function m7_handle_request(mysqli $conn): void
             update_placement($conn,$id,$status,isset($body['company_name'])?(string)$body['company_name']:null,isset($body['notes'])?(string)$body['notes']:null);
             create_admin_log($conn,$_SESSION['user_id']??null,'update_placement',json_encode(['placement_id'=>$id,'status'=>$status]));
             send_json_response('success','Placement record updated successfully.');
+
+        case 'provisional_batch':
+            $date=trim((string)($body['exam_date']??''));
+            $capacity=require_positive_int($body['capacity']??null,'capacity');
+            $name=trim((string)($body['batch_number']??('PROV-'.date('Ymd-His'))));
+            $assessmentId=!empty($body['assessment_id']) ? require_positive_int($body['assessment_id'],'assessment_id') : 0;
+            $startTime = !empty($body['start_time']) ? trim((string)$body['start_time']) : null;
+            $endTime = !empty($body['end_time']) ? trim((string)$body['end_time']) : null;
+            $data=create_provisional_batch($conn,$name,$assessmentId,$date,$capacity,$startTime,$endTime);
+            create_admin_log($conn,$_SESSION['user_id']??null,'create_provisional_batch',json_encode($data));
+            send_json_response('success','Provisional batch created successfully.',$data,201);
 
         case 'batch':
             $date=trim((string)($body['exam_date']??''));
@@ -227,6 +308,12 @@ function m7_handle_request(mysqli $conn): void
             delete_exam_slot($conn, $slotId);
             create_admin_log($conn, $_SESSION['user_id'] ?? null, 'delete_slot', json_encode(['slot_id' => $slotId]));
             send_json_response('success', 'Exam slot deleted successfully.');
+
+        case 'batch_delete':
+            $batchId = require_positive_int($body['batch_id'] ?? null, 'batch_id');
+            delete_batch($conn, $batchId);
+            create_admin_log($conn, $_SESSION['user_id'] ?? null, 'delete_batch', json_encode(['batch_id' => $batchId]));
+            send_json_response('success', 'Batch deleted successfully.');
 
         case 'allocate':
             $enrollmentId=require_positive_int($body['enrollment_id']??null,'enrollment_id');

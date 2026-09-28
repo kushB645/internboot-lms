@@ -10,7 +10,8 @@ function initStudentResponsiveShell() {
     sidebar.dataset.responsiveShellBound = "1";
 
     document.body.classList.add("overflow-x-hidden");
-    sidebar.classList.add("-translate-x-full", "transition-transform", "duration-200", "lg:translate-x-0");
+    sidebar.classList.remove("hidden", "md:flex");
+    sidebar.classList.add("flex", "-translate-x-full", "transition-transform", "duration-200", "lg:translate-x-0");
     main.classList.remove("ml-[293px]", "w-[calc(100%-293px)]");
     main.classList.add("ml-0", "w-full", "lg:ml-[293px]", "lg:w-[calc(100%-293px)]");
     header.classList.remove("left-[293px]");
@@ -256,7 +257,7 @@ function bindCandidateLogout() {
                     });
                     const csrfData = await csrfRes.json();
                     token = csrfData.data?.token || null;
-                } catch {}
+                } catch { }
                 if (!token) {
                     const m7Res = await fetch("/api/admin/evaluate.php?action=csrf", {
                         credentials: "same-origin",
@@ -296,7 +297,7 @@ function renderCertificateState(source) {
 
     if (source.certificate && source.certificate.status === "Issued" && source.result && source.result.id) {
         const downloadUrl = `api/admin/certificate_pdf.php?result_id=${source.result.id}&t=${Date.now()}`;
-        
+
         if (certStateContainer) {
             certStateContainer.innerHTML = `
                 <div class="mx-auto w-16 h-16 rounded-2xl bg-green-50 border border-green-100 flex items-center justify-center text-green-600 mb-5">
@@ -645,7 +646,7 @@ function renderResultState(source) {
             badge.className = 'inline-flex items-center gap-2 self-start sm:self-auto px-3 py-1.5 rounded-full bg-emerald-50 text-emerald-600 text-xs font-semibold';
             badge.innerHTML = '<span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span> Available';
         }
-        
+
         container.innerHTML = `
             <div class="mx-auto w-14 h-14 rounded-2xl bg-white border border-emerald-100 flex items-center justify-center text-emerald-500 mb-5">
                 <i data-lucide="check-circle" class="w-7 h-7"></i>

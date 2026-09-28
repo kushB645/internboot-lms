@@ -113,6 +113,7 @@
       blue: "bg-blue-50 text-blue-600",
       amber: "bg-amber-50 text-amber-600",
       red: "bg-red-50 text-red-600",
+      purple: "bg-purple-50 text-purple-700 border border-purple-200",
       slate: "bg-slate-100 text-slate-600",
     };
     return `<span class="inline-flex rounded-full px-3 py-1 text-xs font-medium ${styles[type] || styles.slate}">${escapeHtml(text)}</span>`;
@@ -1006,21 +1007,67 @@
     [level, status].forEach((el) => el?.addEventListener("change", run));
   }
 
+  let activeQuestionTab = "available";
+  let cachedQuestionsData = null;
+
   async function loadQuestions() {
     const data = await api("questions");
-    const rows = data.questions || [];
-    const counts = data.counts || {};
+    cachedQuestionsData = data;
+    renderQuestionsView();
+  }
+
+  function renderQuestionsView() {
+    if (!cachedQuestionsData) return;
+    const allRows = cachedQuestionsData.questions || [];
+    const counts = cachedQuestionsData.counts || {};
+    
     const set = (id, v) => {
       const el = $("#" + id);
       if (el) el.textContent = v;
     };
-    set("totalQuestions", counts.total ?? rows.length);
-    set("pendingQuestions", counts.pending ?? rows.filter((q) => q.approval_status === "pending").length);
-    set("approvedQuestions", counts.approved ?? rows.filter((q) => q.approval_status === "approved").length);
+    
+    const availableRows = allRows.filter((q) => !q.is_used && q.approval_status !== "archived");
+    const usedRows = allRows.filter((q) => q.is_used || q.approval_status === "archived");
+
+    set("availableQuestions", counts.available ?? availableRows.length);
+    set("approvedQuestions", counts.approved ?? availableRows.filter((q) => q.approval_status === "approved").length);
+    set("pendingQuestions", counts.pending ?? availableRows.filter((q) => q.approval_status === "pending").length);
+    set("usedQuestions", counts.used ?? usedRows.length);
+    set("badgeAvailableCount", availableRows.length);
+    set("badgeUsedCount", usedRows.length);
+
+    // Style tabs
+    const tabAvail = $("#tabAvailableQuestions");
+    const tabUsed = $("#tabUsedQuestions");
+    const banner = $("#tabBanner");
+    const bannerText = $("#tabBannerText");
+
+    if (activeQuestionTab === "available") {
+      if (tabAvail) {
+        tabAvail.className = "px-5 py-3 text-sm font-semibold border-b-2 border-intern-blue text-intern-blue flex items-center gap-2 transition";
+      }
+      if (tabUsed) {
+        tabUsed.className = "px-5 py-3 text-sm font-semibold border-b-2 border-transparent text-slate-500 hover:text-slate-700 flex items-center gap-2 transition";
+      }
+      if (banner) banner.className = "px-6 py-3 bg-blue-50/50 border-b border-blue-100 text-xs font-medium text-blue-700 flex items-center gap-2";
+      if (bannerText) bannerText.textContent = "Showing active questions available to be served in upcoming batch assessments.";
+    } else {
+      if (tabAvail) {
+        tabAvail.className = "px-5 py-3 text-sm font-semibold border-b-2 border-transparent text-slate-500 hover:text-slate-700 flex items-center gap-2 transition";
+      }
+      if (tabUsed) {
+        tabUsed.className = "px-5 py-3 text-sm font-semibold border-b-2 border-purple-600 text-purple-700 flex items-center gap-2 transition";
+      }
+      if (banner) banner.className = "px-6 py-3 bg-purple-50/50 border-b border-purple-100 text-xs font-medium text-purple-700 flex items-center gap-2";
+      if (bannerText) bannerText.textContent = "Showing questions that have already appeared in batch exams. They are safely archived and will never appear in available pools, preserving candidate history.";
+    }
+
+    const rowsToDisplay = activeQuestionTab === "available" ? availableRows : usedRows;
     const tbody = $("#questionsTableBody");
     if (!tbody) return;
-    tbody.innerHTML = rows.length
-      ? rows
+
+    tbody.innerHTML = rowsToDisplay.length
+      ? rowsToDisplay
           .map((q) => {
             const m = String(q.question_bank || "").match(/level\s*([1-5])/i);
             const level = m ? m[1] : "—";
@@ -1033,25 +1080,43 @@
               </div>`;
             }).join('');
 
-            return `<tr data-question="true" data-level="${m ? `level ${m[1]}` : ""}" data-status="${escapeHtml(q.approval_status)}">
+            const isArchived = q.is_used || q.approval_status === "archived";
+            const statusDisplay = isArchived
+              ? badge("Used in Exam", "purple")
+              : badge(label(q.approval_status), typeForStatus(q.approval_status));
+
+            const usageText = isArchived
+              ? `<span class="inline-flex items-center gap-1 text-purple-600 font-medium"><i data-lucide="history" class="h-3 w-3"></i> Already Appeared in Exam</span>`
+              : `<span class="text-slate-400">${escapeHtml(q.question_bank)} · ${Number(q.option_count || 0)} options</span>`;
+
+            const actionsHtml = isArchived
+              ? `<span class="inline-flex items-center gap-1 text-xs text-purple-700 font-medium bg-purple-50 px-2.5 py-1.5 rounded-lg border border-purple-100">
+                  <i data-lucide="shield-check" class="h-3.5 w-3.5"></i> History Preserved
+                </span>`
+              : `<div class="flex gap-2">
+                  ${q.approval_status !== "approved" ? `<button class="approve-question rounded-lg bg-green-50 px-3 py-2 text-xs font-medium text-green-600 hover:bg-green-100" data-id="${q.id}">Approve</button>` : ""}
+                  ${q.approval_status !== "rejected" ? `<button class="reject-question rounded-lg bg-red-50 px-3 py-2 text-xs font-medium text-red-600 hover:bg-red-100" data-id="${q.id}">Reject</button>` : ""}
+                </div>`;
+
+            return `<tr data-question="true" data-level="${m ? `level ${m[1]}` : ""}" data-status="${escapeHtml(q.approval_status)}" data-used="${isArchived ? "1" : "0"}">
         <td class="px-6 py-4">
           <p class="max-w-xl font-medium text-slate-800">${escapeHtml(q.question_text)}</p>
           <div class="mt-3 mb-3 pl-2 border-l-2 border-slate-200">
             ${allOptsHtml}
           </div>
-          <p class="mt-1 text-xs text-slate-400">${escapeHtml(q.question_bank)} · ${Number(q.option_count || 0)} options</p>
+          <p class="mt-1 text-xs">${usageText}</p>
         </td>
         <td class="px-6 py-4">${level === "—" ? "—" : badge(`Level ${level}`, "blue")}</td>
         <td class="px-6 py-4 text-slate-500">${escapeHtml(q.type || "MCQ")}</td>
-        <td class="px-6 py-4">${badge(label(q.approval_status), typeForStatus(q.approval_status))}</td>
-        <td class="px-6 py-4"><div class="flex gap-2">
-          ${q.approval_status !== "approved" ? `<button class="approve-question rounded-lg bg-green-50 px-3 py-2 text-xs font-medium text-green-600" data-id="${q.id}">Approve</button>` : ""}
-          ${q.approval_status !== "rejected" ? `<button class="reject-question rounded-lg bg-red-50 px-3 py-2 text-xs font-medium text-red-600" data-id="${q.id}">Reject</button>` : ""}
-        </div></td>
+        <td class="px-6 py-4">${statusDisplay}</td>
+        <td class="px-6 py-4">${actionsHtml}</td>
       </tr>`;
           })
           .join("")
-      : `<tr id="emptyQuestions"><td class="px-6 py-12 text-center text-sm text-slate-500" colspan="5">No questions available</td></tr>`;
+      : `<tr id="emptyQuestions"><td class="px-6 py-12 text-center text-sm text-slate-500" colspan="5">
+          ${activeQuestionTab === "available" ? "No available questions found in the active pool." : "No questions have been used/archived from exams yet."}
+        </td></tr>`;
+
     refreshIcons();
 
     $$(".approve-question").forEach(
@@ -1060,7 +1125,27 @@
     $$(".reject-question").forEach(
       (b) => (b.onclick = () => setQuestionStatus(b.dataset.id, "rejected")),
     );
+    wireQuestionTabs();
     wireQuestionFilters();
+  }
+
+  function wireQuestionTabs() {
+    const tabAvail = $("#tabAvailableQuestions");
+    const tabUsed = $("#tabUsedQuestions");
+    if (tabAvail && !tabAvail.dataset.bound) {
+      tabAvail.dataset.bound = "1";
+      tabAvail.onclick = () => {
+        activeQuestionTab = "available";
+        renderQuestionsView();
+      };
+    }
+    if (tabUsed && !tabUsed.dataset.bound) {
+      tabUsed.dataset.bound = "1";
+      tabUsed.onclick = () => {
+        activeQuestionTab = "used";
+        renderQuestionsView();
+      };
+    }
   }
 
   async function setQuestionStatus(id, status) {
@@ -1132,10 +1217,41 @@
         } catch (err) {
           notify(err.message, true);
         } finally {
-            if (btn) {
-                btn.disabled = false;
-                btn.innerHTML = `<i class="ri-calendar-check-line"></i> Create Provisional Slot`;
-            }
+          if (btn) {
+            btn.disabled = false;
+            btn.innerHTML = `<i data-lucide="calendar-check" class="h-4 w-4"></i> Create Provisional Slot`;
+            refreshIcons();
+          }
+        }
+      };
+    }
+
+    const slotBatchSelect = $("#slotBatchSelect");
+    if (slotBatchSelect) {
+      slotBatchSelect.innerHTML = '<option value="">Select Batch</option>' + 
+        batches.map(b => `<option value="${b.id}">${escapeHtml(b.batch_number)}</option>`).join("");
+    }
+
+    const addSlotForm = $("#addSlotForm");
+    if (addSlotForm && !addSlotForm.dataset.bound) {
+      addSlotForm.dataset.bound = "1";
+      addSlotForm.onsubmit = async (e) => {
+        e.preventDefault();
+        const btn = addSlotForm.querySelector('button[type="submit"]');
+        if (btn) btn.disabled = true;
+        try {
+          await api("slot", {
+            method: "POST",
+            body: Object.fromEntries(new FormData(addSlotForm)),
+          });
+          notify("Slot added successfully!");
+          addSlotForm.reset();
+          document.getElementById('addSlotModal').classList.add('hidden');
+          await loadBatches();
+        } catch (err) {
+          notify(err.message, true);
+        } finally {
+          if (btn) btn.disabled = false;
         }
       };
     }
@@ -1160,11 +1276,31 @@
         <td class="px-6 py-4 text-slate-500">${escapeHtml(s.start_time?.slice(0, 5) || "")} - ${escapeHtml(s.end_time?.slice(0, 5) || "")}</td>
         <td class="px-6 py-4">${s.capacity}</td><td class="px-6 py-4">${s.allocated}</td><td class="px-6 py-4">${s.seats_remaining}</td>
         <td class="px-6 py-4">${badge(s.seats_remaining > 0 ? "Available" : "Full", s.seats_remaining > 0 ? "green" : "red")}</td>
+        <td class="px-6 py-4 text-right">
+          <button class="delete-batch rounded-lg bg-red-50 hover:bg-red-100 px-3 py-1.5 text-xs font-semibold text-red-600 transition" data-batch-id="${s.batch_id}">Delete</button>
+        </td>
       </tr>`,
             )
             .join("")
-        : `<tr><td class="px-6 py-10 text-center text-sm text-slate-500" colspan="6">No slots created yet.</td></tr>`;
+        : `<tr><td class="px-6 py-10 text-center text-sm text-slate-500" colspan="7">No slots created yet.</td></tr>`;
     refreshIcons();
+
+    $$(".delete-batch").forEach(
+      (btn) =>
+        (btn.onclick = async () => {
+          if (!confirm("Are you sure you want to delete this batch and its slot?")) return;
+          try {
+            await api("batch_delete", {
+              method: "POST",
+              body: { batch_id: Number(btn.dataset.batchId) },
+            });
+            notify("Batch deleted successfully.");
+            await loadBatches();
+          } catch (e) {
+            notify(e.message, true);
+          }
+        }),
+    );
 
     const allocBody = $("#allocationTableBody");
     const unallocated = eligible.filter((c) => !c.batch_id);
