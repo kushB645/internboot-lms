@@ -1924,7 +1924,7 @@
               <div class="border-t border-b border-slate-100 py-3 space-y-3">
                 <div class="flex items-center justify-between">
                   <span class="text-xs font-bold uppercase tracking-wider text-slate-600">Select Topics & Question Breakdown</span>
-                  <span id="aif_total_badge" class="px-2.5 py-1 rounded-full text-xs font-bold bg-purple-100 text-purple-700 shadow-sm">Total: 15 questions</span>
+                  <span id="aif_total_badge" class="px-2.5 py-1 rounded-full text-xs font-bold bg-purple-100 text-purple-700 shadow-sm">Total: 100 questions</span>
                 </div>
 
                 <!-- 1. Aptitude -->
@@ -1937,7 +1937,7 @@
                     </label>
                     <div class="flex items-center gap-1.5 shrink-0">
                       <label class="text-xs text-slate-500 font-medium">Questions:</label>
-                      <input type="number" id="aif_count_aptitude" min="0" max="40" value="5" class="w-16 rounded-md border border-slate-300 bg-white px-2 py-1 text-xs text-center font-bold text-slate-800 outline-none focus:border-purple-600">
+                      <input type="number" id="aif_count_aptitude" min="0" max="100" value="30" class="w-16 rounded-md border border-slate-300 bg-white px-2 py-1 text-xs text-center font-bold text-slate-800 outline-none focus:border-purple-600">
                     </div>
                   </div>
                   <div class="mt-2.5" id="aif_sub_aptitude_wrap">
@@ -1954,7 +1954,7 @@
                     </label>
                     <div class="flex items-center gap-1.5 shrink-0">
                       <label class="text-xs text-slate-500 font-medium">Questions:</label>
-                      <input type="number" id="aif_count_dsa" min="0" max="40" value="5" class="w-16 rounded-md border border-slate-300 bg-white px-2 py-1 text-xs text-center font-bold text-slate-800 outline-none focus:border-purple-600">
+                      <input type="number" id="aif_count_dsa" min="0" max="100" value="35" class="w-16 rounded-md border border-slate-300 bg-white px-2 py-1 text-xs text-center font-bold text-slate-800 outline-none focus:border-purple-600">
                     </div>
                   </div>
                   <div class="mt-2.5" id="aif_sub_dsa_wrap">
@@ -1971,7 +1971,7 @@
                     </label>
                     <div class="flex items-center gap-1.5 shrink-0">
                       <label class="text-xs text-slate-500 font-medium">Questions:</label>
-                      <input type="number" id="aif_count_core" min="0" max="40" value="5" class="w-16 rounded-md border border-slate-300 bg-white px-2 py-1 text-xs text-center font-bold text-slate-800 outline-none focus:border-purple-600">
+                      <input type="number" id="aif_count_core" min="0" max="100" value="35" class="w-16 rounded-md border border-slate-300 bg-white px-2 py-1 text-xs text-center font-bold text-slate-800 outline-none focus:border-purple-600">
                     </div>
                   </div>
                   <div class="mt-2.5" id="aif_sub_core_wrap">
@@ -1990,15 +1990,15 @@
                 <div class="grid grid-cols-3 gap-3">
                   <div>
                     <label class="block text-xs text-slate-500 mb-1">Easy</label>
-                    <input type="number" id="aif_easy" min="0" value="5" class="w-full rounded-lg border border-slate-300 p-2 text-sm text-center outline-none focus:border-purple-600 focus:ring-1 focus:ring-purple-600">
+                    <input type="number" id="aif_easy" min="0" value="35" class="w-full rounded-lg border border-slate-300 p-2 text-sm text-center outline-none focus:border-purple-600 focus:ring-1 focus:ring-purple-600">
                   </div>
                   <div>
                     <label class="block text-xs text-slate-500 mb-1">Medium</label>
-                    <input type="number" id="aif_medium" min="0" value="7" class="w-full rounded-lg border border-slate-300 p-2 text-sm text-center outline-none focus:border-purple-600 focus:ring-1 focus:ring-purple-600">
+                    <input type="number" id="aif_medium" min="0" value="45" class="w-full rounded-lg border border-slate-300 p-2 text-sm text-center outline-none focus:border-purple-600 focus:ring-1 focus:ring-purple-600">
                   </div>
                   <div>
                     <label class="block text-xs text-slate-500 mb-1">Hard</label>
-                    <input type="number" id="aif_hard" min="0" value="3" class="w-full rounded-lg border border-slate-300 p-2 text-sm text-center outline-none focus:border-purple-600 focus:ring-1 focus:ring-purple-600">
+                    <input type="number" id="aif_hard" min="0" value="20" class="w-full rounded-lg border border-slate-300 p-2 text-sm text-center outline-none focus:border-purple-600 focus:ring-1 focus:ring-purple-600">
                   </div>
                 </div>
               </div>
@@ -2071,7 +2071,7 @@
                 cnt.dataset.prev = cnt.value;
                 cnt.value = "0";
               } else {
-                cnt.value = cnt.dataset.prev || "5";
+                cnt.value = cnt.dataset.prev || (chkId === "aif_enable_aptitude" ? "30" : "35");
               }
               calcTotals();
             });
@@ -2129,8 +2129,8 @@
               return;
             }
 
-            if (totalCount > 50) {
-              errBox.textContent = "Maximum 50 questions can be generated per request.";
+            if (totalCount > 100) {
+              errBox.textContent = "Maximum 100 questions can be generated per request.";
               errBox.classList.remove("hidden");
               return;
             }
