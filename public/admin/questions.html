@@ -175,19 +175,19 @@
             </div>
           </div>
 
-          <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
             <div
               class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100"
             >
-              <p class="text-sm text-slate-500 mb-1">Total Questions</p>
-              <h3 class="text-3xl font-bold text-slate-800" id="totalQuestions">
+              <p class="text-sm text-slate-500 mb-1">Available in Bank</p>
+              <h3 class="text-3xl font-bold text-slate-800" id="availableQuestions">
                 0
               </h3>
             </div>
             <div
               class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100"
             >
-              <p class="text-sm text-slate-500 mb-1">Approved</p>
+              <p class="text-sm text-slate-500 mb-1">Approved (Active)</p>
               <h3
                 class="text-3xl font-bold text-green-600"
                 id="approvedQuestions"
@@ -206,11 +206,44 @@
                 0
               </h3>
             </div>
+            <div
+              class="bg-white p-6 rounded-2xl shadow-sm border border-purple-100 bg-purple-50/20"
+            >
+              <p class="text-sm text-purple-700 mb-1 font-medium">Used in Exams (Archived)</p>
+              <h3
+                class="text-3xl font-bold text-purple-700"
+                id="usedQuestions"
+              >
+                0
+              </h3>
+            </div>
+          </div>
+
+          <!-- Section Tabs -->
+          <div class="flex items-center gap-2 mb-4 border-b border-slate-200">
+            <button
+              id="tabAvailableQuestions"
+              class="px-5 py-3 text-sm font-semibold border-b-2 border-intern-blue text-intern-blue flex items-center gap-2 transition"
+            >
+              <i data-lucide="layers" class="h-4 w-4"></i> Available Questions Bank
+              <span id="badgeAvailableCount" class="bg-blue-100 text-blue-700 text-xs px-2.5 py-0.5 rounded-full font-bold">0</span>
+            </button>
+            <button
+              id="tabUsedQuestions"
+              class="px-5 py-3 text-sm font-semibold border-b-2 border-transparent text-slate-500 hover:text-slate-700 flex items-center gap-2 transition"
+            >
+              <i data-lucide="archive" class="h-4 w-4"></i> Used in Exams / History
+              <span id="badgeUsedCount" class="bg-purple-100 text-purple-700 text-xs px-2.5 py-0.5 rounded-full font-bold">0</span>
+            </button>
           </div>
 
           <div
             class="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden"
           >
+            <div id="tabBanner" class="px-6 py-3 bg-blue-50/50 border-b border-blue-100 text-xs font-medium text-blue-700 flex items-center gap-2">
+              <i data-lucide="info" class="h-4 w-4 flex-shrink-0"></i>
+              <span id="tabBannerText">Showing active questions available to be served in upcoming batch assessments.</span>
+            </div>
             <div
               class="p-4 border-b border-slate-100 flex flex-wrap gap-4 items-center bg-slate-50/50"
             >
@@ -242,8 +275,8 @@
                 class="px-3 py-2 rounded-lg border border-slate-200 text-sm bg-white min-w-[140px]"
               >
                 <option value="">All Statuses</option>
-                <option value="pending">Pending</option>
                 <option value="approved">Approved</option>
+                <option value="pending">Pending</option>
                 <option value="rejected">Rejected</option>
               </select>
             </div>

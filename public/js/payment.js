@@ -430,8 +430,8 @@ function setText(selector, value) {
 }
 
 function updateAvatar(name) {
-    const avatarEl = document.querySelector('.avatar') || document.querySelector('[data-candidate="initials"]');
-    if (!avatarEl || !name || name === "—") return;
+    const avatarEls = document.querySelectorAll('.avatar, [data-candidate="initials"]');
+    if (!avatarEls.length || !name || name === "—") return;
 
     const initials = name
         .trim()
@@ -441,7 +441,9 @@ function updateAvatar(name) {
         .map(part => part[0].toUpperCase())
         .join("");
 
-    avatarEl.textContent = initials || "CA";
+    avatarEls.forEach(el => {
+        el.textContent = initials || "CA";
+    });
 }
 
 function setStatusBadge(text, colorClass) {

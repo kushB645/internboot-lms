@@ -57,7 +57,11 @@ function get_recent_candidates(mysqli $conn, int $limit = 10): array
     $limit = max(1, min($limit, 50));
     return q_all($conn, "SELECT c.id, c.full_name, u.email,
         COALESCE((SELECT p.status FROM payments p WHERE p.candidate_id=c.id ORDER BY p.id DESC LIMIT 1),'pending') payment_status,
-        COALESCE(e.eligibility_status,'pending') enrollment_status,
+        CASE
+          WHEN (SELECT p.status FROM payments p WHERE p.candidate_id=c.id ORDER BY p.id DESC LIMIT 1) = 'success'
+               AND e.eligibility_status = 'eligible' THEN 'eligible'
+          ELSE 'pending'
+        END enrollment_status,
         CASE WHEN EXISTS(SELECT 1 FROM results r JOIN attempts a ON a.id=r.attempt_id WHERE a.candidate_id=c.id)
              THEN 'completed'
              WHEN EXISTS(SELECT 1 FROM attempts a WHERE a.candidate_id=c.id AND a.status IN ('in_progress','submitted','expired')) THEN 'pending'
@@ -86,7 +90,11 @@ function get_candidates(mysqli $conn): array
 {
     return q_all($conn, "SELECT c.id, c.full_name, c.phone, u.email,
         COALESCE((SELECT p.status FROM payments p WHERE p.candidate_id=c.id ORDER BY p.id DESC LIMIT 1),'pending') payment_status,
-        COALESCE((SELECT e.eligibility_status FROM enrollments e WHERE e.candidate_id=c.id ORDER BY e.id DESC LIMIT 1),'pending') enrollment_status,
+        CASE
+          WHEN (SELECT p.status FROM payments p WHERE p.candidate_id=c.id ORDER BY p.id DESC LIMIT 1) = 'success'
+               AND (SELECT e.eligibility_status FROM enrollments e WHERE e.candidate_id=c.id ORDER BY e.id DESC LIMIT 1) = 'eligible' THEN 'eligible'
+          ELSE 'pending'
+        END enrollment_status,
         (SELECT a.title FROM enrollments e JOIN assessments a ON a.id=e.assessment_id WHERE e.candidate_id=c.id ORDER BY e.id DESC LIMIT 1) assessment_title,
         CASE
           WHEN EXISTS(SELECT 1 FROM results r JOIN attempts ax ON ax.id=r.attempt_id WHERE ax.candidate_id=c.id) THEN 'completed'
@@ -103,7 +111,11 @@ function m7_get_candidate(mysqli $conn, int $candidateId): ?array
 {
     return q_one($conn, "SELECT c.id,c.full_name,c.phone,c.profile_details,u.email,u.created_at,
         COALESCE((SELECT p.status FROM payments p WHERE p.candidate_id=c.id ORDER BY p.id DESC LIMIT 1),'pending') payment_status,
-        COALESCE(e.eligibility_status,'pending') enrollment_status,
+        CASE
+          WHEN (SELECT p.status FROM payments p WHERE p.candidate_id=c.id ORDER BY p.id DESC LIMIT 1) = 'success'
+               AND e.eligibility_status = 'eligible' THEN 'eligible'
+          ELSE 'pending'
+        END enrollment_status,
         a.title assessment_title
         FROM candidates c JOIN users u ON u.id=c.user_id
         LEFT JOIN enrollments e ON e.candidate_id=c.id
@@ -239,6 +251,12 @@ function get_questions(mysqli $conn, bool $isAdmin = false): array
     return q_all($conn, "SELECT q.id, q.question_text, q.difficulty, q.approval_status,
         qb.id question_bank_id, qb.name question_bank, a.id assessment_id, a.title assessment_title,
         (SELECT COUNT(*) FROM options o WHERE o.question_id=q.id) option_count,
+        (SELECT GROUP_CONCAT(CONCAT(IF(o.is_correct=1, '[✓] ', '[ ] '), o.option_text) SEPARATOR '|||') FROM options o WHERE o.question_id=q.id) all_options,
+        (SELECT COUNT(DISTINCT aq.attempt_id) FROM attempt_questions aq WHERE aq.question_id=q.id) times_used,
+        CASE 
+            WHEN q.approval_status = 'archived' OR (SELECT COUNT(*) FROM attempt_questions aq WHERE aq.question_id=q.id) > 0 THEN 1 
+            ELSE 0 
+        END is_used,
         $correctOptionSql
       FROM questions q
       JOIN question_banks qb ON qb.id=q.question_bank_id
@@ -274,6 +292,7 @@ function get_batches(mysqli $conn): array
         FROM enrollments e
         JOIN candidates c ON c.id=e.candidate_id
         JOIN users u ON u.id=c.user_id
+        JOIN payments p ON p.candidate_id=c.id AND p.status='success'
         WHERE e.eligibility_status='eligible' AND e.batch_id IS NULL
         AND NOT EXISTS (SELECT 1 FROM attempts a2 WHERE a2.candidate_id = c.id AND a2.assessment_id = e.assessment_id)
         ORDER BY c.full_name ASC");
@@ -720,5 +739,159 @@ function create_admin_log(mysqli $conn, ?int $userId, string $action, ?string $d
     $stmt->bind_param('isss', $userId, $action, $details, $ip);
     $stmt->execute();
     $stmt->close();
+}
+
+function delete_batch(mysqli $conn, int $batchId): void
+{
+    $batch = q_one($conn, 'SELECT id, batch_number FROM batches WHERE id = ?', 'i', [$batchId]);
+    if (!$batch) throw new InvalidArgumentException('Batch not found.');
+
+    $conn->begin_transaction();
+    try {
+        // Unassign enrollments
+        $conn->query("UPDATE enrollments SET batch_id = NULL WHERE batch_id = $batchId");
+
+        // Find schedules
+        $schedRes = $conn->query("SELECT id FROM exam_schedules WHERE batch_id = $batchId");
+        $schedIds = [];
+        while ($r = $schedRes->fetch_assoc()) $schedIds[] = (int)$r['id'];
+
+        if (!empty($schedIds)) {
+            $inSched = implode(',', $schedIds);
+            $conn->query("UPDATE enrollments SET provisional_schedule_id = NULL WHERE provisional_schedule_id IN ($inSched)");
+            $conn->query("DELETE FROM notifications WHERE related_schedule_id IN ($inSched)");
+
+            // Find slots
+            $slotRes = $conn->query("SELECT id FROM exam_slots WHERE exam_schedule_id IN ($inSched)");
+            $slotIds = [];
+            while ($r = $slotRes->fetch_assoc()) $slotIds[] = (int)$r['id'];
+
+            if (!empty($slotIds)) {
+                $inSlots = implode(',', $slotIds);
+                $attRes = $conn->query("SELECT id FROM attempts WHERE exam_slot_id IN ($inSlots)");
+                $attIds = [];
+                while ($r = $attRes->fetch_assoc()) $attIds[] = (int)$r['id'];
+
+                if (!empty($attIds)) {
+                    $inAtt = implode(',', $attIds);
+                    $conn->query("DELETE FROM answers WHERE attempt_id IN ($inAtt)");
+                    $conn->query("DELETE FROM attempt_questions WHERE attempt_id IN ($inAtt)");
+                    $conn->query("DELETE FROM certificates WHERE result_id IN (SELECT id FROM results WHERE attempt_id IN ($inAtt))");
+                    $conn->query("DELETE FROM placement_records WHERE result_id IN (SELECT id FROM results WHERE attempt_id IN ($inAtt))");
+                    $conn->query("DELETE FROM results WHERE attempt_id IN ($inAtt)");
+                    $conn->query("DELETE FROM attempts WHERE id IN ($inAtt)");
+                }
+
+                $conn->query("DELETE FROM exam_slots WHERE id IN ($inSlots)");
+            }
+
+            $conn->query("DELETE FROM exam_schedules WHERE id IN ($inSched)");
+        }
+
+        $conn->query("DELETE FROM batches WHERE id = $batchId");
+        $conn->commit();
+    } catch (Throwable $e) {
+        $conn->rollback();
+        throw $e;
+    }
+}
+
+function check_payment_enrollment_integrity(mysqli $conn): array
+{
+    return q_all($conn, "SELECT p.id as payment_id, p.candidate_id, p.assessment_id, p.amount, p.created_at as paid_at,
+                 c.full_name, c.email, e.id as enrollment_id, e.eligibility_status
+          FROM payments p
+          JOIN candidates c ON c.id = p.candidate_id
+          LEFT JOIN enrollments e ON e.candidate_id = p.candidate_id AND e.assessment_id = p.assessment_id
+          WHERE p.status = 'completed'
+          AND (e.id IS NULL OR e.eligibility_status <> 'eligible')");
+}
+
+function create_provisional_batch(mysqli $conn, string $batchNumber, int $assessmentId, string $examDate, int $capacity, ?string $startTime = null, ?string $endTime = null): array
+{
+    $batchNumber = trim($batchNumber);
+    if ($batchNumber === '' || strlen($batchNumber) > 50) {
+        throw new InvalidArgumentException('Batch name must be between 1 and 50 characters.');
+    }
+    if ($capacity < 1) {
+        throw new InvalidArgumentException('Batch capacity must be positive.');
+    }
+
+    $date = DateTime::createFromFormat('!Y-m-d', $examDate);
+    $errors = DateTime::getLastErrors();
+    if (!$date || ($errors !== false && ($errors['warning_count'] || $errors['error_count'])) || $date->format('Y-m-d') !== $examDate) {
+        throw new InvalidArgumentException('Enter a valid exam date.');
+    }
+    if ($date < new DateTime('today')) {
+        throw new InvalidArgumentException('Exam date cannot be in the past.');
+    }
+
+    if ($assessmentId > 0) {
+        $assessment = q_one($conn, "SELECT id,title,duration_minutes,status FROM assessments WHERE id=? AND status <> 'archived'", 'i', [$assessmentId]);
+    } else {
+        $assessment = q_one($conn, "SELECT id,title,duration_minutes,status FROM assessments WHERE status = 'active' ORDER BY id DESC LIMIT 1");
+        if (!$assessment) {
+            $assessment = q_one($conn, "SELECT id,title,duration_minutes,status FROM assessments WHERE status <> 'archived' ORDER BY id DESC LIMIT 1");
+        }
+    }
+    if (!$assessment) {
+        throw new InvalidArgumentException('No active assessment exists. Create or activate an assessment first.');
+    }
+    $assessmentId = (int)$assessment['id'];
+
+    $duplicate = q_one($conn, 'SELECT id FROM batches WHERE batch_number=?', 's', [$batchNumber]);
+    if ($duplicate) {
+        throw new InvalidArgumentException('A batch with this name already exists.');
+    }
+
+    $duration = max(1, (int)$assessment['duration_minutes']);
+
+    $conn->begin_transaction();
+    try {
+        $stmt = $conn->prepare('INSERT INTO batches(batch_number,assessment_id) VALUES(?,?)');
+        $stmt->bind_param('si', $batchNumber, $assessmentId);
+        $stmt->execute();
+        $batchId = $stmt->insert_id;
+        $stmt->close();
+
+        // Create as PROVISIONAL schedule
+        $stmt = $conn->prepare("INSERT INTO exam_schedules(batch_id,exam_date,status) VALUES(?,?,'provisional')");
+        $stmt->bind_param('is', $batchId, $examDate);
+        $stmt->execute();
+        $scheduleId = $stmt->insert_id;
+        $stmt->close();
+
+        $start1 = $startTime ?: '10:00:00';
+        if (strlen($start1) === 5) {
+            $start1 .= ':00';
+        }
+        $end1 = $endTime ?: (new DateTime('2000-01-01 ' . $start1))->modify("+{$duration} minutes")->format('H:i:s');
+        if (strlen($end1) === 5) {
+            $end1 .= ':00';
+        }
+
+        $stmt = $conn->prepare('INSERT INTO exam_slots(exam_schedule_id,start_time,end_time,capacity,seats_remaining) VALUES(?,?,?,?,?)');
+        $stmt->bind_param('issii', $scheduleId, $start1, $end1, $capacity, $capacity);
+        $stmt->execute();
+        $slot1 = $stmt->insert_id;
+        $stmt->close();
+
+        $conn->commit();
+        return [
+            'batch_id' => $batchId,
+            'batch_number' => $batchNumber,
+            'assessment_id' => $assessmentId,
+            'assessment_title' => $assessment['title'],
+            'schedule_id' => $scheduleId,
+            'exam_date' => $examDate,
+            'capacity' => $capacity,
+            'slots' => [
+                ['slot_id' => $slot1, 'start_time' => $start1, 'end_time' => $end1, 'capacity' => $capacity]
+            ]
+        ];
+    } catch (Throwable $e) {
+        $conn->rollback();
+        throw $e;
+    }
 }
 

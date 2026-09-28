@@ -289,7 +289,7 @@
             title="Open My Profile"
           >
             <div
-              class="w-9 h-9 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center font-semibold"
+              class="avatar w-9 h-9 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center font-semibold text-sm shrink-0"
               data-candidate="initials"
             >
               --
@@ -710,36 +710,43 @@
     const avatar = document.getElementById("sidebar-student-avatar");
     const name = document.getElementById("sidebar-student-name");
 
-    function syncSidebarProfile() {
-      const sourceName = document.querySelector(
-        '[data-candidate="name"]'
-      );
+    function syncProfileInitials() {
+      const sourceName = document.querySelector('header [data-candidate="name"]') || document.querySelector('[data-candidate="name"]');
+      const nameVal = sourceName?.textContent?.trim();
 
-      const sourceInitials = document.querySelector(
-        '[data-candidate="initials"]'
-      );
-
-      if (sourceName && name) {
-        const value = sourceName.textContent.trim();
-
-        if (value && name.textContent !== value) {
-          name.textContent = value;
+      if (nameVal && nameVal !== "—" && nameVal !== "Student" && nameVal !== "Candidate") {
+        if (name && name.textContent !== nameVal) {
+          name.textContent = nameVal;
         }
-      }
 
-      if (sourceInitials && avatar) {
-        const value = sourceInitials.textContent.trim();
+        const initials = nameVal
+          .split(/\s+/)
+          .filter(Boolean)
+          .slice(0, 2)
+          .map((part) => part[0].toUpperCase())
+          .join("");
 
-        if (value && avatar.querySelector("span").textContent !== value) {
-          avatar.querySelector("span").textContent = value;
+        if (initials) {
+          document.querySelectorAll('.avatar, [data-candidate="initials"]').forEach((el) => {
+            el.textContent = initials;
+          });
+          const sidebarSpan = avatar?.querySelector("span");
+          if (sidebarSpan) {
+            sidebarSpan.textContent = initials;
+          }
         }
       }
     }
 
     // Initial sync
-    syncSidebarProfile();
+    syncProfileInitials();
 
-    
+    // Observe changes to name element so asynchronous API response updates initials immediately
+    const nameEl = document.querySelector('[data-candidate="name"]');
+    if (nameEl) {
+      const observer = new MutationObserver(() => syncProfileInitials());
+      observer.observe(nameEl, { childList: true, characterData: true, subtree: true });
+    }
   });
 </script>
   </body>
