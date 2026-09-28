@@ -339,16 +339,22 @@ try {
         'notes'      => null,
         'updated_at' => null,
     ];
+
+    // If candidate has completed exam and has a level, placement is applicable
+    if ($resultRow && $resultRow['level_assigned']) {
+        $placement['applicable'] = true;
+        $placement['status'] = 'eligible';
+        $placement['statusLabel'] = 'Eligible';
+    }
+
     if ($placementRow) {
         $rawStatus = $placementRow['placement_status'] ?? '';
-        $placement = [
-            'applicable'  => true,
-            'status'      => $rawStatus,
-            'statusLabel' => $placementStatusLabels[$rawStatus] ?? ucfirst(str_replace('_', ' ', $rawStatus)),
-            'company'     => $placementRow['company_name'] ?: null,
-            'notes'       => $placementRow['notes'] ?: null,
-            'updated_at'  => !empty($placementRow['updated_at']) ? date('d M Y', strtotime($placementRow['updated_at'])) : null,
-        ];
+        $placement['applicable']  = true;
+        $placement['status']      = $rawStatus;
+        $placement['statusLabel'] = $placementStatusLabels[$rawStatus] ?? ucfirst(str_replace('_', ' ', $rawStatus));
+        $placement['company']     = $placementRow['company_name'] ?: null;
+        $placement['notes']       = $placementRow['notes'] ?: null;
+        $placement['updated_at']  = !empty($placementRow['updated_at']) ? date('d M Y', strtotime($placementRow['updated_at'])) : null;
     }
 
     $profileStatus = !empty($candidate['profile_details']) ? 'Verified' : 'Basic Profile';
