@@ -1921,28 +1921,85 @@
                 </select>
               </div>
 
-              <div>
-                <label class="block text-sm font-medium text-slate-700 mb-1">Topic / Subject <span class="text-red-500">*</span></label>
-                <input type="text" id="aif_topic" class="w-full rounded-lg border border-slate-300 p-2.5 text-sm outline-none focus:border-purple-600 focus:ring-1 focus:ring-purple-600" placeholder="e.g. PHP Data Types & Functions" required>
+              <div class="border-t border-b border-slate-100 py-3 space-y-3">
+                <div class="flex items-center justify-between">
+                  <span class="text-xs font-bold uppercase tracking-wider text-slate-600">Select Topics & Question Breakdown</span>
+                  <span id="aif_total_badge" class="px-2.5 py-1 rounded-full text-xs font-bold bg-purple-100 text-purple-700 shadow-sm">Total: 15 questions</span>
+                </div>
+
+                <!-- 1. Aptitude -->
+                <div class="rounded-xl border border-slate-200 bg-slate-50/70 p-3.5 transition hover:border-purple-300">
+                  <div class="flex items-center justify-between gap-3">
+                    <label class="flex items-center gap-2 cursor-pointer font-semibold text-sm text-slate-800 select-none">
+                      <input type="checkbox" id="aif_enable_aptitude" checked class="h-4 w-4 rounded text-purple-600 focus:ring-purple-500">
+                      <span>🧠 Aptitude</span>
+                      <span class="text-xs font-normal text-slate-500">(Quant, Logical & Verbal)</span>
+                    </label>
+                    <div class="flex items-center gap-1.5 shrink-0">
+                      <label class="text-xs text-slate-500 font-medium">Questions:</label>
+                      <input type="number" id="aif_count_aptitude" min="0" max="40" value="5" class="w-16 rounded-md border border-slate-300 bg-white px-2 py-1 text-xs text-center font-bold text-slate-800 outline-none focus:border-purple-600">
+                    </div>
+                  </div>
+                  <div class="mt-2.5" id="aif_sub_aptitude_wrap">
+                    <input type="text" id="aif_topic_aptitude" class="w-full rounded-md border border-slate-200 bg-white px-2.5 py-1.5 text-xs text-slate-700 placeholder-slate-400 outline-none focus:border-purple-500" placeholder="Focus: e.g. Quantitative Aptitude, Logical Reasoning, Number Series, Data Interpretation" value="Quantitative Aptitude, Logical Reasoning, Data Interpretation">
+                  </div>
+                </div>
+
+                <!-- 2. DSA -->
+                <div class="rounded-xl border border-slate-200 bg-slate-50/70 p-3.5 transition hover:border-purple-300">
+                  <div class="flex items-center justify-between gap-3">
+                    <label class="flex items-center gap-2 cursor-pointer font-semibold text-sm text-slate-800 select-none">
+                      <input type="checkbox" id="aif_enable_dsa" checked class="h-4 w-4 rounded text-purple-600 focus:ring-purple-500">
+                      <span>⚡ Data Structures & Algorithms (DSA)</span>
+                    </label>
+                    <div class="flex items-center gap-1.5 shrink-0">
+                      <label class="text-xs text-slate-500 font-medium">Questions:</label>
+                      <input type="number" id="aif_count_dsa" min="0" max="40" value="5" class="w-16 rounded-md border border-slate-300 bg-white px-2 py-1 text-xs text-center font-bold text-slate-800 outline-none focus:border-purple-600">
+                    </div>
+                  </div>
+                  <div class="mt-2.5" id="aif_sub_dsa_wrap">
+                    <input type="text" id="aif_topic_dsa" class="w-full rounded-md border border-slate-200 bg-white px-2.5 py-1.5 text-xs text-slate-700 placeholder-slate-400 outline-none focus:border-purple-500" placeholder="Focus: e.g. Arrays, Strings, Trees, Linked Lists, Sorting, Binary Search, DP" value="Arrays, Strings, Trees, Linked Lists, Sorting, Binary Search">
+                  </div>
+                </div>
+
+                <!-- 3. Core Domain Knowledge -->
+                <div class="rounded-xl border border-slate-200 bg-slate-50/70 p-3.5 transition hover:border-purple-300">
+                  <div class="flex items-center justify-between gap-3">
+                    <label class="flex items-center gap-2 cursor-pointer font-semibold text-sm text-slate-800 select-none">
+                      <input type="checkbox" id="aif_enable_core" checked class="h-4 w-4 rounded text-purple-600 focus:ring-purple-500">
+                      <span>💻 Core Domain Knowledge</span>
+                    </label>
+                    <div class="flex items-center gap-1.5 shrink-0">
+                      <label class="text-xs text-slate-500 font-medium">Questions:</label>
+                      <input type="number" id="aif_count_core" min="0" max="40" value="5" class="w-16 rounded-md border border-slate-300 bg-white px-2 py-1 text-xs text-center font-bold text-slate-800 outline-none focus:border-purple-600">
+                    </div>
+                  </div>
+                  <div class="mt-2.5" id="aif_sub_core_wrap">
+                    <input type="text" id="aif_topic_core" class="w-full rounded-md border border-slate-200 bg-white px-2.5 py-1.5 text-xs text-slate-700 placeholder-slate-400 outline-none focus:border-purple-500" placeholder="Focus: e.g. Core Programming, OOPs, DBMS & SQL, Web Architecture, OS" value="Core Programming, OOPs, DBMS & SQL, Web Architecture">
+                  </div>
+                </div>
               </div>
 
               <div>
-                <label class="block text-sm font-medium text-slate-700 mb-1">Question Type (Optional)</label>
-                <input type="text" id="aif_type" class="w-full rounded-lg border border-slate-300 p-2.5 text-sm outline-none focus:border-purple-600 focus:ring-1 focus:ring-purple-600" placeholder="e.g. Code Snippet, Conceptual, Scenario-based">
+                <label class="block text-sm font-medium text-slate-700 mb-1">Question Style (Optional)</label>
+                <input type="text" id="aif_type" class="w-full rounded-lg border border-slate-300 p-2.5 text-sm outline-none focus:border-purple-600 focus:ring-1 focus:ring-purple-600" placeholder="e.g. Conceptual, Code Snippet, Problem-Solving, Scenario-based" value="Conceptual and Code Snippet based">
               </div>
 
-              <div class="grid grid-cols-3 gap-4">
-                <div>
-                  <label class="block text-sm font-medium text-slate-700 mb-1">Easy</label>
-                  <input type="number" id="aif_easy" min="0" value="2" class="w-full rounded-lg border border-slate-300 p-2.5 text-sm outline-none focus:border-purple-600 focus:ring-1 focus:ring-purple-600" required>
-                </div>
-                <div>
-                  <label class="block text-sm font-medium text-slate-700 mb-1">Medium</label>
-                  <input type="number" id="aif_medium" min="0" value="2" class="w-full rounded-lg border border-slate-300 p-2.5 text-sm outline-none focus:border-purple-600 focus:ring-1 focus:ring-purple-600" required>
-                </div>
-                <div>
-                  <label class="block text-sm font-medium text-slate-700 mb-1">Hard</label>
-                  <input type="number" id="aif_hard" min="0" value="1" class="w-full rounded-lg border border-slate-300 p-2.5 text-sm outline-none focus:border-purple-600 focus:ring-1 focus:ring-purple-600" required>
+              <div>
+                <label class="block text-xs font-semibold uppercase tracking-wider text-slate-600 mb-1.5">Difficulty Distribution</label>
+                <div class="grid grid-cols-3 gap-3">
+                  <div>
+                    <label class="block text-xs text-slate-500 mb-1">Easy</label>
+                    <input type="number" id="aif_easy" min="0" value="5" class="w-full rounded-lg border border-slate-300 p-2 text-sm text-center outline-none focus:border-purple-600 focus:ring-1 focus:ring-purple-600">
+                  </div>
+                  <div>
+                    <label class="block text-xs text-slate-500 mb-1">Medium</label>
+                    <input type="number" id="aif_medium" min="0" value="7" class="w-full rounded-lg border border-slate-300 p-2 text-sm text-center outline-none focus:border-purple-600 focus:ring-1 focus:ring-purple-600">
+                  </div>
+                  <div>
+                    <label class="block text-xs text-slate-500 mb-1">Hard</label>
+                    <input type="number" id="aif_hard" min="0" value="3" class="w-full rounded-lg border border-slate-300 p-2 text-sm text-center outline-none focus:border-purple-600 focus:ring-1 focus:ring-purple-600">
+                  </div>
                 </div>
               </div>
 
@@ -1952,7 +2009,9 @@
 
               <div class="mt-6 flex justify-end gap-3 border-t border-slate-100 pt-5">
                 <button type="button" onclick="document.getElementById('m7Modal').remove()" class="rounded-lg px-4 py-2 text-sm font-medium text-slate-600 hover:bg-slate-50 transition">Cancel</button>
-                <button type="submit" id="aif_submit" class="rounded-lg bg-purple-600 px-4 py-2 text-sm font-medium text-white hover:bg-purple-700 transition">Generate Questions</button>
+                <button type="submit" id="aif_submit" class="rounded-lg bg-purple-600 px-5 py-2 text-sm font-medium text-white hover:bg-purple-700 transition flex items-center gap-2">
+                  <i class="ri-sparkling-fill"></i> Generate Questions
+                </button>
               </div>
             </form>
           `;
@@ -1969,6 +2028,69 @@
           }).catch(console.error);
 
           const form = $("#generateAiForm");
+
+          // Interactive helpers for dynamic counts & difficulty distribution
+          const calcTotals = () => {
+            const aptEnabled = $("#aif_enable_aptitude")?.checked;
+            const dsaEnabled = $("#aif_enable_dsa")?.checked;
+            const coreEnabled = $("#aif_enable_core")?.checked;
+
+            const aptCount = aptEnabled ? (parseInt($("#aif_count_aptitude")?.value, 10) || 0) : 0;
+            const dsaCount = dsaEnabled ? (parseInt($("#aif_count_dsa")?.value, 10) || 0) : 0;
+            const coreCount = coreEnabled ? (parseInt($("#aif_count_core")?.value, 10) || 0) : 0;
+
+            const total = aptCount + dsaCount + coreCount;
+            const badge = $("#aif_total_badge");
+            if (badge) {
+              badge.textContent = `Total: ${total} questions`;
+            }
+
+            // Distribute difficulty dynamically if total > 0
+            if (total > 0) {
+              const easy = Math.round(total * 0.35);
+              const hard = Math.max(1, Math.round(total * 0.20));
+              const medium = Math.max(0, total - easy - hard);
+              const easyInput = $("#aif_easy");
+              const medInput = $("#aif_medium");
+              const hardInput = $("#aif_hard");
+              if (easyInput && !easyInput.dataset.manual) easyInput.value = easy;
+              if (medInput && !medInput.dataset.manual) medInput.value = medium;
+              if (hardInput && !hardInput.dataset.manual) hardInput.value = hard;
+            }
+          };
+
+          const setupSection = (chkId, countId, wrapId) => {
+            const chk = $(`#${chkId}`);
+            const cnt = $(`#${countId}`);
+            const wrap = $(`#${wrapId}`);
+            if (!chk || !cnt) return;
+            chk.addEventListener("change", () => {
+              cnt.disabled = !chk.checked;
+              if (wrap) wrap.style.opacity = chk.checked ? "1" : "0.4";
+              if (!chk.checked) {
+                cnt.dataset.prev = cnt.value;
+                cnt.value = "0";
+              } else {
+                cnt.value = cnt.dataset.prev || "5";
+              }
+              calcTotals();
+            });
+            cnt.addEventListener("input", calcTotals);
+          };
+
+          setupSection("aif_enable_aptitude", "aif_count_aptitude", "aif_sub_aptitude_wrap");
+          setupSection("aif_enable_dsa", "aif_count_dsa", "aif_sub_dsa_wrap");
+          setupSection("aif_enable_core", "aif_count_core", "aif_sub_core_wrap");
+
+          ["#aif_easy", "#aif_medium", "#aif_hard"].forEach(id => {
+            const el = $(id);
+            if (el) {
+              el.addEventListener("input", () => { el.dataset.manual = "1"; });
+            }
+          });
+
+          calcTotals();
+
           form.onsubmit = async (e) => {
             e.preventDefault();
             const errBox = $("#aif_error");
@@ -1976,35 +2098,66 @@
             errBox.classList.add("hidden");
 
             const qbankId = $("#aif_bank").value;
-            const topic = $("#aif_topic").value.trim();
+            const aptEnabled = $("#aif_enable_aptitude")?.checked;
+            const dsaEnabled = $("#aif_enable_dsa")?.checked;
+            const coreEnabled = $("#aif_enable_core")?.checked;
+
+            const aptCount = aptEnabled ? (parseInt($("#aif_count_aptitude")?.value, 10) || 0) : 0;
+            const dsaCount = dsaEnabled ? (parseInt($("#aif_count_dsa")?.value, 10) || 0) : 0;
+            const coreCount = coreEnabled ? (parseInt($("#aif_count_core")?.value, 10) || 0) : 0;
+
+            const aptTopic = $("#aif_topic_aptitude")?.value.trim() || "";
+            const dsaTopic = $("#aif_topic_dsa")?.value.trim() || "";
+            const coreTopic = $("#aif_topic_core")?.value.trim() || "";
+
             const qType = $("#aif_type").value.trim();
+            const totalCount = aptCount + dsaCount + coreCount;
+
             const easyCount = parseInt($("#aif_easy").value, 10) || 0;
             const mediumCount = parseInt($("#aif_medium").value, 10) || 0;
             const hardCount = parseInt($("#aif_hard").value, 10) || 0;
-            
-            const totalCount = easyCount + mediumCount + hardCount;
 
-            if (!qbankId || !topic) {
-              errBox.textContent = "Question bank and topic description are required.";
+            if (!qbankId) {
+              errBox.textContent = "Please select a Question Bank.";
               errBox.classList.remove("hidden");
               return;
             }
-            
+
             if (totalCount <= 0) {
-              errBox.textContent = "You must generate at least 1 question.";
+              errBox.textContent = "Please select at least one topic and specify at least 1 question.";
               errBox.classList.remove("hidden");
               return;
             }
+
+            if (totalCount > 50) {
+              errBox.textContent = "Maximum 50 questions can be generated per request.";
+              errBox.classList.remove("hidden");
+              return;
+            }
+
+            const sections = [];
+            if (aptEnabled && aptCount > 0) {
+              sections.push(`${aptCount} Aptitude questions (focusing on: ${aptTopic || 'Quantitative, Logical & Verbal Reasoning'})`);
+            }
+            if (dsaEnabled && dsaCount > 0) {
+              sections.push(`${dsaCount} Data Structures & Algorithms (DSA) questions (focusing on: ${dsaTopic || 'Arrays, Strings, Trees, Linked Lists, Sorting, Binary Search'})`);
+            }
+            if (coreEnabled && coreCount > 0) {
+              sections.push(`${coreCount} Core Domain Knowledge questions (focusing on: ${coreTopic || 'Core Programming, OOPs, DBMS/SQL, Web Architecture'})`);
+            }
+
+            const combinedTopic = `Section Distribution:\n` + sections.map(s => `- ${s}`).join('\n') + (qType ? `\nQuestion Style: ${qType}` : '');
 
             submitBtn.disabled = true;
-            submitBtn.textContent = "Generating with AI...";
+            submitBtn.innerHTML = `<i class="ri-loader-4-line animate-spin"></i> Generating ${totalCount} Questions...`;
 
             try {
               const res = await apiQbank("generate_questions", {
                 method: "POST",
                 body: {
                   question_bank_id: parseInt(qbankId, 10),
-                  topic: topic,
+                  topic: combinedTopic,
+                  count: totalCount,
                   question_type: qType,
                   easy_count: easyCount,
                   medium_count: mediumCount,
@@ -2012,14 +2165,14 @@
                 }
               });
 
-              notify(`Generated ${res.inserted || totalCount} question(s), pending admin approval.`);
+              notify(`Successfully generated ${res.inserted || totalCount} question(s) across selected topics!`);
               $("#m7Modal").remove();
               await loadQuestions();
             } catch (err) {
               errBox.textContent = err.message || "AI generation failed.";
               errBox.classList.remove("hidden");
               submitBtn.disabled = false;
-              submitBtn.textContent = "Generate Questions";
+              submitBtn.innerHTML = `<i class="ri-sparkling-fill"></i> Generate Questions`;
             }
           };
         } catch (e) {
