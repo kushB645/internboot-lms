@@ -308,7 +308,7 @@ function renderCertificateState(source) {
                     <a href="${downloadUrl}" target="_blank" class="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-medium transition-colors shadow-sm focus:ring-2 focus:ring-blue-500/20">
                         <i data-lucide="download" class="w-4 h-4"></i> Download PDF
                     </a>
-                    <a href="${downloadUrl}" target="_blank" class="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 font-medium transition-colors shadow-sm">
+                    <a href="${downloadUrl}&view=1" target="_blank" class="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 font-medium transition-colors shadow-sm">
                         <i data-lucide="eye" class="w-4 h-4"></i> View Online
                     </a>
                 </div>
@@ -324,7 +324,7 @@ function renderCertificateState(source) {
         }
 
         if (certMainContainer) {
-            certMainContainer.className = "grid grid-cols-1 xl:grid-cols-2 gap-5 mb-6";
+            certMainContainer.className = "grid grid-cols-1 md:grid-cols-2 gap-5 mb-6";
         }
 
         if (certPreviewCard) {
